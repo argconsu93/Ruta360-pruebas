@@ -145,6 +145,7 @@ async function trazarRutaOptima() {
         : [appState.diaSeleccionado];
 
     let totalProcesados = 0;
+    let erroresEnrutamiento = 0;
     let clientesFueraTotal = [];
     let boundsGlobal = L.latLngBounds();
     appState.simPathCoordinates = [];
@@ -186,8 +187,11 @@ async function trazarRutaOptima() {
         const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsListOSRM.join(';')}?overview=full&geometries=geojson`;
 
         try {
-            const response = await fetch(osrmUrl);
-            const data = await response.json();
+            const data = await solicitarRecurso(osrmUrl, { tipo: 'json', timeoutMs: 20000 });
+
+            if (!data || typeof data.code !== 'string' || !Array.isArray(data.routes)) {
+                throw new ErrorSolicitud('El servicio de rutas devolvió una respuesta inválida.', { url: osrmUrl });
+            }
 
             if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
                 const colorHex = COLORES_DIAS[diaNombre] || '#4f46e5';
@@ -289,6 +293,7 @@ async function trazarRutaOptima() {
                 document.getElementById('metric-h-fin').textContent = horaFinalizacionStr;
             }
         } catch (e) {
+            erroresEnrutamiento += 1;
             console.warn(`Error trazando día ${diaNombre}:`, e);
         }
     }
@@ -312,6 +317,12 @@ async function trazarRutaOptima() {
             });
         }
         mostrarNotificacioniOS("Optimización Exitosa", msgDetails, "success", true);
+    } else if (erroresEnrutamiento > 0) {
+        mostrarNotificacioniOS(
+            "Servicio de rutas no disponible",
+            "No fue posible calcular la ruta en este momento. Revise la conexión e intente nuevamente.",
+            "warning"
+        );
     } else {
         mostrarNotificacioniOS("Aviso de Enrutamiento", "No hay suficientes clientes con coordenadas válidas para optimizar en los días seleccionados.", "warning");
     }
