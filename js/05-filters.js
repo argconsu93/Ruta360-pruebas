@@ -1,5 +1,5 @@
 function esRolAvanzado() {
-    return usuarioActual && ['Jefatura', 'Analista', 'Administrador'].includes(usuarioActual.rol);
+    return appState.usuarioActual && ['Jefatura', 'Analista', 'Administrador'].includes(appState.usuarioActual.rol);
 }
 
 function poblarFiltrosPermitidos() {
@@ -10,8 +10,8 @@ function poblarFiltroPais() {
     const selectPais = document.getElementById('select-pais');
     selectPais.innerHTML = '';
 
-    if (usuarioActual && usuarioActual.pais !== 'TODOS') {
-        paisesSeleccionadosMultiples = [usuarioActual.pais];
+    if (appState.usuarioActual && appState.usuarioActual.pais !== 'TODOS') {
+        appState.paisesSeleccionadosMultiples = [appState.usuarioActual.pais];
         selectPais.disabled = true;
     } else {
         selectPais.disabled = false;
@@ -36,13 +36,13 @@ function poblarFiltroPais() {
 function renderizarChipsPaises() {
     const container = document.getElementById('chips-paises');
     container.innerHTML = '';
-    paisesSeleccionadosMultiples.forEach(p => {
+    appState.paisesSeleccionadosMultiples.forEach(p => {
         const chip = document.createElement('div');
         chip.className = 'chip-item chip-pais';
         const label = document.createElement('span');
         label.textContent = p;
         chip.appendChild(label);
-        if (usuarioActual && usuarioActual.pais === 'TODOS') {
+        if (appState.usuarioActual && appState.usuarioActual.pais === 'TODOS') {
             const btnRemove = document.createElement('span');
             btnRemove.className = 'btn-remove-chip';
             btnRemove.innerHTML = '&times;';
@@ -54,7 +54,7 @@ function renderizarChipsPaises() {
 }
 
 function removerPaisMultiple(pais) {
-    paisesSeleccionadosMultiples = paisesSeleccionadosMultiples.filter(p => p !== pais);
+    appState.paisesSeleccionadosMultiples = appState.paisesSeleccionadosMultiples.filter(p => p !== pais);
     renderizarChipsPaises();
     actualizarOpcionesDivision();
     aplicarFiltros();
@@ -64,8 +64,8 @@ function actualizarOpcionesDivision() {
     const selectDiv = document.getElementById('select-division');
     selectDiv.innerHTML = '';
 
-    if (usuarioActual && usuarioActual.division !== 'TODOS') {
-        divisionesSeleccionadasMultiples = [usuarioActual.division];
+    if (appState.usuarioActual && appState.usuarioActual.division !== 'TODOS') {
+        appState.divisionesSeleccionadasMultiples = [appState.usuarioActual.division];
         selectDiv.disabled = true;
     } else {
         selectDiv.disabled = false;
@@ -75,12 +75,12 @@ function actualizarOpcionesDivision() {
         selectDiv.appendChild(optTodos);
 
         let divisionesDisponibles = [];
-        if (paisesSeleccionadosMultiples.length === 0) {
+        if (appState.paisesSeleccionadosMultiples.length === 0) {
             Object.values(DIVISIONES_POR_PAIS).forEach(list => {
                 list.forEach(d => divisionesDisponibles.push(d.nombre));
             });
         } else {
-            paisesSeleccionadosMultiples.forEach(p => {
+            appState.paisesSeleccionadosMultiples.forEach(p => {
                 const cod = Object.keys(PAISES_MAPA_NOMBRES).find(k => PAISES_MAPA_NOMBRES[k] === p);
                 if (cod && DIVISIONES_POR_PAIS[cod]) {
                     DIVISIONES_POR_PAIS[cod].forEach(d => divisionesDisponibles.push(d.nombre));
@@ -96,7 +96,7 @@ function actualizarOpcionesDivision() {
             selectDiv.appendChild(opt);
         });
 
-        divisionesSeleccionadasMultiples = divisionesSeleccionadasMultiples.filter(d => divisionesDisponibles.includes(d));
+        appState.divisionesSeleccionadasMultiples = appState.divisionesSeleccionadasMultiples.filter(d => divisionesDisponibles.includes(d));
     }
 
     renderizarChipsDivisiones();
@@ -106,13 +106,13 @@ function actualizarOpcionesDivision() {
 function renderizarChipsDivisiones() {
     const container = document.getElementById('chips-divisiones');
     container.innerHTML = '';
-    divisionesSeleccionadasMultiples.forEach(d => {
+    appState.divisionesSeleccionadasMultiples.forEach(d => {
         const chip = document.createElement('div');
         chip.className = 'chip-item chip-division';
         const label = document.createElement('span');
         label.textContent = d;
         chip.appendChild(label);
-        if (usuarioActual && usuarioActual.division === 'TODOS') {
+        if (appState.usuarioActual && appState.usuarioActual.division === 'TODOS') {
             const btnRemove = document.createElement('span');
             btnRemove.className = 'btn-remove-chip';
             btnRemove.innerHTML = '&times;';
@@ -124,7 +124,7 @@ function renderizarChipsDivisiones() {
 }
 
 function removerDivisionMultiple(division) {
-    divisionesSeleccionadasMultiples = divisionesSeleccionadasMultiples.filter(d => d !== division);
+    appState.divisionesSeleccionadasMultiples = appState.divisionesSeleccionadasMultiples.filter(d => d !== division);
     renderizarChipsDivisiones();
     actualizarOpcionesGrupo();
     aplicarFiltros();
@@ -134,16 +134,16 @@ function actualizarOpcionesGrupo() {
     const selectGrupo = document.getElementById('select-grupo');
     selectGrupo.innerHTML = '<option value="TODOS">Seleccionar Grupo</option>';
 
-    if (usuarioActual && usuarioActual.grupo && usuarioActual.grupo !== 'TODOS') {
-        gruposSeleccionadosMultiples = [normalizarNombreGrupo(usuarioActual.grupo)];
+    if (appState.usuarioActual && appState.usuarioActual.grupo && appState.usuarioActual.grupo !== 'TODOS') {
+        appState.gruposSeleccionadosMultiples = [normalizarNombreGrupo(appState.usuarioActual.grupo)];
         selectGrupo.disabled = true;
     } else {
         selectGrupo.disabled = false;
 
-        const pNorms = paisesSeleccionadosMultiples.map(p => normalizarTexto(p));
-        const dCleans = divisionesSeleccionadasMultiples.map(d => d);
+        const pNorms = appState.paisesSeleccionadosMultiples.map(p => normalizarTexto(p));
+        const dCleans = appState.divisionesSeleccionadasMultiples.map(d => d);
 
-        let clientesBase = rawClientes;
+        let clientesBase = appState.rawClientes;
         if (pNorms.length > 0) {
             clientesBase = clientesBase.filter(c => pNorms.some(p => coincidePais(p, c)));
         }
@@ -153,7 +153,7 @@ function actualizarOpcionesGrupo() {
 
         const gruposClientes = clientesBase.map(c => c.grupo || c._grupoNorm);
         
-        let geocercasBase = (rawGeocercas && rawGeocercas.features) ? rawGeocercas.features : [];
+        let geocercasBase = (appState.rawGeocercas && appState.rawGeocercas.features) ? appState.rawGeocercas.features : [];
         if (dCleans.length > 0) {
             geocercasBase = geocercasBase.filter(f => {
                 const divGeo = f.properties.division_clean || f.properties.DIVISION || f.properties.Division || '';
@@ -177,7 +177,7 @@ function actualizarOpcionesGrupo() {
             selectGrupo.appendChild(opt);
         });
 
-        gruposSeleccionadosMultiples = gruposSeleccionadosMultiples.filter(g => gruposUnicos.includes(g));
+        appState.gruposSeleccionadosMultiples = appState.gruposSeleccionadosMultiples.filter(g => gruposUnicos.includes(g));
     }
 
     renderizarChipsGrupos();
@@ -187,7 +187,7 @@ function actualizarOpcionesGrupo() {
 function renderizarChipsGrupos() {
     const container = document.getElementById('chips-grupos');
     container.innerHTML = '';
-    gruposSeleccionadosMultiples.forEach(g => {
+    appState.gruposSeleccionadosMultiples.forEach(g => {
         const chip = document.createElement('div');
         chip.className = 'chip-item';
         const label = document.createElement('span');
@@ -205,7 +205,7 @@ function renderizarChipsGrupos() {
 }
 
 function removerGrupoMultiple(grupo) {
-    gruposSeleccionadosMultiples = gruposSeleccionadosMultiples.filter(g => g !== grupo);
+    appState.gruposSeleccionadosMultiples = appState.gruposSeleccionadosMultiples.filter(g => g !== grupo);
     renderizarChipsGrupos();
     actualizarOpcionesRuta();
     aplicarFiltros();
@@ -215,29 +215,29 @@ function actualizarOpcionesRuta() {
     const selectRuta = document.getElementById('select-ruta');
     selectRuta.innerHTML = '<option value="TODOS">Seleccionar Ruta</option>';
 
-    const pNorms = paisesSeleccionadosMultiples.map(p => normalizarTexto(p));
-    const dCleans = divisionesSeleccionadasMultiples.map(d => d);
+    const pNorms = appState.paisesSeleccionadosMultiples.map(p => normalizarTexto(p));
+    const dCleans = appState.divisionesSeleccionadasMultiples.map(d => d);
 
-    let clientesBase = rawClientes;
+    let clientesBase = appState.rawClientes;
     if (pNorms.length > 0) {
         clientesBase = clientesBase.filter(c => pNorms.some(p => coincidePais(p, c)));
     }
     if (dCleans.length > 0) {
         clientesBase = clientesBase.filter(c => dCleans.some(d => coincideDivision(d, c)));
     }
-    if (gruposSeleccionadosMultiples.length > 0) {
-        clientesBase = clientesBase.filter(c => gruposSeleccionadosMultiples.some(g => coincideGrupo(g, c)));
+    if (appState.gruposSeleccionadosMultiples.length > 0) {
+        clientesBase = clientesBase.filter(c => appState.gruposSeleccionadosMultiples.some(g => coincideGrupo(g, c)));
     }
 
-    let geocercasBase = (rawGeocercas && rawGeocercas.features) ? rawGeocercas.features : [];
+    let geocercasBase = (appState.rawGeocercas && appState.rawGeocercas.features) ? appState.rawGeocercas.features : [];
     if (dCleans.length > 0) {
         geocercasBase = geocercasBase.filter(f => {
             const divGeo = f.properties.division_clean || f.properties.DIVISION || f.properties.Division || '';
             return dCleans.some(d => coincideDivision(d, { division: divGeo, _divClean: normalizarTexto(divGeo) }));
         });
     }
-    if (gruposSeleccionadosMultiples.length > 0) {
-        geocercasBase = geocercasBase.filter(f => gruposSeleccionadosMultiples.some(g => coincideGrupo(g, { _grupoNorm: f.properties.grupo_clean })));
+    if (appState.gruposSeleccionadosMultiples.length > 0) {
+        geocercasBase = geocercasBase.filter(f => appState.gruposSeleccionadosMultiples.some(g => coincideGrupo(g, { _grupoNorm: f.properties.grupo_clean })));
     }
 
     const rutasClientes = clientesBase.map(c => c.ruta);
@@ -255,14 +255,14 @@ function actualizarOpcionesRuta() {
         selectRuta.appendChild(opt);
     });
 
-    rutasSeleccionadasMultiples = rutasSeleccionadasMultiples.filter(r => rutasUnicas.includes(r));
+    appState.rutasSeleccionadasMultiples = appState.rutasSeleccionadasMultiples.filter(r => rutasUnicas.includes(r));
     renderizarChipsRutas();
 }
 
 function renderizarChipsRutas() {
     const container = document.getElementById('chips-rutas');
     container.innerHTML = '';
-    rutasSeleccionadasMultiples.forEach(r => {
+    appState.rutasSeleccionadasMultiples.forEach(r => {
         const chip = document.createElement('div');
         chip.className = 'chip-item';
         const label = document.createElement('span');
@@ -278,7 +278,7 @@ function renderizarChipsRutas() {
 }
 
 function removerRutaMultiple(ruta) {
-    rutasSeleccionadasMultiples = rutasSeleccionadasMultiples.filter(r => r !== ruta);
+    appState.rutasSeleccionadasMultiples = appState.rutasSeleccionadasMultiples.filter(r => r !== ruta);
     renderizarChipsRutas();
     aplicarFiltros();
 }
@@ -287,34 +287,34 @@ function removerRutaMultiple(ruta) {
 //  PROCESAMIENTO GENERAL DE FILTROS EN MAPA Y KPIS
 // ============================================================
 function aplicarFiltros() {
-    if (rutaOptimaLayerGroup) rutaOptimaLayerGroup.clearLayers();
-    ultimaSecuenciaOptimizada = [];
+    if (appState.rutaOptimaLayerGroup) appState.rutaOptimaLayerGroup.clearLayers();
+    appState.ultimaSecuenciaOptimizada = [];
     document.getElementById('btn-descargar-optimizacion').disabled = true;
     document.getElementById('btn-gmaps-redirect').style.display = 'none';
     document.getElementById('route-simulation-container').style.display = 'none';
     detenerSimulacion();
 
-    const pNorms = paisesSeleccionadosMultiples.map(p => normalizarTexto(p));
-    const dCleans = divisionesSeleccionadasMultiples.map(d => d);
-    const rNorms = rutasSeleccionadasMultiples.map(r => r.toLowerCase());
-    const diaNorm = normalizarTexto(diaSeleccionado);
+    const pNorms = appState.paisesSeleccionadosMultiples.map(p => normalizarTexto(p));
+    const dCleans = appState.divisionesSeleccionadasMultiples.map(d => d);
+    const rNorms = appState.rutasSeleccionadasMultiples.map(r => r.toLowerCase());
+    const diaNorm = normalizarTexto(appState.diaSeleccionado);
 
     let clientesFiltrados = [];
-    if (diaSeleccionado !== 'NINGUNO') {
-        clientesFiltrados = rawClientes.filter(c => {
+    if (appState.diaSeleccionado !== 'NINGUNO') {
+        clientesFiltrados = appState.rawClientes.filter(c => {
             const matchPais = (pNorms.length === 0) || pNorms.some(p => coincidePais(p, c));
             const matchDiv = (dCleans.length === 0) || dCleans.some(d => coincideDivision(d, c));
-            const matchGrupo = (gruposSeleccionadosMultiples.length === 0) || gruposSeleccionadosMultiples.some(g => coincideGrupo(g, c));
+            const matchGrupo = (appState.gruposSeleccionadosMultiples.length === 0) || appState.gruposSeleccionadosMultiples.some(g => coincideGrupo(g, c));
             const matchRuta = (rNorms.length === 0) || rNorms.some(r => coincideRuta(r, c));
             const matchDia = coincideDia(diaNorm, c);
 
-            const infoRuta = rawRutasDistribuidoras[c._rutaNorm] || rawRutasDistribuidoras[c.RUTA] || {};
+            const infoRuta = appState.rawRutasDistribuidoras[c._rutaNorm] || appState.rawRutasDistribuidoras[c.RUTA] || {};
             const canalCliente = (infoRuta.canal || c.CANAL || c.Canal || '').toUpperCase().trim();
 
             let matchSwitchCanal = true;
-            if (swMasivos) {
+            if (appState.swMasivos) {
                 matchSwitchCanal = canalCliente.includes('DETALLE') || canalCliente.includes('PREFERENCIAL');
-            } else if (swEspecificos) {
+            } else if (appState.swEspecificos) {
                 matchSwitchCanal = !canalCliente.includes('DETALLE') && !canalCliente.includes('PREFERENCIAL');
             }
 
@@ -323,15 +323,15 @@ function aplicarFiltros() {
     }
 
     const rutasClientesVisibles = new Set();
-    rawClientes.forEach(c => {
+    appState.rawClientes.forEach(c => {
         const mP = (pNorms.length === 0) || pNorms.some(p => coincidePais(p, c));
         const mD = (dCleans.length === 0) || dCleans.some(d => coincideDivision(d, c));
         if (mP && mD) rutasClientesVisibles.add(c._rutaNorm);
     });
 
     let featuresGeocercasFiltradas = [];
-    if (rawGeocercas && rawGeocercas.features) {
-        featuresGeocercasFiltradas = rawGeocercas.features.filter(f => {
+    if (appState.rawGeocercas && appState.rawGeocercas.features) {
+        featuresGeocercasFiltradas = appState.rawGeocercas.features.filter(f => {
             const rNorm = f.properties._rutaNorm || '';
             const gNorm = f.properties.grupo_clean || 'Sin Grupo';
             const pGeoNorm = normalizarTexto(f.properties.pais_clean || '');
@@ -349,15 +349,15 @@ function aplicarFiltros() {
                 if (!matchDivDirecto && !matchDivPorClientes) return false;
             }
 
-            if (gruposSeleccionadosMultiples.length > 0 && !gruposSeleccionadosMultiples.some(gSel => coincideGrupo(gSel, { _grupoNorm: gNorm, grupo: gNorm }))) return false;
+            if (appState.gruposSeleccionadosMultiples.length > 0 && !appState.gruposSeleccionadosMultiples.some(gSel => coincideGrupo(gSel, { _grupoNorm: gNorm, grupo: gNorm }))) return false;
             if (rNorms.length > 0 && !rNorms.some(rSel => coincideRuta(rSel, { ruta: f.properties.ruta_clean, _rutaNorm: rNorm }))) return false;
 
-            const infoRutaGeo = rawRutasDistribuidoras[rNorm] || rawRutasDistribuidoras[f.properties.ruta_clean] || {};
+            const infoRutaGeo = appState.rawRutasDistribuidoras[rNorm] || appState.rawRutasDistribuidoras[f.properties.ruta_clean] || {};
             const canalGeo = (infoRutaGeo.canal || f.properties.CANAL || f.properties.Canal || '').toUpperCase().trim();
 
-            if (swMasivos) {
+            if (appState.swMasivos) {
                 if (!canalGeo.includes('DETALLE') && !canalGeo.includes('PREFERENCIAL')) return false;
-            } else if (swEspecificos) {
+            } else if (appState.swEspecificos) {
                 if (canalGeo.includes('DETALLE') || canalGeo.includes('PREFERENCIAL')) return false;
             }
 
@@ -365,11 +365,11 @@ function aplicarFiltros() {
         });
     }
 
-    ultimoClientesFiltrados = clientesFiltrados;
-    renderizarDistribuidoras(rawDistribuidoras);
+    appState.ultimoClientesFiltrados = clientesFiltrados;
+    renderizarDistribuidoras(appState.rawDistribuidoras);
     const geocercasBounds = renderizarGeocercas(featuresGeocercasFiltradas);
     const { bounds: clientesBounds, fuera } = renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas);
-    ultimoClientesFuera = fuera;
+    appState.ultimoClientesFuera = fuera;
 
     actualizarTablaClientes(clientesFiltrados);
     actualizarTablaFuera(fuera);
@@ -377,7 +377,7 @@ function aplicarFiltros() {
     actualizarKPIsVisitas();
 
     const btnRutaOpt = document.getElementById('btn-trazar-ruta');
-    if (rutasSeleccionadasMultiples.length === 1 && diaSeleccionado !== 'NINGUNO' && clientesFiltrados.length > 1) {
+    if (appState.rutasSeleccionadasMultiples.length === 1 && appState.diaSeleccionado !== 'NINGUNO' && clientesFiltrados.length > 1) {
         btnRutaOpt.disabled = false;
         btnRutaOpt.title = "Trazar itinerario óptimo vial";
     } else {
@@ -387,20 +387,20 @@ function aplicarFiltros() {
 
     let finalBounds = clientesBounds.isValid() ? clientesBounds : (geocercasBounds && geocercasBounds.isValid() ? geocercasBounds : null);
 
-    if (finalBounds && map) {
-        map.fitBounds(finalBounds, { padding: [40, 40], maxZoom: 15, animate: true });
+    if (finalBounds && appState.map) {
+        appState.map.fitBounds(finalBounds, { padding: [40, 40], maxZoom: 15, animate: true });
     }
 }
 
 function filtrarTablaPorTexto() {
-    clearTimeout(searchDebounceTimeout);
-    searchDebounceTimeout = setTimeout(() => {
+    clearTimeout(appState.searchDebounceTimeout);
+    appState.searchDebounceTimeout = setTimeout(() => {
         const text = document.getElementById('input-search-cliente').value.toLowerCase().trim();
         if (!text) {
-            actualizarTablaClientes(ultimoClientesFiltrados);
+            actualizarTablaClientes(appState.ultimoClientesFiltrados);
             return;
         }
-        const filtrados = ultimoClientesFiltrados.filter(c => c._searchCache && c._searchCache.includes(text));
+        const filtrados = appState.ultimoClientesFiltrados.filter(c => c._searchCache && c._searchCache.includes(text));
         actualizarTablaClientes(filtrados);
     }, 150);
 }
@@ -409,7 +409,7 @@ function actualizarTablaClientes(clientes) {
     const tbody = document.getElementById('tabla-clientes-body');
     const subset = clientes.slice(0, 50);
     const rowsHtml = subset.map(c => {
-        const isVisited = clientesVisitadosMap.get(c.codigo) || false;
+        const isVisited = appState.clientesVisitadosMap.get(c.codigo) || false;
         const codigo = escapeHTML(c.codigo);
         return `
             <tr id="row-cli-${codigo}" class="clickable-row ${isVisited ? 'visited-row' : ''}" data-action="select-client" data-client-code="${codigo}">
@@ -446,9 +446,9 @@ function actualizarTablaFuera(clientesFuera) {
 }
 
 function actualizarKPIsVisitas() {
-    let total = ultimoClientesFiltrados.length;
+    let total = appState.ultimoClientesFiltrados.length;
     let visitados = 0;
-    ultimoClientesFiltrados.forEach(c => { if (clientesVisitadosMap.get(c.codigo) === true) visitados++; });
+    appState.ultimoClientesFiltrados.forEach(c => { if (appState.clientesVisitadosMap.get(c.codigo) === true) visitados++; });
     let pendientes = total - visitados;
     let porcentaje = total > 0 ? Math.round((visitados / total) * 100) : 0;
     document.getElementById('kpi-visitados').innerText = visitados;
@@ -462,15 +462,15 @@ function actualizarKPIsVisitas() {
 }
 
 function seleccionarClienteEnMapa(codigo) {
-    const marker = clienteMarkersMap[codigo];
-    const clientObj = rawClientes.find(c => c.codigo === codigo);
+    const marker = appState.clienteMarkersMap[codigo];
+    const clientObj = appState.rawClientes.find(c => c.codigo === codigo);
     if (marker && clientObj && clientObj.lat !== null && clientObj.lng !== null) {
         if (window.innerWidth <= 768) {
             const drawer = document.getElementById('mobile-drawer');
             if (!drawer.classList.contains('collapsed')) toggleDrawer();
         }
-        clusterMarkersGroup.zoomToShowLayer(marker, () => {
-            map.setView([clientObj.lat, clientObj.lng], 17, { animate: true });
+        appState.clusterMarkersGroup.zoomToShowLayer(marker, () => {
+            appState.map.setView([clientObj.lat, clientObj.lng], 17, { animate: true });
             marker.openPopup();
         });
     } else {

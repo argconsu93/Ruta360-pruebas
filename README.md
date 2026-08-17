@@ -40,3 +40,7 @@ npm run test:browser
 ```
 
 Cada `push` y pull request ejecuta estas comprobaciones automáticamente mediante GitHub Actions.
+
+## Estado de la aplicación
+
+El estado mutable compartido vive en `appState`, creado por `crearEstadoInicial()`. Los módulos funcionales leen y actualizan este objeto explícitamente, evitando decenas de variables globales independientes y facilitando futuras migraciones a módulos ES.

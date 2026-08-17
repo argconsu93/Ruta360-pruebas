@@ -94,7 +94,7 @@ function actualizarLeyendaMapa() {
     const titleEl = document.getElementById('legend-box-title');
     const listEl = document.getElementById('legend-items-list');
     
-    if (!swMasivos && !swEspecificos && !swTipoZona) {
+    if (!appState.swMasivos && !appState.swEspecificos && !appState.swTipoZona) {
         legendBox.style.display = 'none';
         return;
     }
@@ -102,7 +102,7 @@ function actualizarLeyendaMapa() {
     legendBox.style.display = 'flex';
     listEl.innerHTML = '';
 
-    if (swMasivos) {
+    if (appState.swMasivos) {
         titleEl.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> Canales Masivos';
         const items = [
             { label: 'Detalle', color: COLORES_CANALES_MASIVOS['DETALLE'] },
@@ -111,7 +111,7 @@ function actualizarLeyendaMapa() {
         items.forEach(it => {
             listEl.innerHTML += `<div class="legend-item-row"><div class="legend-color-dot" style="background:${it.color};"></div><span>${it.label}</span></div>`;
         });
-    } else if (swEspecificos) {
+    } else if (appState.swEspecificos) {
         titleEl.innerHTML = '<i class="fa-solid fa-boxes-packing"></i> Canales Específicos';
         const items = [
             { label: 'Mayoreo', color: COLORES_CANALES_ESPECIFICOS['MAYOREO'] },
@@ -123,7 +123,7 @@ function actualizarLeyendaMapa() {
         items.forEach(it => {
             listEl.innerHTML += `<div class="legend-item-row"><div class="legend-color-dot" style="background:${it.color};"></div><span>${it.label}</span></div>`;
         });
-    } else if (swTipoZona) {
+    } else if (appState.swTipoZona) {
         titleEl.innerHTML = '<i class="fa-solid fa-map-pin"></i> Tipos de Zona';
         const items = [
             { label: 'Urbana', color: COLORES_TIPO_ZONA_FIJOS['URBANA'] },
@@ -138,8 +138,8 @@ function actualizarLeyendaMapa() {
 }
 
 function renderizarGeocercas(featuresGeocercasFiltradas) {
-    geocercasLayerGroup.clearLayers();
-    geocercasBBoxCache = [];
+    appState.geocercasLayerGroup.clearLayers();
+    appState.geocercasBBoxCache = [];
 
     if (!featuresGeocercasFiltradas || featuresGeocercasFiltradas.length === 0) return null;
 
@@ -160,7 +160,7 @@ function renderizarGeocercas(featuresGeocercasFiltradas) {
         if (geom.type === 'Polygon') extractRings(geom.coordinates);
         else if (geom.type === 'MultiPolygon') geom.coordinates.forEach(poly => extractRings(poly));
 
-        geocercasBBoxCache.push({
+        appState.geocercasBBoxCache.push({
             feature: feat,
             bbox: [minLng, minLat, maxLng, maxLat]
         });
@@ -170,7 +170,7 @@ function renderizarGeocercas(featuresGeocercasFiltradas) {
         { type: "FeatureCollection", features: featuresGeocercasFiltradas },
         {
             style: function(feature) {
-                if (isSatelliteActive) {
+                if (appState.isSatelliteActive) {
                     return { color: '#38bdf8', weight: 2.5, fillColor: '#38bdf8', fillOpacity: 0.2 };
                 }
                 const props = feature.properties || {};
@@ -179,22 +179,22 @@ function renderizarGeocercas(featuresGeocercasFiltradas) {
                 const realGrupo = props.grupo_clean || 'Sin Grupo';
                 const realRuta = props.ruta_clean || 'N/A';
                 
-                const infoRuta = rawRutasDistribuidoras[realRuta] || rawRutasDistribuidoras[props._rutaNorm] || {};
+                const infoRuta = appState.rawRutasDistribuidoras[realRuta] || appState.rawRutasDistribuidoras[props._rutaNorm] || {};
                 const realCanal = (infoRuta.canal || props.CANAL || props.Canal || 'N/D').toUpperCase().trim();
                 const realTipoZona = (infoRuta.tipoZona || props.TIPO_ZONA || props.Tipo_Zona || 'N/D').toUpperCase().trim();
 
                 let colorBase = '#0369a1';
 
-                if (swMasivos) {
+                if (appState.swMasivos) {
                     colorBase = obtenerColorPorCanal(realCanal);
-                } else if (swEspecificos) {
+                } else if (appState.swEspecificos) {
                     colorBase = obtenerColorPorCanal(realCanal);
-                } else if (swTipoZona) {
+                } else if (appState.swTipoZona) {
                     colorBase = obtenerColorPorTipoZona(realTipoZona);
                 } else {
-                    if (paisesSeleccionadosMultiples.length === 0 || paisesSeleccionadosMultiples.length > 1) {
+                    if (appState.paisesSeleccionadosMultiples.length === 0 || appState.paisesSeleccionadosMultiples.length > 1) {
                         colorBase = obtenerColorPorPais(realPais);
-                    } else if (divisionesSeleccionadasMultiples.length === 0 || divisionesSeleccionadasMultiples.length > 1) {
+                    } else if (appState.divisionesSeleccionadasMultiples.length === 0 || appState.divisionesSeleccionadasMultiples.length > 1) {
                         colorBase = obtenerColorDinamico(realDivision);
                     } else {
                         colorBase = obtenerColorDinamico(realGrupo);
@@ -210,7 +210,7 @@ function renderizarGeocercas(featuresGeocercasFiltradas) {
                 const realGrupo = props.grupo_clean || 'Sin Grupo';
                 const realRuta = props.ruta_clean || 'N/A';
                 
-                const infoRuta = rawRutasDistribuidoras[realRuta] || rawRutasDistribuidoras[props._rutaNorm] || {};
+                const infoRuta = appState.rawRutasDistribuidoras[realRuta] || appState.rawRutasDistribuidoras[props._rutaNorm] || {};
                 const realCanal = infoRuta.canal || props.CANAL || props.Canal || 'N/D';
                 const realTipoZona = infoRuta.tipoZona || props.TIPO_ZONA || props.Tipo_Zona || 'N/D';
 
@@ -231,17 +231,17 @@ function renderizarGeocercas(featuresGeocercasFiltradas) {
                 `);
             }
         }
-    ).addTo(geocercasLayerGroup);
+    ).addTo(appState.geocercasLayerGroup);
 
     actualizarLeyendaMapa();
     return geoJsonLayer.getBounds();
 }
 
 function renderizarDistribuidoras(distribuidorasData) {
-    distribuidorasLayerGroup.clearLayers();
+    appState.distribuidorasLayerGroup.clearLayers();
     if (!distribuidorasData || !distribuidorasData.features || distribuidorasData.features.length === 0) return;
     L.geoJSON(distribuidorasData, {
-        style: { color: isSatelliteActive ? '#f43f5e' : '#b91c1c', weight: 2.5, fillColor: '#b91c1c', fillOpacity: 0.2 },
+        style: { color: appState.isSatelliteActive ? '#f43f5e' : '#b91c1c', weight: 2.5, fillColor: '#b91c1c', fillOpacity: 0.2 },
         onEachFeature: function(feature, layer) {
             const props = feature.properties || {};
             let nombreDist = obtenerValorPropiedad(props, 'Ruta', 'RUTA', 'ruta', 'DISTRIBUIDORA', 'Distribuidora', 'distribuidora', 'BOCADELI', 'Bocadeli', 'bocadeli', 'NOMBRE', 'Nombre', 'nombre');
@@ -255,12 +255,12 @@ function renderizarDistribuidoras(distribuidorasData) {
                 </div>
             `);
         }
-    }).addTo(distribuidorasLayerGroup);
+    }).addTo(appState.distribuidorasLayerGroup);
 }
 
 function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
-    clusterMarkersGroup.clearLayers();
-    Object.keys(clienteMarkersMap).forEach(key => delete clienteMarkersMap[key]);
+    appState.clusterMarkersGroup.clearLayers();
+    Object.keys(appState.clienteMarkersMap).forEach(key => delete appState.clienteMarkersMap[key]);
     let bounds = L.latLngBounds();
     let conCoords = 0;
     const fuera = [];
@@ -273,7 +273,7 @@ function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
         if (c.lat !== null && c.lng !== null && !isNaN(c.lat) && !isNaN(c.lng)) {
             conCoords++;
             bounds.extend([c.lat, c.lng]);
-            const isVisited = clientesVisitadosMap.get(c.codigo) || false;
+            const isVisited = appState.clientesVisitadosMap.get(c.codigo) || false;
 
             const gridLat = Math.round(c.lat / 0.000072);
             const gridLng = Math.round(c.lng / 0.000072);
@@ -295,21 +295,21 @@ function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
             let colorFill = isVisited ? '#15803d' : '#0369a1';
             let colorStroke = isVisited ? '#166534' : '#075985';
             
-            if (isSatelliteActive) {
+            if (appState.isSatelliteActive) {
                 colorFill = isVisited ? '#22c55e' : '#38bdf8';
                 colorStroke = '#ffffff';
             }
 
             const marker = L.circleMarker([renderLat, renderLng], {
-                radius: isSatelliteActive ? 7 : 6,
+                radius: appState.isSatelliteActive ? 7 : 6,
                 fillColor: colorFill,
                 color: colorStroke,
-                weight: isSatelliteActive ? 2.5 : 1.5,
+                weight: appState.isSatelliteActive ? 2.5 : 1.5,
                 fillOpacity: 0.95
             }).bindPopup(generarPopupHTML(c, isVisited));
             
             newMarkersList.push(marker);
-            clienteMarkersMap[c.codigo] = marker;
+            appState.clienteMarkersMap[c.codigo] = marker;
 
             if (tieneGeocercas && !estaDentroDeGeocercasOptimizado(c.lat, c.lng)) {
                 fuera.push(c);
@@ -318,7 +318,7 @@ function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
     });
 
     if (newMarkersList.length > 0) {
-        clusterMarkersGroup.addLayers(newMarkersList);
+        appState.clusterMarkersGroup.addLayers(newMarkersList);
     }
 
     document.getElementById('kpi-coords').innerText = conCoords;
@@ -386,10 +386,10 @@ function puntoEnPoligono(point, vs) {
 }
 
 function estaDentroDeGeocercasOptimizado(lat, lng) {
-    if (!geocercasBBoxCache || geocercasBBoxCache.length === 0) return true;
+    if (!appState.geocercasBBoxCache || appState.geocercasBBoxCache.length === 0) return true;
     const pt = [lng, lat];
-    for (let i = 0; i < geocercasBBoxCache.length; i++) {
-        const item = geocercasBBoxCache[i];
+    for (let i = 0; i < appState.geocercasBBoxCache.length; i++) {
+        const item = appState.geocercasBBoxCache[i];
         const bbox = item.bbox;
         if (lng < bbox[0] || lng > bbox[2] || lat < bbox[1] || lat > bbox[3]) continue;
         const geom = item.feature.geometry;

@@ -5,10 +5,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (chkMasivos) {
         chkMasivos.addEventListener('change', function() {
-            swMasivos = this.checked;
-            if (swMasivos) {
-                swEspecificos = false;
-                swTipoZona = false;
+            appState.swMasivos = this.checked;
+            if (appState.swMasivos) {
+                appState.swEspecificos = false;
+                appState.swTipoZona = false;
                 if (chkEspecificos) chkEspecificos.checked = false;
                 if (chkTipoZona) chkTipoZona.checked = false;
             }
@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (chkEspecificos) {
         chkEspecificos.addEventListener('change', function() {
-            swEspecificos = this.checked;
-            if (swEspecificos) {
-                swMasivos = false;
-                swTipoZona = false;
+            appState.swEspecificos = this.checked;
+            if (appState.swEspecificos) {
+                appState.swMasivos = false;
+                appState.swTipoZona = false;
                 if (chkMasivos) chkMasivos.checked = false;
                 if (chkTipoZona) chkTipoZona.checked = false;
             }
@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (chkTipoZona) {
         chkTipoZona.addEventListener('change', function() {
-            swTipoZona = this.checked;
-            if (swTipoZona) {
-                swMasivos = false;
-                swEspecificos = false;
+            appState.swTipoZona = this.checked;
+            if (appState.swTipoZona) {
+                appState.swMasivos = false;
+                appState.swEspecificos = false;
                 if (chkMasivos) chkMasivos.checked = false;
                 if (chkEspecificos) chkEspecificos.checked = false;
             }
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('select-pais').addEventListener('change', function() {
         const val = this.value;
         if (val && val !== 'TODOS') {
-            if (!paisesSeleccionadosMultiples.includes(val)) paisesSeleccionadosMultiples.push(val);
+            if (!appState.paisesSeleccionadosMultiples.includes(val)) appState.paisesSeleccionadosMultiples.push(val);
             renderizarChipsPaises();
             actualizarOpcionesDivision();
             aplicarFiltros();
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('select-division').addEventListener('change', function() {
         const val = this.value;
         if (val && val !== 'TODOS') {
-            if (!divisionesSeleccionadasMultiples.includes(val)) divisionesSeleccionadasMultiples.push(val);
+            if (!appState.divisionesSeleccionadasMultiples.includes(val)) appState.divisionesSeleccionadasMultiples.push(val);
             renderizarChipsDivisiones();
             actualizarOpcionesGrupo();
             aplicarFiltros();
@@ -133,9 +133,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const val = this.value;
         if (val && val !== 'TODOS') {
             if (esRolAvanzado()) {
-                if (!gruposSeleccionadosMultiples.includes(val)) gruposSeleccionadosMultiples.push(val);
+                if (!appState.gruposSeleccionadosMultiples.includes(val)) appState.gruposSeleccionadosMultiples.push(val);
             } else {
-                gruposSeleccionadosMultiples = [val];
+                appState.gruposSeleccionadosMultiples = [val];
             }
             renderizarChipsGrupos();
             actualizarOpcionesRuta();
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('select-ruta').addEventListener('change', function() {
         const val = this.value;
         if (val && val !== 'TODOS') {
-            if (!rutasSeleccionadasMultiples.includes(val)) rutasSeleccionadasMultiples.push(val);
+            if (!appState.rutasSeleccionadasMultiples.includes(val)) appState.rutasSeleccionadasMultiples.push(val);
             renderizarChipsRutas();
             aplicarFiltros();
         }
@@ -157,11 +157,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-day').forEach(btn => {
         btn.addEventListener('click', function() {
             const dia = this.getAttribute('data-dia');
-            if (diaSeleccionado === dia) {
-                diaSeleccionado = 'NINGUNO';
+            if (appState.diaSeleccionado === dia) {
+                appState.diaSeleccionado = 'NINGUNO';
                 document.querySelectorAll('.btn-day').forEach(b => b.classList.remove('active'));
             } else {
-                diaSeleccionado = dia;
+                appState.diaSeleccionado = dia;
                 document.querySelectorAll('.btn-day').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
             }

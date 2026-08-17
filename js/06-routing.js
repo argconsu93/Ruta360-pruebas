@@ -8,10 +8,10 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
 }
 
 function obtenerCentroideDistribuidoraPorNombre(nombreDistribuidora) {
-    if (!rawDistribuidoras || !rawDistribuidoras.features) return null;
+    if (!appState.rawDistribuidoras || !appState.rawDistribuidoras.features) return null;
     const targetNorm = normalizarTexto(nombreDistribuidora);
     
-    const feat = rawDistribuidoras.features.find(f => {
+    const feat = appState.rawDistribuidoras.features.find(f => {
         const props = f.properties || {};
         let n = obtenerValorPropiedad(props, 'Ruta', 'RUTA', 'ruta', 'DISTRIBUIDORA', 'Distribuidora', 'distribuidora', 'BOCADELI', 'Bocadeli', 'bocadeli', 'NOMBRE', 'Nombre', 'nombre') || '';
         const nNorm = normalizarTexto(n);
@@ -102,9 +102,9 @@ function optimizarSecuenciaSweep2OPT(secuenciaOriginal, puntoOrigen) {
 }
 
 async function trazarRutaOptima() {
-    if (rutaOptimaLayerGroup) rutaOptimaLayerGroup.clearLayers();
-    if (clusterMarkersGroup) clusterMarkersGroup.clearLayers();
-    ultimaSecuenciaOptimizada = [];
+    if (appState.rutaOptimaLayerGroup) appState.rutaOptimaLayerGroup.clearLayers();
+    if (appState.clusterMarkersGroup) appState.clusterMarkersGroup.clearLayers();
+    appState.ultimaSecuenciaOptimizada = [];
     detenerSimulacion();
 
     const btnOpt = document.getElementById('btn-trazar-ruta');
@@ -112,7 +112,7 @@ async function trazarRutaOptima() {
     btnOpt.disabled = true;
     btnOpt.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Optimizando con Barrido Sectorial...';
 
-    const rutaSel = rutasSeleccionadasMultiples[0];
+    const rutaSel = appState.rutasSeleccionadasMultiples[0];
     const minutosPorParada = parseInt(document.getElementById('input-tiempo-parada').value) || 10;
     const horaSalidaStr = document.getElementById('input-hora-salida').value || '08:00';
     const [salidaH, salidaM] = horaSalidaStr.split(':').map(Number);
@@ -126,42 +126,42 @@ async function trazarRutaOptima() {
     }
 
     let nombreDistribuidora = "";
-    const distEntry = rawRutasDistribuidoras[rutaSel];
+    const distEntry = appState.rawRutasDistribuidoras[rutaSel];
     if (distEntry) {
         nombreDistribuidora = typeof distEntry === 'object' ? (distEntry.distribuidora || '') : String(distEntry);
     }
     
     let puntoReferencia = nombreDistribuidora ? obtenerCentroideDistribuidoraPorNombre(nombreDistribuidora) : null;
-    if (!puntoReferencia && rawDistribuidoras && rawDistribuidoras.features && rawDistribuidoras.features.length > 0) {
-        const featDef = rawDistribuidoras.features[0];
+    if (!puntoReferencia && appState.rawDistribuidoras && appState.rawDistribuidoras.features && appState.rawDistribuidoras.features.length > 0) {
+        const featDef = appState.rawDistribuidoras.features[0];
         let coordsDef = featDef.geometry.type === 'Polygon' ? featDef.geometry.coordinates[0] : featDef.geometry.coordinates[0][0];
         let sLat = 0, sLng = 0;
         coordsDef.forEach(pt => { sLng += pt[0]; sLat += pt[1]; });
         puntoReferencia = { lat: sLat / coordsDef.length, lng: sLng / coordsDef.length };
     }
 
-    let diasAProcesar = (diaSeleccionado === 'TODOS') 
+    let diasAProcesar = (appState.diaSeleccionado === 'TODOS') 
         ? ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'] 
-        : [diaSeleccionado];
+        : [appState.diaSeleccionado];
 
     let totalProcesados = 0;
     let clientesFueraTotal = [];
     let boundsGlobal = L.latLngBounds();
-    simPathCoordinates = [];
+    appState.simPathCoordinates = [];
 
     let acumuladorDistanciaTransito = 0;
     let acumuladorDistanciaGeocerca = 0;
     let acumuladorTiempoVisitasMin = 0;
 
     for (let diaNombre of diasAProcesar) {
-        const clientesDia = ultimoClientesFiltrados.filter(c => {
+        const clientesDia = appState.ultimoClientesFiltrados.filter(c => {
             if (c.lat === null || c.lng === null || isNaN(c.lat) || isNaN(c.lng)) return false;
             return coincideDia(normalizarTexto(diaNombre), c);
         });
 
         const clientesValidosEnGeocerca = [];
         clientesDia.forEach(c => {
-            if (ultimoClientesFuera.some(f => f.codigo === c.codigo)) {
+            if (appState.ultimoClientesFuera.some(f => f.codigo === c.codigo)) {
                 clientesFueraTotal.push(c);
             } else {
                 clientesValidosEnGeocerca.push(c);
@@ -194,12 +194,12 @@ async function trazarRutaOptima() {
                 const routeGeometry = data.routes[0].geometry;
                 
                 if (routeGeometry && routeGeometry.coordinates) {
-                    simPathCoordinates = routeGeometry.coordinates.map(pt => [pt[1], pt[0]]);
+                    appState.simPathCoordinates = routeGeometry.coordinates.map(pt => [pt[1], pt[0]]);
                 }
 
                 const routePath = L.geoJSON(routeGeometry, {
                     style: { color: colorHex, weight: 4, opacity: 0.85 }
-                }).addTo(rutaOptimaLayerGroup);
+                }).addTo(appState.rutaOptimaLayerGroup);
 
                 boundsGlobal.extend(routePath.getBounds());
 
@@ -211,7 +211,7 @@ async function trazarRutaOptima() {
 
                 secuenciaDia.forEach((c, idx) => {
                     const num = idx + 1;
-                    const isVisited = clientesVisitadosMap.get(c.codigo) || false;
+                    const isVisited = appState.clientesVisitadosMap.get(c.codigo) || false;
 
                     minutosAcumulados += minutosPorParada;
                     acumuladorTiempoVisitasMin += minutosPorParada;
@@ -253,10 +253,10 @@ async function trazarRutaOptima() {
                     const markerOpt = L.marker([renderLat, renderLng], { icon: customIcon })
                         .bindPopup(generarPopupHTML(c, isVisited, num, diaNombre));
 
-                    clusterMarkersGroup.addLayer(markerOpt);
-                    clienteMarkersMap[c.codigo] = markerOpt;
+                    appState.clusterMarkersGroup.addLayer(markerOpt);
+                    appState.clienteMarkersMap[c.codigo] = markerOpt;
 
-                    ultimaSecuenciaOptimizada.push({
+                    appState.ultimaSecuenciaOptimizada.push({
                         "Orden de Visita": num,
                         "Día de Visita": diaNombre,
                         "Ruta": c.ruta,
@@ -294,7 +294,7 @@ async function trazarRutaOptima() {
     }
 
     if (totalProcesados > 0) {
-        if (boundsGlobal.isValid()) map.fitBounds(boundsGlobal, { padding: [50, 50] });
+        if (boundsGlobal.isValid()) appState.map.fitBounds(boundsGlobal, { padding: [50, 50] });
         document.getElementById('btn-descargar-optimizacion').disabled = false;
         document.getElementById('btn-gmaps-redirect').style.display = 'flex';
         document.getElementById('route-simulation-container').style.display = 'flex';
@@ -324,15 +324,15 @@ async function trazarRutaOptima() {
 //  FUNCIONES DE SIMULACIÓN DE CAMIÓN (Tolerancia 75 metros)
 // ============================================================
 function inicializarSimuladorRuta() {
-    if (!simPathCoordinates || simPathCoordinates.length === 0) return;
-    simCurrentStep = 0;
-    simTotalSteps = simPathCoordinates.length;
+    if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
+    appState.simCurrentStep = 0;
+    appState.simTotalSteps = appState.simPathCoordinates.length;
     document.getElementById('sim-range-progress').value = 0;
-    document.getElementById('sim-parada-label').textContent = `Paso: 0 / ${simTotalSteps}`;
+    document.getElementById('sim-parada-label').textContent = `Paso: 0 / ${appState.simTotalSteps}`;
     document.getElementById('sim-time-display').textContent = document.getElementById('input-hora-salida').value || '08:00';
 
-    simCheckmarkMarkers.forEach(m => map.removeLayer(m));
-    simCheckmarkMarkers = [];
+    appState.simCheckmarkMarkers.forEach(m => appState.map.removeLayer(m));
+    appState.simCheckmarkMarkers = [];
 
     const truckIcon = L.divIcon({
         className: 'truck-sim-icon',
@@ -341,42 +341,42 @@ function inicializarSimuladorRuta() {
         iconAnchor: [16, 16]
     });
 
-    if (simTruckMarker) {
-        map.removeLayer(simTruckMarker);
+    if (appState.simTruckMarker) {
+        appState.map.removeLayer(appState.simTruckMarker);
     }
-    simTruckMarker = L.marker(simPathCoordinates[0], { icon: truckIcon }).addTo(map);
+    appState.simTruckMarker = L.marker(appState.simPathCoordinates[0], { icon: truckIcon }).addTo(appState.map);
 }
 
 function toggleSimulacionRecorrido() {
-    if (!simPathCoordinates || simPathCoordinates.length === 0) return;
+    if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
     const iconBtn = document.getElementById('sim-play-icon');
     
-    if (simIsPlaying) {
+    if (appState.simIsPlaying) {
         detenerSimulacion();
         iconBtn.className = "fa-solid fa-play";
     } else {
-        simIsPlaying = true;
+        appState.simIsPlaying = true;
         iconBtn.className = "fa-solid fa-pause";
         
-        if (simCurrentStep >= simTotalSteps - 1) {
-            simCurrentStep = 0;
-            simCheckmarkMarkers.forEach(m => map.removeLayer(m));
-            simCheckmarkMarkers = [];
+        if (appState.simCurrentStep >= appState.simTotalSteps - 1) {
+            appState.simCurrentStep = 0;
+            appState.simCheckmarkMarkers.forEach(m => appState.map.removeLayer(m));
+            appState.simCheckmarkMarkers = [];
         }
 
-        simIntervalId = setInterval(() => {
-            if (simCurrentStep < simTotalSteps) {
-                const pt = simPathCoordinates[simCurrentStep];
-                simTruckMarker.setLatLng(pt);
+        appState.simIntervalId = setInterval(() => {
+            if (appState.simCurrentStep < appState.simTotalSteps) {
+                const pt = appState.simPathCoordinates[appState.simCurrentStep];
+                appState.simTruckMarker.setLatLng(pt);
 
-                let progressPct = Math.round((simCurrentStep / (simTotalSteps - 1)) * 100);
+                let progressPct = Math.round((appState.simCurrentStep / (appState.simTotalSteps - 1)) * 100);
                 document.getElementById('sim-range-progress').value = progressPct;
-                document.getElementById('sim-parada-label').textContent = `Paso: ${simCurrentStep + 1} / ${simTotalSteps}`;
+                document.getElementById('sim-parada-label').textContent = `Paso: ${appState.simCurrentStep + 1} / ${appState.simTotalSteps}`;
 
-                ultimaSecuenciaOptimizada.forEach(parada => {
+                appState.ultimaSecuenciaOptimizada.forEach(parada => {
                     const distCheck = calcularDistancia(pt[0], pt[1], parada.Latitud, parada.Longitud);
                     if (distCheck <= 0.075) {
-                        const yaExiste = simCheckmarkMarkers.some(m => {
+                        const yaExiste = appState.simCheckmarkMarkers.some(m => {
                             const ll = m.getLatLng();
                             return Math.abs(ll.lat - parada.Latitud) < 0.0001 && Math.abs(ll.lng - parada.Longitud) < 0.0001;
                         });
@@ -387,13 +387,13 @@ function toggleSimulacionRecorrido() {
                                 iconSize: [26, 26],
                                 iconAnchor: [13, 13]
                             });
-                            const chkMarker = L.marker([parada.Latitud, parada.Longitud], { icon: checkIcon, zIndexOffset: 1000 }).addTo(map);
-                            simCheckmarkMarkers.push(chkMarker);
+                            const chkMarker = L.marker([parada.Latitud, parada.Longitud], { icon: checkIcon, zIndexOffset: 1000 }).addTo(appState.map);
+                            appState.simCheckmarkMarkers.push(chkMarker);
                         }
                     }
                 });
 
-                simCurrentStep++;
+                appState.simCurrentStep++;
             } else {
                 detenerSimulacion();
                 document.getElementById('sim-play-icon').className = "fa-solid fa-play";
@@ -403,45 +403,45 @@ function toggleSimulacionRecorrido() {
 }
 
 function detenerSimulacion() {
-    simIsPlaying = false;
-    if (simIntervalId) {
-        clearInterval(simIntervalId);
-        simIntervalId = null;
+    appState.simIsPlaying = false;
+    if (appState.simIntervalId) {
+        clearInterval(appState.simIntervalId);
+        appState.simIntervalId = null;
     }
 }
 
 function cambiarPasoSimulacion(valPercent) {
-    if (!simPathCoordinates || simPathCoordinates.length === 0) return;
+    if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
     detenerSimulacion();
     document.getElementById('sim-play-icon').className = "fa-solid fa-play";
 
-    simCurrentStep = Math.floor((valPercent / 100) * (simTotalSteps - 1));
-    const pt = simPathCoordinates[simCurrentStep];
-    if (simTruckMarker) {
-        simTruckMarker.setLatLng(pt);
+    appState.simCurrentStep = Math.floor((valPercent / 100) * (appState.simTotalSteps - 1));
+    const pt = appState.simPathCoordinates[appState.simCurrentStep];
+    if (appState.simTruckMarker) {
+        appState.simTruckMarker.setLatLng(pt);
     }
-    document.getElementById('sim-parada-label').textContent = `Paso: ${simCurrentStep + 1} / ${simTotalSteps}`;
+    document.getElementById('sim-parada-label').textContent = `Paso: ${appState.simCurrentStep + 1} / ${appState.simTotalSteps}`;
 }
 
 // ============================================================
 //  REDIRECCIÓN A GOOGLE MAPS MULTIPUNTO
 // ============================================================
 function abrirRutaEnGoogleMaps() {
-    if (!ultimaSecuenciaOptimizada || ultimaSecuenciaOptimizada.length === 0) {
+    if (!appState.ultimaSecuenciaOptimizada || appState.ultimaSecuenciaOptimizada.length === 0) {
         mostrarNotificacioniOS("Sin Ruta", "⚠️ Primero debe optimizar una ruta para generar la guía de Google Maps.", "warning");
         return;
     }
 
-    const first = ultimaSecuenciaOptimizada[0];
-    const last = ultimaSecuenciaOptimizada[ultimaSecuenciaOptimizada.length - 1];
+    const first = appState.ultimaSecuenciaOptimizada[0];
+    const last = appState.ultimaSecuenciaOptimizada[appState.ultimaSecuenciaOptimizada.length - 1];
     
     let origin = `${first.Latitud},${first.Longitud}`;
     let destination = `${last.Latitud},${last.Longitud}`;
     
     let waypoints = [];
-    if (ultimaSecuenciaOptimizada.length > 2) {
-        for (let i = 1; i < ultimaSecuenciaOptimizada.length - 1; i++) {
-            waypoints.push(`${ultimaSecuenciaOptimizada[i].Latitud},${ultimaSecuenciaOptimizada[i].Longitud}`);
+    if (appState.ultimaSecuenciaOptimizada.length > 2) {
+        for (let i = 1; i < appState.ultimaSecuenciaOptimizada.length - 1; i++) {
+            waypoints.push(`${appState.ultimaSecuenciaOptimizada[i].Latitud},${appState.ultimaSecuenciaOptimizada[i].Longitud}`);
         }
     }
 
@@ -455,15 +455,15 @@ function abrirRutaEnGoogleMaps() {
 }
 
 function descargarOptimizacionRuta() {
-    if (!ultimaSecuenciaOptimizada || ultimaSecuenciaOptimizada.length === 0) {
+    if (!appState.ultimaSecuenciaOptimizada || appState.ultimaSecuenciaOptimizada.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ Primero debe ejecutar la 'Optimización de ruta' para generar el listado ordenado.", "warning");
         return;
     }
-    const worksheet = XLSX.utils.json_to_sheet(ultimaSecuenciaOptimizada);
+    const worksheet = XLSX.utils.json_to_sheet(appState.ultimaSecuenciaOptimizada);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Ruta Optimizada");
     
-    const rutaSel = rutasSeleccionadasMultiples[0] || "Ruta";
+    const rutaSel = appState.rutasSeleccionadasMultiples[0] || "Ruta";
     const fecha = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Optimizacion_Ruta_${rutaSel}_${diaSeleccionado}_${fecha}.xlsx`);
+    XLSX.writeFile(workbook, `Optimizacion_Ruta_${rutaSel}_${appState.diaSeleccionado}_${fecha}.xlsx`);
 }

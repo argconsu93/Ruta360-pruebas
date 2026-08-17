@@ -1,10 +1,10 @@
 function abrirModalVisitaCliente(codigo) {
-    const client = rawClientes.find(c => c.codigo === codigo);
+    const client = appState.rawClientes.find(c => c.codigo === codigo);
     if (!client) return;
     
-    clienteEnEdicion = client;
-    tempGpsLat = client.lat;
-    tempGpsLng = client.lng;
+    appState.clienteEnEdicion = client;
+    appState.tempGpsLat = client.lat;
+    appState.tempGpsLng = client.lng;
 
     document.getElementById('visit-modal-client-name').textContent = client.nombre;
     document.getElementById('visit-modal-client-code').textContent = client.codigo;
@@ -17,7 +17,7 @@ function abrirModalVisitaCliente(codigo) {
     
     document.getElementById('txt-coords-actuales-display').textContent = `Lat: ${client.lat ? client.lat.toFixed(5) : '-'}, Lng: ${client.lng ? client.lng.toFixed(5) : '-'}`;
 
-    const prevData = registroVisitasDetalleMap.get(codigo);
+    const prevData = appState.registroVisitasDetalleMap.get(codigo);
     if (prevData) {
         const radios = document.getElementsByName('radio-visita');
         radios.forEach(r => { if (r.value === prevData.tipoVisita) r.checked = true; });
@@ -63,18 +63,18 @@ function formatearDecimalesVenta(input) {
 }
 
 function evaluarCambioDataCliente() {
-    if (!clienteEnEdicion) return;
+    if (!appState.clienteEnEdicion) return;
     
     const nomNuevo = document.getElementById('edit-nombre-tienda').value.trim();
     const diaNuevo = document.getElementById('edit-dia-visita').value;
     const telNuevo = document.getElementById('edit-telefono-cliente').value.trim();
     const dirNuevo = document.getElementById('edit-direccion-cliente').value.trim();
 
-    const cambioNombre = nomNuevo !== clienteEnEdicion.nombre;
-    const cambioDia = diaNuevo !== clienteEnEdicion.dia;
-    const cambioTel = telNuevo !== (clienteEnEdicion.telefono !== 'Sin teléfono' ? clienteEnEdicion.telefono : '');
-    const cambioDir = dirNuevo !== clienteEnEdicion.direccion;
-    const cambioGPS = (tempGpsLat !== clienteEnEdicion.lat) || (tempGpsLng !== clienteEnEdicion.lng);
+    const cambioNombre = nomNuevo !== appState.clienteEnEdicion.nombre;
+    const cambioDia = diaNuevo !== appState.clienteEnEdicion.dia;
+    const cambioTel = telNuevo !== (appState.clienteEnEdicion.telefono !== 'Sin teléfono' ? appState.clienteEnEdicion.telefono : '');
+    const cambioDir = dirNuevo !== appState.clienteEnEdicion.direccion;
+    const cambioGPS = (appState.tempGpsLat !== appState.clienteEnEdicion.lat) || (appState.tempGpsLng !== appState.clienteEnEdicion.lng);
 
     const btnGuardar = document.getElementById('btn-guardar-visita');
     if (cambioNombre || cambioDia || cambioTel || cambioDir || cambioGPS) {
@@ -88,9 +88,9 @@ function capturarCoordenadasGPS() {
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                tempGpsLat = position.coords.latitude;
-                tempGpsLng = position.coords.longitude;
-                document.getElementById('txt-coords-actuales-display').textContent = `Nuevas GPS -> Lat: ${tempGpsLat.toFixed(5)}, Lng: ${tempGpsLng.toFixed(5)}`;
+                appState.tempGpsLat = position.coords.latitude;
+                appState.tempGpsLng = position.coords.longitude;
+                document.getElementById('txt-coords-actuales-display').textContent = `Nuevas GPS -> Lat: ${appState.tempGpsLat.toFixed(5)}, Lng: ${appState.tempGpsLng.toFixed(5)}`;
                 evaluarCambioDataCliente();
                 mostrarNotificacioniOS("GPS Capturado", "📍 Coordenadas geográficas obtenidas con éxito.", "success");
             },
@@ -117,19 +117,19 @@ function cerrarModalConfirmacion() {
 }
 
 function ejecutarGuardadoDefinitivo() {
-    if (!clienteEnEdicion) return;
-    const cod = clienteEnEdicion.codigo;
+    if (!appState.clienteEnEdicion) return;
+    const cod = appState.clienteEnEdicion.codigo;
 
     const nomNuevo = document.getElementById('edit-nombre-tienda').value.trim();
     const diaNuevo = document.getElementById('edit-dia-visita').value;
     const telNuevo = document.getElementById('edit-telefono-cliente').value.trim();
     const dirNuevo = document.getElementById('edit-direccion-cliente').value.trim();
 
-    const cambioNombre = nomNuevo !== clienteEnEdicion.nombre;
-    const cambioDia = diaNuevo !== clienteEnEdicion.dia;
-    const cambioTel = telNuevo !== (clienteEnEdicion.telefono !== 'Sin teléfono' ? clienteEnEdicion.telefono : '');
-    const cambioDir = dirNuevo !== clienteEnEdicion.direccion;
-    const cambioGPS = (tempGpsLat !== clienteEnEdicion.lat) || (tempGpsLng !== clienteEnEdicion.lng);
+    const cambioNombre = nomNuevo !== appState.clienteEnEdicion.nombre;
+    const cambioDia = diaNuevo !== appState.clienteEnEdicion.dia;
+    const cambioTel = telNuevo !== (appState.clienteEnEdicion.telefono !== 'Sin teléfono' ? appState.clienteEnEdicion.telefono : '');
+    const cambioDir = dirNuevo !== appState.clienteEnEdicion.direccion;
+    const cambioGPS = (appState.tempGpsLat !== appState.clienteEnEdicion.lat) || (appState.tempGpsLng !== appState.clienteEnEdicion.lng);
 
     const huboActualizacionCliente = cambioNombre || cambioDia || cambioTel || cambioDir || cambioGPS;
 
@@ -148,7 +148,7 @@ function ejecutarGuardadoDefinitivo() {
     const totalVentaVal = document.getElementById('input-total-venta').value;
     const obsVal = document.getElementById('txt-observacion-visita').value.trim();
 
-    registroVisitasDetalleMap.set(cod, {
+    appState.registroVisitasDetalleMap.set(cod, {
         tipoVisita: tipoVisita,
         totalVenta: totalVentaVal ? parseFloat(totalVentaVal).toFixed(2) : '0.00',
         motivos: motivosSel,
@@ -156,15 +156,15 @@ function ejecutarGuardadoDefinitivo() {
         fechaHora: new Date().toLocaleString()
     });
 
-    clienteEnEdicion.nombre = nomNuevo || clienteEnEdicion.nombre;
-    clienteEnEdicion.dia = diaNuevo;
-    clienteEnEdicion.telefono = telNuevo || 'Sin teléfono';
-    clienteEnEdicion.direccion = dirNuevo || clienteEnEdicion.direccion;
-    clienteEnEdicion.lat = tempGpsLat;
-    clienteEnEdicion.lng = tempGpsLng;
+    appState.clienteEnEdicion.nombre = nomNuevo || appState.clienteEnEdicion.nombre;
+    appState.clienteEnEdicion.dia = diaNuevo;
+    appState.clienteEnEdicion.telefono = telNuevo || 'Sin teléfono';
+    appState.clienteEnEdicion.direccion = dirNuevo || appState.clienteEnEdicion.direccion;
+    appState.clienteEnEdicion.lat = appState.tempGpsLat;
+    appState.clienteEnEdicion.lng = appState.tempGpsLng;
 
-    clienteEnEdicion._diaNorm = normalizarTexto(clienteEnEdicion.dia);
-    clienteEnEdicion._searchCache = (clienteEnEdicion.nombre + ' ' + clienteEnEdicion.codigo).toLowerCase();
+    appState.clienteEnEdicion._diaNorm = normalizarTexto(appState.clienteEnEdicion.dia);
+    appState.clienteEnEdicion._searchCache = (appState.clienteEnEdicion.nombre + ' ' + appState.clienteEnEdicion.codigo).toLowerCase();
 
     cambiarEstadoVisitado(cod, true);
     cerrarModalConfirmacion();
@@ -179,15 +179,15 @@ function ejecutarGuardadoDefinitivo() {
 }
 
 function cambiarEstadoVisitado(codigo, visitado) {
-    clientesVisitadosMap.set(codigo, visitado);
-    const marker = clienteMarkersMap[codigo];
+    appState.clientesVisitadosMap.set(codigo, visitado);
+    const marker = appState.clienteMarkersMap[codigo];
     if (marker) {
         marker.setStyle({
             fillColor: visitado ? '#15803d' : '#0369a1',
             color: visitado ? '#166534' : '#075985',
             fillOpacity: visitado ? 0.95 : 0.85
         });
-        const clientObj = rawClientes.find(c => c.codigo === codigo);
+        const clientObj = appState.rawClientes.find(c => c.codigo === codigo);
         if (clientObj) marker.setPopupContent(generarPopupHTML(clientObj, visitado));
     }
     const fila = document.getElementById(`row-cli-${codigo}`);

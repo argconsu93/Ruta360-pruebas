@@ -235,55 +235,52 @@ const COLORES_DIAS = {
 };
 
 // ============================================================
-//  VARIABLES GLOBALES
+//  ESTADO CENTRALIZADO DE LA APLICACIÓN
 // ============================================================
-let rawClientes = [];
-let rawGeocercas = { type: "FeatureCollection", features: [] };
-let rawDistribuidoras = { type: "FeatureCollection", features: [] };
-let rawRutasDistribuidoras = {};
-let usuarioActual = null;
-let swMasivos = false;
-let swEspecificos = false;
-let swTipoZona = false;
-let diaSeleccionado = 'TODOS';
-let map = null;
+function crearEstadoInicial() {
+    return {
+        rawClientes: [],
+        rawGeocercas: { type: "FeatureCollection", features: [] },
+        rawDistribuidoras: { type: "FeatureCollection", features: [] },
+        rawRutasDistribuidoras: {},
+        usuarioActual: null,
+        swMasivos: false,
+        swEspecificos: false,
+        swTipoZona: false,
+        diaSeleccionado: 'TODOS',
+        map: null,
+        clusterMarkersGroup: null,
+        geocercasLayerGroup: null,
+        distribuidorasLayerGroup: null,
+        rutaOptimaLayerGroup: null,
+        clienteMarkersMap: {},
+        clientesVisitadosMap: new Map(),
+        registroVisitasDetalleMap: new Map(),
+        clienteEnEdicion: null,
+        tempGpsLat: null,
+        tempGpsLng: null,
+        ultimoClientesFiltrados: [],
+        ultimoClientesFuera: [],
+        paisesSeleccionadosMultiples: [],
+        divisionesSeleccionadasMultiples: [],
+        gruposSeleccionadosMultiples: [],
+        rutasSeleccionadasMultiples: [],
+        ultimaNotificacionesiOS: '',
+        ultimaSecuenciaOptimizada: [],
+        isSatelliteActive: false,
+        geocercasBBoxCache: [],
+        searchDebounceTimeout: null,
+        simIntervalId: null,
+        simCurrentStep: 0,
+        simTotalSteps: 0,
+        simPathCoordinates: [],
+        simTruckMarker: null,
+        simIsPlaying: false,
+        simCheckmarkMarkers: [],
+    };
+}
 
-let clusterMarkersGroup = null;
-let geocercasLayerGroup = null;
-let distribuidorasLayerGroup = null;
-let rutaOptimaLayerGroup = null;
-
-const clienteMarkersMap = {};
-const clientesVisitadosMap = new Map();
-const registroVisitasDetalleMap = new Map();
-
-let clienteEnEdicion = null;
-let tempGpsLat = null;
-let tempGpsLng = null;
-
-let ultimoClientesFiltrados = [];
-let ultimoClientesFuera = [];
-
-let paisesSeleccionadosMultiples = [];
-let divisionesSeleccionadasMultiples = [];
-let gruposSeleccionadosMultiples = [];
-let rutasSeleccionadasMultiples = [];
-
-let ultimaNotificacionesiOS = "";
-let ultimaSecuenciaOptimizada = [];
-let isSatelliteActive = false;
-let geocercasBBoxCache = [];
-
-let searchDebounceTimeout = null;
-
-// Variables de Simulación de Ruta
-let simIntervalId = null;
-let simCurrentStep = 0;
-let simTotalSteps = 0;
-let simPathCoordinates = [];
-let simTruckMarker = null;
-let simIsPlaying = false;
-let simCheckmarkMarkers = [];
+const appState = crearEstadoInicial();
 
 // ============================================================
 //  CARGA DE DATOS DESDE REPOSITORIO (RUTAS EXACTAS DEFINITIVAS)
