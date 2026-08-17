@@ -1,0 +1,47 @@
+﻿Roles;Pais;Division;Grupo;Nombres;Contraseña
+Supervisor;El Salvador;SV Centro;GRUPO 01;JORGE LUIS PINEDA;BocasvcG01
+Supervisor;El Salvador;SV Centro;GRUPO 02;OSCAR ANTONIO DEL CID ;BocasvcG02
+Supervisor;El Salvador;SV Centro;GRUPO 03;RICARDO ERNESTO RIVAS;BocasvcG03
+Supervisor;El Salvador;SV Centro;GRUPO 04;NOE ALBERTO CORNEJO ;BocasvcG04
+Supervisor;El Salvador;SV Centro;GRUPO 05;CHRISTIAN CORTEZ;BocasvcG05
+Supervisor;El Salvador;SV Centro;GRUPO 06;JAIME NAVARRO ;BocasvcG06
+Supervisor;El Salvador;SV Centro;GRUPO 07;RUBEN OCEAS HERNANDEZ ;BocasvcG07
+Supervisor;El Salvador;SV Centro;GRUPO 08;EDWIN ADONAY GALEAS ;BocasvcG08
+Supervisor;El Salvador;SV Centro;GRUPO 09;LUIS ALFREDO LOPEZ ;BocasvcG09
+Supervisor;El Salvador;SV Centro;GRUPO 10;MANUEL ANTONIO ORELLANA ;BocasvcG10
+Jefatura;El Salvador;SV Centro;TODOS;NOE HERNANDEZ;SVCentro26
+Administrador;TODOS;TODOS;TODOS;ALVARO CAMPOS;Admin#Boca360
+Analista;TODOS;TODOS;TODOS;PAOLA CASTANEDA;AnalistaReg1
+Analista;TODOS;TODOS;TODOS;ALDAHIR RODRIGUEZ;AnalistaReg2
+Jefatura;TODOS;TODOS;TODOS;JESSICA MEJIA;Boca360R
+Analista;TODOS;TODOS;TODOS;RENE DOMINGUEZ;AnalistaReg3
+Jefatura;TODOS;TODOS;TODOS;WILBER MERCADO;Boca360R
+Administrador;TODOS;TODOS;TODOS;ISRAEL CONSUEGRA;Admin#Boca360
+Analista;TODOS;TODOS;TODOS;JACQUELINE GUILLEN;AnalistaReg4
+Administrador;TODOS;TODOS;TODOS;OSCAR BARRERA;Admin#Boca360
+Analista;El Salvador;SV Oriente;TODOS;MIGUEL GARCIA;Ansvoriente.26
+Analista;El Salvador;SV Occidente;TODOS;LENNIN GAMEZ;Ansvoccidente.26
+Analista;Honduras;TODOS;TODOS;MILENA MILLA;Anhnnorte.26
+Analista;Honduras;HN Norte;TODOS;MARLON ESPINAL;Anhnnorte.26
+Analista;Honduras;HN Centro;TODOS;JEANCARLO MOLINERO;Anhncentro.26
+Analista;Guatemala;GT Centro;TODOS;PABLO SALGUERO;Angtcentro.26
+Analista;Guatemala;GT Sur;TODOS;JOSE MICHELENA;Angtsur.26
+Analista;Guatemala;GT Norte;TODOS;WALTER BARRIENTOS;Angtnorte.26
+Supervisor;El Salvador;SV Occidente;GRUPO 01;OMAR SANCHEZ;BocasvoccG01
+Supervisor;El Salvador;SV Occidente;GRUPO 02;FERNANDO VEGA;BocasvoccG02
+Supervisor;El Salvador;SV Occidente;GRUPO 03;JOSE LARA;BocasvoccG03
+Supervisor;El Salvador;SV Occidente;GRUPO 04;OSCAR PEÑATE;BocasvoccG04
+Supervisor;El Salvador;SV Occidente;GRUPO 05;ROLANDO IZAGUIRRE;BocasvoccG05
+Supervisor;El Salvador;SV Oriente;GRUPO 01;JHONY MACHADO;BocasvoG01
+Supervisor;El Salvador;SV Oriente;GRUPO 02;ERICK BLANCO;BocasvoG02
+Supervisor;El Salvador;SV Oriente;GRUPO 03;JOSE JOYA;BocasvoG03
+Supervisor;El Salvador;SV Oriente;GRUPO 04;RUDY REYES;BocasvoG04
+Jefatura;El Salvador;SV Oriente;TODOS;LUIS SERMEÑO;Svoriente26
+Jefatura;El Salvador;SV Occidente;TODOS;EMILIO RIVAS;Svoccidente26
+Jefatura;Honduras;HN Centro;TODOS;DAVID CORDOBA;Hncentro26
+Jefatura;Honduras;HN Norte;TODOS;ROSNI FERNANDEZ;Hnnorte26
+Jefatura;Guatemala;GT Centro;TODOS;ALEX GALICIA;Gtcentro26
+Jefatura;Guatemala;GT Sur;TODOS;ARQUIMIDES HERNANDEZ;Gtsur26
+Jefatura;Guatemala;GT Norte;TODOS;RENE MARROQUIN;Gtnorte26
+Jefatura;TODOS;TODOS;TODOS;ROBERTO VASQUEZ;Boca360R
+Jefatura;TODOS;TODOS;TODOS;RICARDO PERLA;Boca360R
