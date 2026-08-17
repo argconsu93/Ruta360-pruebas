@@ -495,7 +495,7 @@
 <body>
 
 <!-- ============================================================ -->
-<!-- 2. HTML - ESTRUCTURA DE LA PÁGINA (Mismo HTML que antes)    -->
+<!-- 2. HTML - ESTRUCTURA DE LA PÁGINA                            -->
 <!-- ============================================================ -->
 
 <!-- LOGIN MODAL -->
@@ -507,21 +507,21 @@
             <h2>Seleccione su País</h2>
             <p>Elija la región territorial para iniciar:</p>
             <div class="country-flags-row">
-                <div class="flag-card" onclick="window.APP.seleccionarPais('GT', 'Guatemala')">
+                <div class="flag-card" id="flag-gt">
                     <img src="https://flagcdn.com/w80/gt.png" class="flag-img" alt="Guatemala">
                     <span class="flag-label">Guatemala</span>
                 </div>
-                <div class="flag-card" onclick="window.APP.seleccionarPais('SV', 'El Salvador')">
+                <div class="flag-card" id="flag-sv">
                     <img src="https://flagcdn.com/w80/sv.png" class="flag-img" alt="El Salvador">
                     <span class="flag-label">El Salvador</span>
                 </div>
-                <div class="flag-card" onclick="window.APP.seleccionarPais('HN', 'Honduras')">
+                <div class="flag-card" id="flag-hn">
                     <img src="https://flagcdn.com/w80/hn.png" class="flag-img" alt="Honduras">
                     <span class="flag-label">Honduras</span>
                 </div>
             </div>
             <div class="regional-button-row">
-                <button class="btn-regional-access" onclick="window.APP.seleccionarAccesoRegional()">
+                <button class="btn-regional-access" id="btn-acceso-regional">
                     <i class="fa-solid fa-earth-americas"></i> Acceso Regional
                 </button>
             </div>
@@ -532,7 +532,7 @@
             <p id="txt-sub-pais">Divisiones de la zona:</p>
             <div class="divisions-grid" id="container-divisiones"></div>
             <div style="margin-top: 14px;">
-                <button class="btn-back-step" onclick="window.APP.volverAPasoPais()">
+                <button class="btn-back-step" id="btn-back-to-pais">
                     <i class="fa-solid fa-arrow-left"></i> Cambiar País
                 </button>
             </div>
@@ -636,7 +636,7 @@
 
         <!-- ACCORDION: FILTROS -->
         <div class="accordion-card open" id="acc-filtros">
-            <div class="accordion-header" onclick="window.APP.toggleAccordion('acc-filtros')">
+            <div class="accordion-header" id="acc-filtros-header">
                 <span><i class="fa-solid fa-filter"></i> Filtros y Ubicación</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -680,7 +680,7 @@
 
         <!-- ACCORDION: CAPAS -->
         <div class="accordion-card" id="acc-capas">
-            <div class="accordion-header" onclick="window.APP.toggleAccordion('acc-capas')">
+            <div class="accordion-header" id="acc-capas-header">
                 <span><i class="fa-solid fa-layer-group"></i> Modos de Capa</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -713,7 +713,7 @@
 
         <!-- ACCORDION: KPIS -->
         <div class="accordion-card" id="acc-kpis">
-            <div class="accordion-header" onclick="window.APP.toggleAccordion('acc-kpis')">
+            <div class="accordion-header" id="acc-kpis-header">
                 <span><i class="fa-solid fa-chart-pie"></i> Indicadores y Clientes</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -765,7 +765,7 @@
 
         <!-- ACCORDION: ACCIONES -->
         <div class="accordion-card" id="acc-acciones">
-            <div class="accordion-header" onclick="window.APP.toggleAccordion('acc-acciones')">
+            <div class="accordion-header" id="acc-acciones-header">
                 <span><i class="fa-solid fa-route"></i> Optimización y Acciones</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -874,7 +874,7 @@
     <div class="visit-modal-card">
         <div class="modal-header">
             <h3><i class="fa-solid fa-clipboard-user"></i> Gestión de Visita</h3>
-            <button class="btn-close-modal" onclick="window.APP.cerrarModalVisita()">&times;</button>
+            <button class="btn-close-modal" id="btn-cerrar-modal-visita">&times;</button>
         </div>
         <div class="visit-form-body">
             <div style="background: #f1f5f9; padding: 10px 12px; border-radius: 12px;">
@@ -959,7 +959,7 @@
                             <span style="font-weight:800; color:#1e3a8a;">Coordenadas GPS</span>
                             <span style="font-size:0.68rem; color:#64748b;" id="txt-coords-actuales-display">Lat: -, Lng: -</span>
                         </div>
-                        <button type="button" class="btn-gps" onclick="window.APP.capturarCoordenadasGPS()">
+                        <button type="button" class="btn-gps" id="btn-capturar-gps">
                             <i class="fa-solid fa-location-crosshairs"></i> Capturar
                         </button>
                     </div>
@@ -967,7 +967,7 @@
             </div>
         </div>
         <div class="modal-footer-actions">
-            <button class="btn-modal-cancel" onclick="window.APP.cerrarModalVisita()">Cancelar</button>
+            <button class="btn-modal-cancel" id="btn-cancelar-visita">Cancelar</button>
             <button class="btn-modal-save" id="btn-guardar-visita">Guardar</button>
         </div>
     </div>
@@ -979,14 +979,14 @@
         <h4>Confirmar Registro</h4>
         <p>¿Está seguro de guardar los cambios?</p>
         <div class="confirm-actions-row">
-            <button class="btn-confirm-cancel" onclick="window.APP.cerrarModalConfirmacion()">Cancelar</button>
-            <button class="btn-confirm-ok" onclick="window.APP.ejecutarGuardadoDefinitivo()">De acuerdo</button>
+            <button class="btn-confirm-cancel" id="btn-confirm-cancel">Cancelar</button>
+            <button class="btn-confirm-ok" id="btn-confirm-ok">De acuerdo</button>
         </div>
     </div>
 </div>
 
 <!-- ============================================================ -->
-<!-- 3. SCRIPTS MODULARES - CARGA DE MÓDULOS                    -->
+<!-- 3. SCRIPTS MODULARES                                         -->
 <!-- ============================================================ -->
 <script type="importmap">
 {
@@ -997,14 +997,17 @@
 </script>
 
 <script type="module">
-// Importar el punto de entrada de la aplicación
+// Importar la aplicación
 import { App } from './js/app.js';
 
-// Inicializar la aplicación cuando el DOM esté listo
+// Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    window.APP = new App();
-    // Exponer APP globalmente para los onclick del HTML
-    window.APP = window.APP;
+    const app = new App();
+    
+    // Exponer app globalmente
+    window.APP = app;
+    
+    console.log('✅ Ruta360 inicializado');
 });
 </script>
 
