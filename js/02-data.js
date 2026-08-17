@@ -114,7 +114,7 @@ function cargarClientes() {
                     skipEmptyLines: true,
                     complete: function(results) {
                         const clientes = parsearFilasClientes(results.data);
-                        rawClientes = clientes;
+                        appState.rawClientes = clientes;
                         resolve(clientes);
                     }
                 });
@@ -154,7 +154,7 @@ function cargarMapeoRutasDistribuidoras() {
                 const tipoZona = idxTipoZona !== -1 && partes[idxTipoZona] ? partes[idxTipoZona].trim() : '';
 
                 if (r && r.toUpperCase() !== 'RUTA') {
-                    rawRutasDistribuidoras[r] = {
+                    appState.rawRutasDistribuidoras[r] = {
                         distribuidora: d,
                         canal: canal,
                         tipoZona: tipoZona,
@@ -167,12 +167,12 @@ function cargarMapeoRutasDistribuidoras() {
 }
 
 function sincronizarGruposClientes() {
-    if (!rawClientes || !rawGeocercas || !rawGeocercas.features) return;
+    if (!appState.rawClientes || !appState.rawGeocercas || !appState.rawGeocercas.features) return;
     const rutaToGrupoMap = {};
     for (let r in MAPEO_RUTAS_GRUPOS) {
         rutaToGrupoMap[r.toLowerCase().trim()] = MAPEO_RUTAS_GRUPOS[r];
     }
-    rawGeocercas.features.forEach(f => {
+    appState.rawGeocercas.features.forEach(f => {
         const props = f.properties || {};
         const rClean = (props.ruta_clean || props.RUTA || props.Ruta || '').toLowerCase().trim();
         const gClean = props.grupo_clean || props.GRUPO || props.Grupo;
@@ -180,7 +180,7 @@ function sincronizarGruposClientes() {
             rutaToGrupoMap[rClean] = normalizarNombreGrupo(gClean);
         }
     });
-    rawClientes.forEach(c => {
+    appState.rawClientes.forEach(c => {
         const rNorm = (c.ruta || '').toLowerCase().trim();
         if ((!c.grupo || c.grupo === 'Sin Grupo') && rutaToGrupoMap[rNorm]) {
             c.grupo = rutaToGrupoMap[rNorm];
@@ -198,12 +198,12 @@ function cargarDatosIniciales() {
 
     return Promise.all([promUsuarios, promClientes, promGeocercas, promDistribuidoras, promRutasDist])
         .then(([, clientes, geocercas, distribuidoras]) => {
-            rawClientes = clientes;
-            rawGeocercas = geocercas || { type: "FeatureCollection", features: [] };
-            rawDistribuidoras = distribuidoras || { type: "FeatureCollection", features: [] };
+            appState.rawClientes = clientes;
+            appState.rawGeocercas = geocercas || { type: "FeatureCollection", features: [] };
+            appState.rawDistribuidoras = distribuidoras || { type: "FeatureCollection", features: [] };
             procesarPropiedadesGeocercas();
             sincronizarGruposClientes();
-            return { clientes, geocercas: rawGeocercas, distribuidoras: rawDistribuidoras };
+            return { clientes, geocercas: appState.rawGeocercas, distribuidoras: appState.rawDistribuidoras };
         });
 }
 
@@ -229,8 +229,8 @@ function obtenerValorPropiedad(props, ...nombresPosibles) {
 }
 
 function procesarPropiedadesGeocercas() {
-    if (!rawGeocercas || !rawGeocercas.features) return;
-    rawGeocercas.features.forEach(feat => {
+    if (!appState.rawGeocercas || !appState.rawGeocercas.features) return;
+    appState.rawGeocercas.features.forEach(feat => {
         const props = feat.properties || {};
         
         let rutaName = obtenerValorPropiedad(props, 'Ruta', 'RUTA', 'ruta', 'COD_RUTA', 'Cod_Ruta', 'Name', 'name', 'nambe', 'Geocercas_SV_Ruta', 'Geocercas_SV_RUTA');
@@ -252,8 +252,8 @@ function procesarPropiedadesGeocercas() {
                 const matchGrupo = searchStr.match(/GRUPO[_\s]*([0-9]+)/i);
                 if (matchGrupo) {
                     grupoClean = "GRUPO " + matchGrupo[1].padStart(2, '0');
-                } else if (rawClientes && rawClientes.length > 0) {
-                    const matchCliente = rawClientes.find(c => c.ruta === rutaName && c.grupo && c.grupo !== "Sin Grupo");
+                } else if (appState.rawClientes && appState.rawClientes.length > 0) {
+                    const matchCliente = appState.rawClientes.find(c => c.ruta === rutaName && c.grupo && c.grupo !== "Sin Grupo");
                     if (matchCliente) {
                         grupoClean = matchCliente.grupo;
                         if (!paisClean) paisClean = matchCliente.pais || '';
@@ -263,8 +263,8 @@ function procesarPropiedadesGeocercas() {
             }
         }
 
-        if ((!paisClean || !divisionClean) && rawClientes && rawClientes.length > 0 && rutaName) {
-            const clienteRef = rawClientes.find(c => c.ruta === rutaName || c._rutaNorm === rutaName.toLowerCase());
+        if ((!paisClean || !divisionClean) && appState.rawClientes && appState.rawClientes.length > 0 && rutaName) {
+            const clienteRef = appState.rawClientes.find(c => c.ruta === rutaName || c._rutaNorm === rutaName.toLowerCase());
             if (clienteRef) {
                 if (!paisClean) paisClean = clienteRef.pais || '';
                 if (!divisionClean) divisionClean = clienteRef.division || '';
@@ -283,13 +283,13 @@ function procesarPropiedadesGeocercas() {
 //  MAPA, CAPAS Y MARCADORES
 // ============================================================
 function inicializarMapa() {
-    if (map) { map.remove(); map = null; }
+    if (appState.map) { appState.map.remove(); appState.map = null; }
     
     const googleRoad = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '© Google Maps' });
     const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '© Google Satellite' });
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' });
 
-    map = L.map('map', {
+    appState.map = L.map('appState.map', {
         center: [13.6929, -89.2182],
         zoom: 11,
         layers: [googleRoad],
@@ -302,17 +302,17 @@ function inicializarMapa() {
         "OpenStreetMap": osmLayer
     };
 
-    L.control.layers(baseMaps).addTo(map);
+    L.control.layers(baseMaps).addTo(appState.map);
 
-    map.on('baselayerchange', function(e) {
-        isSatelliteActive = e.name.toLowerCase().includes('satélite') || e.name.toLowerCase().includes('satellite');
+    appState.map.on('baselayerchange', function(e) {
+        appState.isSatelliteActive = e.name.toLowerCase().includes('satélite') || e.name.toLowerCase().includes('satellite');
         aplicarFiltros();
     });
 
-    distribuidorasLayerGroup = L.layerGroup().addTo(map);
-    geocercasLayerGroup = L.layerGroup().addTo(map);
+    appState.distribuidorasLayerGroup = L.layerGroup().addTo(appState.map);
+    appState.geocercasLayerGroup = L.layerGroup().addTo(appState.map);
     
-    clusterMarkersGroup = L.markerClusterGroup({
+    appState.clusterMarkersGroup = L.markerClusterGroup({
         maxClusterRadius: 0,
         disableClusteringAtZoom: 1,
         spiderfyOnMaxZoom: false,
@@ -320,7 +320,7 @@ function inicializarMapa() {
         chunkedLoading: true,
         chunkInterval: 50,
         chunkDelay: 10
-    }).addTo(map);
+    }).addTo(appState.map);
 
-    rutaOptimaLayerGroup = L.layerGroup().addTo(map);
+    appState.rutaOptimaLayerGroup = L.layerGroup().addTo(appState.map);
 }

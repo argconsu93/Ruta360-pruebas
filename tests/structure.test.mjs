@@ -30,5 +30,7 @@ const applicationSource = expectedScripts
   .map((relativePath) => fs.readFileSync(path.join(root, relativePath), 'utf8'))
   .join('\n');
 assert.ok(!/<button[^>]+onclick=/i.test(applicationSource), 'Los templates no deben generar onclick inline');
+assert.ok(applicationSource.includes('const appState = crearEstadoInicial()'), 'Debe existir un estado centralizado');
+assert.ok(!/\blet\s+(rawClientes|usuarioActual|diaSeleccionado|simIntervalId)\b/.test(applicationSource), 'No deben reaparecer estados globales independientes');
 
 console.log('Pruebas estructurales superadas');

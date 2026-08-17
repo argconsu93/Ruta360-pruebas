@@ -25,36 +25,36 @@ function validarLogin() {
     }
     const userObj = USUARIOS_ROLES.find(u => u.nombre === nombreSel);
     if (userObj && userObj.pass && passInput && passInput === userObj.pass.toLowerCase()) {
-        usuarioActual = userObj;
+        appState.usuarioActual = userObj;
         document.getElementById('login-modal').style.display = 'none';
         
-        const userText = usuarioActual.nombre;
+        const userText = appState.usuarioActual.nombre;
         document.getElementById('txt-rol-activo').textContent = userText;
         document.getElementById('txt-rol-activo-mobile').textContent = userText;
 
-        if (usuarioActual.rol === 'Administrador') {
+        if (appState.usuarioActual.rol === 'Administrador') {
             document.getElementById('panel-admin-actualizacion').style.display = 'flex';
         } else {
             document.getElementById('panel-admin-actualizacion').style.display = 'none';
         }
         
-        if (esAccesoRegionalGlobal || usuarioActual.pais === 'TODOS') {
-            paisesSeleccionadosMultiples = [];
-            divisionesSeleccionadasMultiples = [];
+        if (esAccesoRegionalGlobal || appState.usuarioActual.pais === 'TODOS') {
+            appState.paisesSeleccionadosMultiples = [];
+            appState.divisionesSeleccionadasMultiples = [];
         } else {
             const nombrePaisModal = PAISES_MAPA_NOMBRES[paisSeleccionado] || "El Salvador";
-            paisesSeleccionadosMultiples = [nombrePaisModal];
-            divisionesSeleccionadasMultiples = [divisionSeleccionada];
+            appState.paisesSeleccionadosMultiples = [nombrePaisModal];
+            appState.divisionesSeleccionadasMultiples = [divisionSeleccionada];
         }
 
-        gruposSeleccionadosMultiples = (usuarioActual.grupo && usuarioActual.grupo !== 'TODOS') ? [normalizarNombreGrupo(usuarioActual.grupo)] : [];
-        rutasSeleccionadasMultiples = [];
+        appState.gruposSeleccionadosMultiples = (appState.usuarioActual.grupo && appState.usuarioActual.grupo !== 'TODOS') ? [normalizarNombreGrupo(appState.usuarioActual.grupo)] : [];
+        appState.rutasSeleccionadasMultiples = [];
 
         inicializarMapa();
         poblarFiltrosPermitidos();
         
         setTimeout(() => {
-            if (map) map.invalidateSize();
+            if (appState.map) appState.map.invalidateSize();
             aplicarFiltros();
         }, 150);
 
@@ -65,11 +65,11 @@ function validarLogin() {
 }
 
 function cerrarSesion() {
-    usuarioActual = null;
-    paisesSeleccionadosMultiples = [];
-    divisionesSeleccionadasMultiples = [];
-    gruposSeleccionadosMultiples = [];
-    rutasSeleccionadasMultiples = [];
+    appState.usuarioActual = null;
+    appState.paisesSeleccionadosMultiples = [];
+    appState.divisionesSeleccionadasMultiples = [];
+    appState.gruposSeleccionadosMultiples = [];
+    appState.rutasSeleccionadasMultiples = [];
     esAccesoRegionalGlobal = false;
 
     document.getElementById('input-password').value = '';
@@ -81,14 +81,14 @@ function cerrarSesion() {
     document.getElementById('login-modal').style.display = 'flex';
     document.getElementById('mobile-user-dropdown').classList.remove('active');
     
-    if (map) { map.remove(); map = null; }
+    if (appState.map) { appState.map.remove(); appState.map = null; }
 }
 
 // ============================================================
 //  NOTIFICACIONES Y EXPORTACIONES
 // ============================================================
 function mostrarNotificacioniOS(titulo, contenido, tipoIcono = 'success', permitirHTML = false) {
-    ultimaNotificacionesiOS = contenido;
+    appState.ultimaNotificacionesiOS = contenido;
     document.getElementById('ios-notif-title').textContent = titulo;
     const body = document.getElementById('ios-notif-body');
     if (permitirHTML) body.innerHTML = contenido;
@@ -112,7 +112,7 @@ function cerrarNotificacioniOS() {
 }
 
 function reabrirUltimaNotificacion() {
-    if (ultimaNotificacionesiOS) {
+    if (appState.ultimaNotificacionesiOS) {
         document.getElementById('ios-notif-overlay').style.display = 'flex';
     } else {
         mostrarNotificacioniOS("Notificaciones", "No hay notificaciones pendientes.", "info");
@@ -127,25 +127,25 @@ function abrirModalComparativo() {
     const tbody = document.getElementById('tabla-comparativo-body');
     tbody.innerHTML = '';
     
-    const pNorms = paisesSeleccionadosMultiples.map(p => normalizarTexto(p));
-    const dCleans = divisionesSeleccionadasMultiples.map(d => d);
+    const pNorms = appState.paisesSeleccionadosMultiples.map(p => normalizarTexto(p));
+    const dCleans = appState.divisionesSeleccionadasMultiples.map(d => d);
 
-    let clientesAnalizar = rawClientes;
+    let clientesAnalizar = appState.rawClientes;
     if (pNorms.length > 0) {
         clientesAnalizar = clientesAnalizar.filter(c => pNorms.some(p => coincidePais(p, c)));
     }
     if (dCleans.length > 0) {
         clientesAnalizar = clientesAnalizar.filter(c => dCleans.some(d => coincideDivision(d, c)));
     }
-    if (gruposSeleccionadosMultiples.length > 0) {
-        clientesAnalizar = clientesAnalizar.filter(c => gruposSeleccionadosMultiples.some(g => coincideGrupo(g, c)));
+    if (appState.gruposSeleccionadosMultiples.length > 0) {
+        clientesAnalizar = clientesAnalizar.filter(c => appState.gruposSeleccionadosMultiples.some(g => coincideGrupo(g, c)));
     }
 
     const rutasMap = {};
     clientesAnalizar.forEach(c => {
         if (!rutasMap[c.ruta]) rutasMap[c.ruta] = { total: 0, visitados: 0 };
         rutasMap[c.ruta].total++;
-        if (clientesVisitadosMap.get(c.codigo) === true) rutasMap[c.ruta].visitados++;
+        if (appState.clientesVisitadosMap.get(c.codigo) === true) rutasMap[c.ruta].visitados++;
     });
 
     Object.keys(rutasMap).sort().forEach(r => {
@@ -172,9 +172,9 @@ function cerrarModalComparativo() {
 
 function descargarClientesVisitados() {
     const listVisitados = [];
-    rawClientes.forEach(c => {
-        if (clientesVisitadosMap.get(c.codigo) === true) {
-            const det = registroVisitasDetalleMap.get(c.codigo) || {};
+    appState.rawClientes.forEach(c => {
+        if (appState.clientesVisitadosMap.get(c.codigo) === true) {
+            const det = appState.registroVisitasDetalleMap.get(c.codigo) || {};
             listVisitados.push({
                 "País": c.pais,
                 "División": c.division,
@@ -205,12 +205,12 @@ function descargarClientesVisitados() {
 }
 
 function descargarItinerarioFiltrado() {
-    if (!ultimoClientesFiltrados || ultimoClientesFiltrados.length === 0) {
+    if (!appState.ultimoClientesFiltrados || appState.ultimoClientesFiltrados.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ No hay clientes disponibles en la lista con los filtros seleccionados.", "warning");
         return;
     }
-    const datosExportar = ultimoClientesFiltrados.map(c => {
-        const det = registroVisitasDetalleMap.get(c.codigo) || {};
+    const datosExportar = appState.ultimoClientesFiltrados.map(c => {
+        const det = appState.registroVisitasDetalleMap.get(c.codigo) || {};
         return {
             "País": c.pais,
             "División": c.division,
@@ -221,12 +221,12 @@ function descargarItinerarioFiltrado() {
             "Teléfono": c.telefono,
             "Direccion": c.direccion,
             "Dia de visita": c.dia,
-            "Estado Visitado": clientesVisitadosMap.get(c.codigo) ? "SÍ" : "NO",
+            "Estado Visitado": appState.clientesVisitadosMap.get(c.codigo) ? "SÍ" : "NO",
             "Resultado Visita": det.tipoVisita || '-',
             "Total Venta ($)": det.totalVenta || '0.00',
             "Motivos": (det.motivos || []).join(', '),
             "Observaciones": det.observacion || '',
-            "Fuera de Geocerca": ultimoClientesFuera.some(f => f.codigo === c.codigo) ? "SÍ" : "NO"
+            "Fuera de Geocerca": appState.ultimoClientesFuera.some(f => f.codigo === c.codigo) ? "SÍ" : "NO"
         };
     });
     const worksheet = XLSX.utils.json_to_sheet(datosExportar);
@@ -236,12 +236,12 @@ function descargarItinerarioFiltrado() {
 }
 
 function descargarClientesFueraGeocerca() {
-    if (!ultimoClientesFuera || ultimoClientesFuera.length === 0) {
+    if (!appState.ultimoClientesFuera || appState.ultimoClientesFuera.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ No hay clientes fuera de geocerca en la selección actual.", "warning");
         return;
     }
-    const datosExportar = ultimoClientesFuera.map(c => {
-        const det = registroVisitasDetalleMap.get(c.codigo) || {};
+    const datosExportar = appState.ultimoClientesFuera.map(c => {
+        const det = appState.registroVisitasDetalleMap.get(c.codigo) || {};
         return {
             "País": c.pais || '',
             "División": c.division || '',
@@ -254,7 +254,7 @@ function descargarClientesFueraGeocerca() {
             "Teléfono": c.telefono || '',
             "Latitud": c.lat || '',
             "Longitud": c.lng || '',
-            "Estado Visitado": clientesVisitadosMap.get(c.codigo) ? "SÍ" : "NO",
+            "Estado Visitado": appState.clientesVisitadosMap.get(c.codigo) ? "SÍ" : "NO",
             "Resultado Visita": det.tipoVisita || '-',
             "Total Venta ($)": det.totalVenta || '0.00'
         };
@@ -264,7 +264,7 @@ function descargarClientesFueraGeocerca() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fuera_de_Geocerca");
     const fecha = new Date().toISOString().slice(0, 10);
     XLSX.writeFile(workbook, `Clientes_Fuera_Geocerca_${fecha}.xlsx`);
-    mostrarNotificacioniOS("Descarga Exitosa", `✅ Se descargaron ${ultimoClientesFuera.length} clientes fuera de geocerca.`, "success");
+    mostrarNotificacioniOS("Descarga Exitosa", `✅ Se descargaron ${appState.ultimoClientesFuera.length} clientes fuera de geocerca.`, "success");
 }
 
 function subirNuevoCSV(file) {
@@ -273,7 +273,7 @@ function subirNuevoCSV(file) {
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-            rawClientes = parsearFilasClientes(results.data);
+            appState.rawClientes = parsearFilasClientes(results.data);
             procesarPropiedadesGeocercas();
             sincronizarGruposClientes();
             poblarFiltrosPermitidos();
@@ -288,7 +288,7 @@ function subirNuevoGeoJSON(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            rawGeocercas = JSON.parse(e.target.result);
+            appState.rawGeocercas = JSON.parse(e.target.result);
             procesarPropiedadesGeocercas();
             sincronizarGruposClientes();
             poblarFiltrosPermitidos();
@@ -306,7 +306,7 @@ function subirNuevoGeoJSONDistribuidoras(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            rawDistribuidoras = JSON.parse(e.target.result);
+            appState.rawDistribuidoras = JSON.parse(e.target.result);
             aplicarFiltros();
             mostrarNotificacioniOS("Distribuidoras Cargadas", "✅ GeoJSON de distribuidoras cargado correctamente.", "success");
         } catch(err) { 
@@ -332,7 +332,7 @@ function toggleDrawer() {
     label.innerHTML = drawer.classList.contains('collapsed') 
         ? '<i class="fa-solid fa-chevron-up"></i> Mostrar Panel de Control' 
         : '<i class="fa-solid fa-chevron-down"></i> Ocultar';
-    setTimeout(() => { if (map) map.invalidateSize(); }, 360);
+    setTimeout(() => { if (appState.map) appState.map.invalidateSize(); }, 360);
 }
 
 // ============================================================

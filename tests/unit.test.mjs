@@ -11,9 +11,15 @@ const sources = ['js/01-core.js', 'js/06-routing.js']
 
 new vm.Script(sources, { filename: 'ruta360-domain.js' }).runInContext(context);
 
-assert.ok(!/pass\s*:\s*['"][^'"]+['"]/.test(sources), 'No debe haber contraseñas embebidas');
-
 const evaluate = (expression) => vm.runInContext(expression, context);
+
+assert.ok(!/pass\s*:\s*['"][^'"]+['"]/.test(sources), 'No debe haber contraseñas embebidas');
+assert.equal(evaluate('appState.rawClientes.length'), 0);
+assert.equal(evaluate('appState.usuarioActual'), null);
+assert.equal(evaluate("appState.diaSeleccionado"), 'TODOS');
+evaluate("appState.rawClientes.push({ codigo: 'QA-STATE' })");
+assert.equal(evaluate('appState.rawClientes[0].codigo'), 'QA-STATE');
+assert.equal(evaluate('crearEstadoInicial().rawClientes.length'), 0, 'El estado inicial no debe compartir arreglos mutados');
 
 assert.equal(evaluate("normalizarTexto('  División ÁÉÍÓÚ Ñ  ')"), 'division aeiou n');
 assert.equal(evaluate("normalizarNombreGrupo('GRUPO_07')"), 'GRUPO 07');
