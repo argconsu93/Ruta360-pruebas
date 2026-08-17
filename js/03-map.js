@@ -220,12 +220,12 @@ function renderizarGeocercas(featuresGeocercasFiltradas) {
                             <i class="fa-solid fa-draw-polygon"></i> Cobertura Geocerca
                         </b>
                         <div style="font-size:0.85rem; line-height:1.4;">
-                            <b>País:</b> ${realPais}<br>
-                            <b>División:</b> ${realDivision}<br>
-                            <b>Grupo:</b> ${realGrupo}<br>
-                            <b>Ruta:</b> ${realRuta}<br>
-                            <b>Canal:</b> ${realCanal}<br>
-                            <b>Tipo Zona:</b> ${realTipoZona}
+                            <b>País:</b> ${escapeHTML(realPais)}<br>
+                            <b>División:</b> ${escapeHTML(realDivision)}<br>
+                            <b>Grupo:</b> ${escapeHTML(realGrupo)}<br>
+                            <b>Ruta:</b> ${escapeHTML(realRuta)}<br>
+                            <b>Canal:</b> ${escapeHTML(realCanal)}<br>
+                            <b>Tipo Zona:</b> ${escapeHTML(realTipoZona)}
                         </div>
                     </div>
                 `);
@@ -251,7 +251,7 @@ function renderizarDistribuidoras(distribuidorasData) {
             }
             layer.bindPopup(`
                 <div style="font-family:'Inter',sans-serif; padding:4px;">
-                    <b style="color:#0b1e42; font-size:0.9rem;"><i class="fa-solid fa-building"></i> ${nombreDist}</b>
+                    <b style="color:#0b1e42; font-size:0.9rem;"><i class="fa-solid fa-building"></i> ${escapeHTML(nombreDist)}</b>
                 </div>
             `);
         }
@@ -327,35 +327,45 @@ function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
 }
 
 function generarPopupHTML(c, isVisited, numeroParada = null, diaRuta = null) {
+    const safe = {
+        codigo: escapeHTML(c.codigo),
+        nombre: escapeHTML(c.nombre),
+        grupo: escapeHTML(c.grupo),
+        ruta: escapeHTML(c.ruta),
+        dia: escapeHTML(c.dia),
+        telefono: escapeHTML(c.telefono || 'N/A'),
+        direccion: escapeHTML(c.direccion),
+    };
+    const safeDiaRuta = escapeHTML(diaRuta || '');
     let headerParada = numeroParada 
         ? `<div style="background:#4f46e5; color:white; font-size:0.7rem; font-weight:800; padding:3px 8px; border-radius:12px; display:inline-block; margin-bottom:6px;">
-            <i class="fa-solid fa-flag"></i> PARADA #${numeroParada} ${diaRuta ? ' (' + diaRuta + ')' : ''}
+            <i class="fa-solid fa-flag"></i> PARADA #${Number(numeroParada)} ${diaRuta ? ' (' + safeDiaRuta + ')' : ''}
            </div>`
         : "";
 
     let navButtons = (c.lat !== null && c.lng !== null) 
         ? `<div style="display: flex; gap: 6px; margin: 8px 0;">
-            <a href="https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}" target="_blank" class="nav-btn btn-gmaps" style="background:#0369a1; color:white; padding:4px 8px; border-radius:6px; font-size:0.72rem; text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Maps</a>
-            <a href="https://waze.com/ul?ll=${c.lat},${c.lng}&navigate=yes" target="_blank" class="nav-btn btn-waze" style="background:#0284c7; color:white; padding:4px 8px; border-radius:6px; font-size:0.72rem; text-decoration:none;"><i class="fa-solid fa-location-arrow"></i> Waze</a>
+            <a href="https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}" target="_blank" rel="noopener noreferrer" class="nav-btn btn-gmaps" style="background:#0369a1; color:white; padding:4px 8px; border-radius:6px; font-size:0.72rem; text-decoration:none;"><i class="fa-solid fa-location-dot"></i> Maps</a>
+            <a href="https://waze.com/ul?ll=${c.lat},${c.lng}&navigate=yes" target="_blank" rel="noopener noreferrer" class="nav-btn btn-waze" style="background:#0284c7; color:white; padding:4px 8px; border-radius:6px; font-size:0.72rem; text-decoration:none;"><i class="fa-solid fa-location-arrow"></i> Waze</a>
            </div>`
         : `<div style="font-size: 0.75rem; color: #ef4444; margin: 6px 0; font-weight: 600;">⚠️ Sin coordenadas registradas</div>`;
         
     return `
         <div style="font-family: 'Inter', sans-serif; padding: 4px; min-width: 210px;">
             ${headerParada}
-            <b style="font-size: 0.95rem; color: #0f172a; display:block;">${c.nombre}</b>
+            <b style="font-size: 0.95rem; color: #0f172a; display:block;">${safe.nombre}</b>
             <hr style="margin: 6px 0; border: 0; border-top: 1px solid #cbd5e1;">
             <div style="font-size: 0.84rem; color: #334155; line-height: 1.5;">
-                <b>Código:</b> ${c.codigo}<br>
-                <b>Grupo:</b> ${c.grupo}<br>
-                <b>Ruta:</b> ${c.ruta}<br>
-                <b>Día:</b> ${c.dia}<br>
-                <b>Teléfono:</b> ${c.telefono || 'N/A'}<br>
-                <b>Dirección:</b> ${c.direccion}
+                <b>Código:</b> ${safe.codigo}<br>
+                <b>Grupo:</b> ${safe.grupo}<br>
+                <b>Ruta:</b> ${safe.ruta}<br>
+                <b>Día:</b> ${safe.dia}<br>
+                <b>Teléfono:</b> ${safe.telefono}<br>
+                <b>Dirección:</b> ${safe.direccion}
             </div>
             ${navButtons}
             <div style="margin-top: 8px;">
-                <button onclick="abrirModalVisitaCliente('${c.codigo}')" style="width:100%; background:${isVisited ? '#15803d' : '#1e3a8a'}; color:white; border:none; padding:7px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
+                <button data-action="open-visit" data-client-code="${safe.codigo}" style="width:100%; background:${isVisited ? '#15803d' : '#1e3a8a'}; color:white; border:none; padding:7px; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
                     <i class="fa-solid fa-pen-to-square"></i> ${isVisited ? 'Editar Visita / Datos' : 'Registrar Visita / Datos'}
                 </button>
             </div>

@@ -308,10 +308,10 @@ async function trazarRutaOptima() {
         if (clientesFueraTotal.length > 0) {
             msgDetails += `<br><span style="color:#dc2626; font-weight:bold;">⚠️ Puntos Excluidos (${clientesFueraTotal.length}):</span><br>`;
             clientesFueraTotal.forEach(f => {
-                msgDetails += `- Cód. ${f.codigo}: ${f.nombre} (${f.dia})<br>`;
+                msgDetails += `- Cód. ${escapeHTML(f.codigo)}: ${escapeHTML(f.nombre)} (${escapeHTML(f.dia)})<br>`;
             });
         }
-        mostrarNotificacioniOS("Optimización Exitosa", msgDetails, "success");
+        mostrarNotificacioniOS("Optimización Exitosa", msgDetails, "success", true);
     } else {
         mostrarNotificacioniOS("Aviso de Enrutamiento", "No hay suficientes clientes con coordenadas válidas para optimizar en los días seleccionados.", "warning");
     }

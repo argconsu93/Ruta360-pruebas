@@ -39,7 +39,9 @@ function renderizarChipsPaises() {
     paisesSeleccionadosMultiples.forEach(p => {
         const chip = document.createElement('div');
         chip.className = 'chip-item chip-pais';
-        chip.innerHTML = `<span>${p}</span>`;
+        const label = document.createElement('span');
+        label.textContent = p;
+        chip.appendChild(label);
         if (usuarioActual && usuarioActual.pais === 'TODOS') {
             const btnRemove = document.createElement('span');
             btnRemove.className = 'btn-remove-chip';
@@ -107,7 +109,9 @@ function renderizarChipsDivisiones() {
     divisionesSeleccionadasMultiples.forEach(d => {
         const chip = document.createElement('div');
         chip.className = 'chip-item chip-division';
-        chip.innerHTML = `<span>${d}</span>`;
+        const label = document.createElement('span');
+        label.textContent = d;
+        chip.appendChild(label);
         if (usuarioActual && usuarioActual.division === 'TODOS') {
             const btnRemove = document.createElement('span');
             btnRemove.className = 'btn-remove-chip';
@@ -186,7 +190,9 @@ function renderizarChipsGrupos() {
     gruposSeleccionadosMultiples.forEach(g => {
         const chip = document.createElement('div');
         chip.className = 'chip-item';
-        chip.innerHTML = `<span>${g}</span>`;
+        const label = document.createElement('span');
+        label.textContent = g;
+        chip.appendChild(label);
         if (esRolAvanzado()) {
             const btnRemove = document.createElement('span');
             btnRemove.className = 'btn-remove-chip';
@@ -259,7 +265,9 @@ function renderizarChipsRutas() {
     rutasSeleccionadasMultiples.forEach(r => {
         const chip = document.createElement('div');
         chip.className = 'chip-item';
-        chip.innerHTML = `<span>${r}</span>`;
+        const label = document.createElement('span');
+        label.textContent = r;
+        chip.appendChild(label);
         const btnRemove = document.createElement('span');
         btnRemove.className = 'btn-remove-chip';
         btnRemove.innerHTML = '&times;';
@@ -402,12 +410,13 @@ function actualizarTablaClientes(clientes) {
     const subset = clientes.slice(0, 50);
     const rowsHtml = subset.map(c => {
         const isVisited = clientesVisitadosMap.get(c.codigo) || false;
+        const codigo = escapeHTML(c.codigo);
         return `
-            <tr id="row-cli-${c.codigo}" class="clickable-row ${isVisited ? 'visited-row' : ''}" onclick="seleccionarClienteEnMapa('${c.codigo}')">
-                <td style="font-weight:700;color:#1e3a8a;">${c.codigo}</td>
-                <td>${c.nombre}</td>
-                <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 5px; border-radius:4px; font-weight:bold;">${c.ruta}</span></td>
-                <td>${c.dia}</td>
+            <tr id="row-cli-${codigo}" class="clickable-row ${isVisited ? 'visited-row' : ''}" data-action="select-client" data-client-code="${codigo}">
+                <td style="font-weight:700;color:#1e3a8a;">${codigo}</td>
+                <td>${escapeHTML(c.nombre)}</td>
+                <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 5px; border-radius:4px; font-weight:bold;">${escapeHTML(c.ruta)}</span></td>
+                <td>${escapeHTML(c.dia)}</td>
                 <td class="col-estado">
                     ${isVisited ? '<span style="color:#15803d; font-weight:bold;"><i class="fa-solid fa-circle-check"></i> Visitado</span>' : '<span style="color:#94a3b8;"><i class="fa-regular fa-circle"></i> Pendiente</span>'}
                 </td>
@@ -424,12 +433,13 @@ function actualizarTablaFuera(clientesFuera) {
     subsetFuera.forEach(c => {
         const tr = document.createElement('tr');
         tr.className = `clickable-row outside-row`;
-        tr.onclick = () => seleccionarClienteEnMapa(c.codigo);
+        tr.dataset.action = 'select-client';
+        tr.dataset.clientCode = c.codigo;
         tr.innerHTML = `
-            <td style="font-weight:700;color:#dc2626;">${c.codigo}</td>
-            <td>${c.nombre}</td>
-            <td><span style="background:#fee2e2; color:#b91c1c; padding:2px 5px; border-radius:4px; font-weight:bold;">${c.ruta}</span></td>
-            <td>${c.dia}</td>
+            <td style="font-weight:700;color:#dc2626;">${escapeHTML(c.codigo)}</td>
+            <td>${escapeHTML(c.nombre)}</td>
+            <td><span style="background:#fee2e2; color:#b91c1c; padding:2px 5px; border-radius:4px; font-weight:bold;">${escapeHTML(c.ruta)}</span></td>
+            <td>${escapeHTML(c.dia)}</td>
         `;
         tbody.appendChild(tr);
     });

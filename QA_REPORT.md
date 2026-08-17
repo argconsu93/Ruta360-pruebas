@@ -35,6 +35,9 @@ Revisión estática del archivo estable de 3,658 líneas y segmentación conserv
 - Prueba automática de sintaxis JavaScript, orden de carga, IDs duplicados y ausencia de CSS embebido.
 - Pruebas unitarias para normalización, filtros, coordenadas, distancias, horarios y optimización.
 - Integración continua para ejecutar pruebas estructurales, unitarias y de navegador en cada PR.
+- Escape de valores externos en popups, tablas y comparativos para reducir inyección HTML.
+- Sustitución de atributos de eventos inline por eventos registrados desde JavaScript.
+- Eliminación de las cuentas y contraseñas de respaldo embebidas; la carga de usuarios ahora falla de forma cerrada.
 - Documentación de ejecución local y mapa de módulos.
 
 ## Siguiente fase recomendada

@@ -24,7 +24,7 @@ function validarLogin() {
         return;
     }
     const userObj = USUARIOS_ROLES.find(u => u.nombre === nombreSel);
-    if (userObj && passInput === userObj.pass.toLowerCase()) {
+    if (userObj && userObj.pass && passInput && passInput === userObj.pass.toLowerCase()) {
         usuarioActual = userObj;
         document.getElementById('login-modal').style.display = 'none';
         
@@ -87,10 +87,12 @@ function cerrarSesion() {
 // ============================================================
 //  NOTIFICACIONES Y EXPORTACIONES
 // ============================================================
-function mostrarNotificacioniOS(titulo, HTMLcontenido, tipoIcono = 'success') {
-    ultimaNotificacionesiOS = HTMLcontenido;
-    document.getElementById('ios-notif-title').innerText = titulo;
-    document.getElementById('ios-notif-body').innerHTML = HTMLcontenido;
+function mostrarNotificacioniOS(titulo, contenido, tipoIcono = 'success', permitirHTML = false) {
+    ultimaNotificacionesiOS = contenido;
+    document.getElementById('ios-notif-title').textContent = titulo;
+    const body = document.getElementById('ios-notif-body');
+    if (permitirHTML) body.innerHTML = contenido;
+    else body.textContent = contenido;
     
     const iconContainer = document.querySelector('.ios-notification-icon');
     if (tipoIcono === 'success') {
@@ -151,7 +153,7 @@ function abrirModalComparativo() {
         const pct = data.total > 0 ? Math.round((data.visitados / data.total) * 100) : 0;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td style="font-weight:700;">${r}</td>
+            <td style="font-weight:700;">${escapeHTML(r)}</td>
             <td>${data.total}</td>
             <td style="color:#15803d; font-weight:bold;">${data.visitados}</td>
             <td>

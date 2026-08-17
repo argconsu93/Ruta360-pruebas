@@ -44,13 +44,68 @@ document.addEventListener('DOMContentLoaded', function() {
 
     actualizarFechaActual();
 
+    document.addEventListener('click', function(event) {
+        const countryCard = event.target.closest('[data-country-code]');
+        if (countryCard) {
+            seleccionarPais(countryCard.dataset.countryCode, countryCard.dataset.countryName);
+            return;
+        }
+
+        const accordion = event.target.closest('[data-accordion-target]');
+        if (accordion) {
+            toggleAccordion(accordion.dataset.accordionTarget);
+            return;
+        }
+
+        const actionElement = event.target.closest('[data-action]');
+        if (!actionElement) return;
+
+        const actions = {
+            'regional-access': seleccionarAccesoRegional,
+            'back-country': volverAPasoPais,
+            'back-login': volverDesdeLogin,
+            'close-visit': cerrarModalVisita,
+            'capture-gps': capturarCoordenadasGPS,
+            'request-save-visit': solicitarConfirmacionGuardar,
+            'close-confirmation': cerrarModalConfirmacion,
+            'confirm-save-visit': ejecutarGuardadoDefinitivo,
+        };
+
+        if (actionElement.dataset.action === 'select-client') {
+            seleccionarClienteEnMapa(actionElement.dataset.clientCode);
+        } else if (actionElement.dataset.action === 'open-visit') {
+            abrirModalVisitaCliente(actionElement.dataset.clientCode);
+        } else if (actions[actionElement.dataset.action]) {
+            actions[actionElement.dataset.action]();
+        }
+    });
+
     document.getElementById('btn-login').addEventListener('click', validarLogin);
+    document.getElementById('toggle-password-btn').addEventListener('click', toggleMostrarPassword);
     document.getElementById('input-password').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') validarLogin();
     });
     document.getElementById('btn-logout').addEventListener('click', cerrarSesion);
     document.getElementById('btn-logout-mobile').addEventListener('click', cerrarSesion);
     document.getElementById('btn-toggle-mobile-user').addEventListener('click', toggleMobileUserDropdown);
+    document.getElementById('btn-sim-play-pause').addEventListener('click', toggleSimulacionRecorrido);
+    document.getElementById('btn-gmaps-redirect').addEventListener('click', abrirRutaEnGoogleMaps);
+    document.getElementById('sim-range-progress').addEventListener('input', function() {
+        cambiarPasoSimulacion(this.value);
+    });
+    document.getElementById('input-total-venta').addEventListener('blur', function() {
+        formatearDecimalesVenta(this);
+    });
+    document.querySelectorAll('input[name="radio-visita"]').forEach(input => {
+        input.addEventListener('change', function() {
+            gestionarCambioTipoVisita(this.value);
+        });
+    });
+    ['edit-dia-visita', 'edit-nombre-tienda', 'edit-telefono-cliente', 'edit-direccion-cliente'].forEach(id => {
+        const element = document.getElementById(id);
+        const eventName = element.tagName === 'SELECT' ? 'change' : 'input';
+        element.addEventListener(eventName, evaluarCambioDataCliente);
+    });
 
     document.getElementById('select-pais').addEventListener('change', function() {
         const val = this.value;
