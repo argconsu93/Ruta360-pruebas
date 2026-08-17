@@ -9,25 +9,82 @@ import { ACTIONS } from '../store/types.js';
 import { DIVISIONES_POR_PAIS, PAISES_MAPA_NOMBRES } from '../utils/constants.js';
 
 export class LoginHandler {
-    constructor(store) {
+    constructor(store, app) {
         this.store = store;
+        this.app = app;
         this.paisSeleccionado = null;
         this.divisionSeleccionada = null;
         this.esAccesoRegional = false;
+        
+        // Enlazar métodos al contexto de la instancia
+        this.seleccionarPais = this.seleccionarPais.bind(this);
+        this.seleccionarAccesoRegional = this.seleccionarAccesoRegional.bind(this);
+        this.seleccionarDivision = this.seleccionarDivision.bind(this);
+        this.volverAPasoPais = this.volverAPasoPais.bind(this);
+        this.volverDesdeLogin = this.volverDesdeLogin.bind(this);
+        this.validarLogin = this.validarLogin.bind(this);
+        this.togglePasswordVisibility = this.togglePasswordVisibility.bind(this);
+        this.cerrarSesion = this.cerrarSesion.bind(this);
         
         this.configurarEventos();
     }
 
     configurarEventos() {
-        document.getElementById('btn-login')?.addEventListener('click', this.validarLogin.bind(this));
-        document.getElementById('input-password')?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') this.validarLogin();
-        });
-        document.getElementById('btn-back-from-login')?.addEventListener('click', this.volverDesdeLogin.bind(this));
-        document.getElementById('toggle-password-btn')?.addEventListener('click', this.togglePasswordVisibility.bind(this));
+        // Botón de login
+        const btnLogin = document.getElementById('btn-login');
+        if (btnLogin) {
+            btnLogin.addEventListener('click', this.validarLogin);
+        }
+        
+        // Enter en password
+        const inputPass = document.getElementById('input-password');
+        if (inputPass) {
+            inputPass.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') this.validarLogin();
+            });
+        }
+        
+        // Botón volver desde login
+        const btnBackFromLogin = document.getElementById('btn-back-from-login');
+        if (btnBackFromLogin) {
+            btnBackFromLogin.addEventListener('click', this.volverDesdeLogin);
+        }
+        
+        // Botón volver a país
+        const btnBackToPais = document.getElementById('btn-back-to-pais');
+        if (btnBackToPais) {
+            btnBackToPais.addEventListener('click', this.volverAPasoPais);
+        }
+        
+        // Toggle password
+        const togglePassBtn = document.getElementById('toggle-password-btn');
+        if (togglePassBtn) {
+            togglePassBtn.addEventListener('click', this.togglePasswordVisibility);
+        }
+        
+        // Botón acceso regional
+        const btnRegional = document.getElementById('btn-acceso-regional');
+        if (btnRegional) {
+            btnRegional.addEventListener('click', this.seleccionarAccesoRegional);
+        }
+        
+        // Botones de países
+        const flagGT = document.getElementById('flag-gt');
+        if (flagGT) {
+            flagGT.addEventListener('click', () => this.seleccionarPais('GT', 'Guatemala'));
+        }
+        const flagSV = document.getElementById('flag-sv');
+        if (flagSV) {
+            flagSV.addEventListener('click', () => this.seleccionarPais('SV', 'El Salvador'));
+        }
+        const flagHN = document.getElementById('flag-hn');
+        if (flagHN) {
+            flagHN.addEventListener('click', () => this.seleccionarPais('HN', 'Honduras'));
+        }
     }
 
     seleccionarPais(codigoPais, nombrePais) {
+        console.log('🌍 Seleccionando país:', codigoPais, nombrePais);
         this.paisSeleccionado = codigoPais;
         this.esAccesoRegional = false;
         
@@ -41,7 +98,7 @@ export class LoginHandler {
             const btn = document.createElement('button');
             btn.className = 'btn-division';
             btn.textContent = d.nombre;
-            btn.onclick = () => this.seleccionarDivision(d.id);
+            btn.addEventListener('click', () => this.seleccionarDivision(d.id));
             container.appendChild(btn);
         });
 
@@ -50,6 +107,7 @@ export class LoginHandler {
     }
 
     seleccionarAccesoRegional() {
+        console.log('🌍 Seleccionando acceso regional');
         this.esAccesoRegional = true;
         this.paisSeleccionado = 'TODOS';
         this.divisionSeleccionada = 'TODOS';
@@ -63,6 +121,7 @@ export class LoginHandler {
     }
 
     seleccionarDivision(idDivision) {
+        console.log('📌 Seleccionando división:', idDivision);
         this.divisionSeleccionada = idDivision;
         document.getElementById('step-division').style.display = 'none';
         
@@ -120,6 +179,7 @@ export class LoginHandler {
     }
 
     validarLogin() {
+        console.log('🔐 Validando login...');
         const nombreSel = document.getElementById('select-usuario-login').value;
         const passInput = document.getElementById('input-password').value.trim().toLowerCase();
         const errorDiv = document.getElementById('login-error');
@@ -134,6 +194,7 @@ export class LoginHandler {
         const userObj = usuarios.find(u => u.nombre === nombreSel);
         
         if (userObj && passInput === userObj.pass.toLowerCase()) {
+            console.log('✅ Login exitoso para:', userObj.nombre);
             document.getElementById('login-modal').style.display = 'none';
             
             this.store.dispatch({
@@ -157,9 +218,12 @@ export class LoginHandler {
             document.getElementById('txt-rol-activo').textContent = userObj.nombre;
             document.getElementById('txt-rol-activo-mobile').textContent = userObj.nombre;
 
-            if (window.APP?.mapView) {
-                window.APP.mapView.init();
-                setTimeout(() => window.APP.store.aplicarFiltros(), 150);
+            // Inicializar mapa después del login
+            if (this.app?.mapView) {
+                setTimeout(() => {
+                    this.app.mapView.init();
+                    this.app.store.aplicarFiltros();
+                }, 150);
             }
         } else {
             errorDiv.textContent = '⚠️ Contraseña incorrecta. Verifique e intente de nuevo.';
@@ -181,6 +245,7 @@ export class LoginHandler {
     }
 
     cerrarSesion() {
+        console.log('🚪 Cerrando sesión...');
         this.store.dispatch({
             type: ACTIONS.SET_USER,
             payload: null
@@ -195,9 +260,9 @@ export class LoginHandler {
         document.getElementById('login-modal').style.display = 'flex';
         document.getElementById('mobile-user-dropdown').classList.remove('active');
         
-        if (window.APP?.mapView?.map) {
-            window.APP.mapView.map.remove();
-            window.APP.mapView.map = null;
+        if (this.app?.mapView?.map) {
+            this.app.mapView.map.remove();
+            this.app.mapView.map = null;
         }
     }
 }
