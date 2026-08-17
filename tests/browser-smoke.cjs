@@ -1,4 +1,4 @@
-const { chromium } = require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('playwright');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -10,8 +10,21 @@ const { chromium } = require('/opt/codex/runtimes/codex-primary-runtime/dependen
     if (message.type() === 'error') errors.push(`console: ${message.text()}`);
   });
 
-  await page.goto('http://127.0.0.1:8000', { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(2500);
+  await page.route('**/clientes.csv*', (route) => route.fulfill({
+    contentType: 'text/csv; charset=utf-8',
+    body: [
+      'CodigoCliente,NombreCliente,Grupo,Ruta,Dia,Latitud,Longitud,Direccion,Telefono,Pais,Division',
+      'QA-001,Cliente de prueba,GRUPO 01,R-001,Lunes,13.7000,-89.2000,Dirección QA,2222-2222,El Salvador,SV Centro',
+    ].join('\n'),
+  }));
+
+  await page.route('**/data/usuarios.csv*', (route) => route.fulfill({
+    contentType: 'text/csv; charset=utf-8',
+    body: 'Nombres,Roles,Pais,Division,Grupo,Contraseña\nUsuario QA,Administrador,TODOS,TODOS,TODOS,prueba',
+  }));
+
+  await page.goto('http://127.0.0.1:8000', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+  await page.waitForTimeout(1500);
 
   const checks = {
     title: await page.title(),

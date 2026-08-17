@@ -21,7 +21,8 @@ Esta rama conserva el comportamiento del archivo estable, pero separa presentaci
 Requiere Node.js 20 o posterior:
 
 ```bash
-npm run check
+npm install
+npm test
 ```
 
 Para probar la aplicación, debe servirse por HTTP; abrir `index.html` con `file://` impedirá cargar CSV y GeoJSON por las restricciones del navegador.
@@ -37,3 +38,5 @@ Con el servidor activo, la prueba de integración en navegador se ejecuta con:
 ```bash
 npm run test:browser
 ```
+
+Cada `push` y pull request ejecuta estas comprobaciones automáticamente mediante GitHub Actions.

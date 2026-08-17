@@ -4,6 +4,11 @@
   "type": "module",
   "scripts": {
     "check": "node tests/structure.test.mjs",
+    "test:unit": "node tests/unit.test.mjs",
+    "test": "npm run check && npm run test:unit",
     "test:browser": "node tests/browser-smoke.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.55.0"
   }
 }

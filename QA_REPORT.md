@@ -33,6 +33,8 @@ Revisión estática del archivo estable de 3,658 líneas y segmentación conserv
 - Conservación del orden original de declaraciones y arranque para minimizar regresiones.
 - Cambio de las teselas Google de HTTP a HTTPS para evitar contenido mixto.
 - Prueba automática de sintaxis JavaScript, orden de carga, IDs duplicados y ausencia de CSS embebido.
+- Pruebas unitarias para normalización, filtros, coordenadas, distancias, horarios y optimización.
+- Integración continua para ejecutar pruebas estructurales, unitarias y de navegador en cada PR.
 - Documentación de ejecución local y mapa de módulos.
 
 ## Siguiente fase recomendada
