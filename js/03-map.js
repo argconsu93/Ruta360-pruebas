@@ -90,7 +90,7 @@ function obtenerColorDinamico(valor) {
 }
 
 function actualizarLeyendaMapa() {
-    const legendBox = document.getElementById('appState.map-legend-box');
+    const legendBox = document.getElementById('map-legend-box');
     const titleEl = document.getElementById('legend-box-title');
     const listEl = document.getElementById('legend-items-list');
     
@@ -124,7 +124,7 @@ function actualizarLeyendaMapa() {
             listEl.innerHTML += `<div class="legend-item-row"><div class="legend-color-dot" style="background:${it.color};"></div><span>${it.label}</span></div>`;
         });
     } else if (appState.swTipoZona) {
-        titleEl.innerHTML = '<i class="fa-solid fa-appState.map-pin"></i> Tipos de Zona';
+        titleEl.innerHTML = '<i class="fa-solid fa-map-pin"></i> Tipos de Zona';
         const items = [
             { label: 'Urbana', color: COLORES_TIPO_ZONA_FIJOS['URBANA'] },
             { label: 'Rural', color: COLORES_TIPO_ZONA_FIJOS['RURAL'] },

@@ -289,7 +289,7 @@ function inicializarMapa() {
     const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '© Google Satellite' });
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' });
 
-    appState.map = L.map('appState.map', {
+    appState.map = L.map('map', {
         center: [13.6929, -89.2182],
         zoom: 11,
         layers: [googleRoad],

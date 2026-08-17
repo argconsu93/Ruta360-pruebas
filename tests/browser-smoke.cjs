@@ -38,6 +38,23 @@ const { chromium } = require('playwright');
     throw new Error(`Fallo de integración: ${JSON.stringify(checks)}`);
   }
 
+  await page.locator('[data-action="regional-access"]').click();
+  await page.locator('#select-usuario-login').selectOption({ label: 'Usuario QA (Administrador - TODOS)' });
+  await page.locator('#input-password').fill('prueba');
+  await page.locator('#btn-login').click();
+  await page.locator('#login-modal').waitFor({ state: 'hidden' });
+  await page.waitForTimeout(500);
+
+  const authenticatedChecks = {
+    mapInitialized: await page.locator('#map.leaflet-container').isVisible(),
+    countryFilterEnabled: await page.locator('#select-pais').isEnabled(),
+    clientRows: await page.locator('#tabla-clientes-body tr').count(),
+  };
+
+  if (!authenticatedChecks.mapInitialized || !authenticatedChecks.countryFilterEnabled || authenticatedChecks.clientRows < 1) {
+    throw new Error(`Fallo después del login: ${JSON.stringify(authenticatedChecks)}`);
+  }
+
   const relevantErrors = errors.filter((message) =>
     !message.includes('404 (File not found)') &&
     !message.includes('Failed to load resource') &&
