@@ -21,14 +21,20 @@ function cargarUsuariosDesdeCSV() {
                                 pais: (pRaw.toUpperCase() === 'REGION' || pRaw.toUpperCase() === 'TODOS' || !pRaw) ? 'TODOS' : pRaw,
                                 division: (!dRaw || dRaw.toUpperCase() === 'REGION' || dRaw.toUpperCase() === 'TODOS') ? 'TODOS' : dRaw,
                                 grupo: (!gRaw || gRaw.toUpperCase() === 'TODOS') ? 'TODOS' : gRaw,
-                                pass: (u.Contraseña || u.PASSWORD || u.pass || "BOCADELI").trim()
+                                pass: (u.Contraseña || u.PASSWORD || u.pass || '').trim()
                             };
                         });
                     }
                 }
             });
         })
-        .catch(err => console.log('Usando lista fallback de usuarios:', err));
+        .catch(err => {
+            USUARIOS_ROLES = [];
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.textContent = '⚠️ No fue posible cargar los usuarios. Recargue la página o contacte al administrador.';
+            errorDiv.style.display = 'block';
+            console.error('Error cargando usuarios:', err);
+        });
 }
 
 function parsearFilasClientes(parsedData) {
@@ -184,14 +190,14 @@ function sincronizarGruposClientes() {
 }
 
 function cargarDatosIniciales() {
-    cargarUsuariosDesdeCSV();
+    const promUsuarios = cargarUsuariosDesdeCSV();
     const promClientes = cargarClientes().catch(() => []);
     const promGeocercas = cargarGeoJSON('data/geocercas_rutas.geojson').catch(() => ({ type: "FeatureCollection", features: [] }));
     const promDistribuidoras = cargarGeoJSON('data/geocercas_distribuidoras.geojson').catch(() => ({ type: "FeatureCollection", features: [] }));
     const promRutasDist = cargarMapeoRutasDistribuidoras();
 
-    return Promise.all([promClientes, promGeocercas, promDistribuidoras, promRutasDist])
-        .then(([clientes, geocercas, distribuidoras]) => {
+    return Promise.all([promUsuarios, promClientes, promGeocercas, promDistribuidoras, promRutasDist])
+        .then(([, clientes, geocercas, distribuidoras]) => {
             rawClientes = clientes;
             rawGeocercas = geocercas || { type: "FeatureCollection", features: [] };
             rawDistribuidoras = distribuidoras || { type: "FeatureCollection", features: [] };

@@ -27,28 +27,28 @@
 
 <div id="login-modal">
     <div class="login-card-container">
-        <img src="assets/logo_bocadeli_blanco.png" class="login-logo" alt="Logo Bocadeli" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 320 80%22 fill=%22%231e3a8a%22><text x=%2210%22 y=%2255%22 font-family=%22Arial, sans-serif%22 font-size=%2246%22 font-weight=%22900%22 letter-spacing=%22-1%22>bocadeli</text><circle cx=%22290%22 cy=%2232%22 r=%228%22 fill=%22%23dc2626%22/></svg>'">
+        <img src="assets/logo_bocadeli_blanco.png" class="login-logo" alt="Logo Bocadeli">
         
         <div id="step-pais">
             <h2>Seleccione su País</h2>
             <p>Elija la región territorial para iniciar:</p>
             <div class="country-flags-row">
-                <div class="flag-card" onclick="seleccionarPais('GT', 'Guatemala')">
-                    <img src="https://flagcdn.com/w80/gt.png" class="flag-img" alt="Guatemala" onerror="this.src='https://flagcdn.com/w80/gt.png'">
+                <div class="flag-card" data-country-code="GT" data-country-name="Guatemala">
+                    <img src="https://flagcdn.com/w80/gt.png" class="flag-img" alt="Guatemala">
                     <span class="flag-label">Guatemala</span>
                 </div>
-                <div class="flag-card" onclick="seleccionarPais('SV', 'El Salvador')">
-                    <img src="https://flagcdn.com/w80/sv.png" class="flag-img" alt="El Salvador" onerror="this.src='https://flagcdn.com/w80/sv.png'">
+                <div class="flag-card" data-country-code="SV" data-country-name="El Salvador">
+                    <img src="https://flagcdn.com/w80/sv.png" class="flag-img" alt="El Salvador">
                     <span class="flag-label">El Salvador</span>
                 </div>
-                <div class="flag-card" onclick="seleccionarPais('HN', 'Honduras')">
-                    <img src="https://flagcdn.com/w80/hn.png" class="flag-img" alt="Honduras" onerror="this.src='https://flagcdn.com/w80/hn.png'">
+                <div class="flag-card" data-country-code="HN" data-country-name="Honduras">
+                    <img src="https://flagcdn.com/w80/hn.png" class="flag-img" alt="Honduras">
                     <span class="flag-label">Honduras</span>
                 </div>
             </div>
 
             <div class="regional-button-row">
-                <button class="btn-regional-access" onclick="seleccionarAccesoRegional()">
+                <button class="btn-regional-access" data-action="regional-access">
                     <i class="fa-solid fa-earth-americas"></i> Acceso Regional
                 </button>
             </div>
@@ -59,7 +59,7 @@
             <p id="txt-sub-pais" style="text-align: center; margin-bottom: 10px;">Divisiones de la zona:</p>
             <div class="divisions-grid" id="container-divisiones"></div>
             <div style="margin-top: 14px; text-align: center;">
-                <button class="btn-back-step" onclick="volverAPasoPais()"><i class="fa-solid fa-arrow-left"></i> Cambiar País</button>
+                <button class="btn-back-step" data-action="back-country"><i class="fa-solid fa-arrow-left"></i> Cambiar País</button>
             </div>
         </div>
 
@@ -77,14 +77,14 @@
                 <label><i class="fa-solid fa-key"></i> Contraseña</label>
                 <div class="password-wrapper">
                     <input type="password" id="input-password" class="login-input" placeholder="Ingrese su contraseña">
-                    <i class="fa-regular fa-eye toggle-password-icon" id="toggle-password-btn" onclick="toggleMostrarPassword()"></i>
+                    <i class="fa-regular fa-eye toggle-password-icon" id="toggle-password-btn"></i>
                 </div>
             </div>
             <div id="login-error">⚠️ Contraseña incorrecta. Intente nuevamente.</div>
             <button class="login-btn" id="btn-login" style="margin-top: 14px;">Ingresar</button>
             
             <div style="margin-top: 12px; text-align: center;">
-                <button class="btn-back-step" id="btn-back-from-login" onclick="volverDesdeLogin()"><i class="fa-solid fa-arrow-left"></i> Volver Atrás</button>
+                <button class="btn-back-step" id="btn-back-from-login" data-action="back-login"><i class="fa-solid fa-arrow-left"></i> Volver Atrás</button>
             </div>
         </div>
 
@@ -94,7 +94,7 @@
 
 <header>
     <div class="header-brand">
-        <img src="assets/logo_bocadeli_blanco.png" class="header-logo" alt="Logo Bocadeli" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 320 80%22 fill=%22%23ffffff%22><text x=%2210%22 y=%2255%22 font-family=%22Arial, sans-serif%22 font-size=%2246%22 font-weight=%22900%22 letter-spacing=%22-1%22>bocadeli</text><circle cx=%22290%22 cy=%2232%22 r=%228%22 fill=%22%23dc2626%22/></svg>'">
+        <img src="assets/logo_bocadeli_blanco.png" class="header-logo" alt="Logo Bocadeli">
         <div class="header-text-group">
             <span class="header-title-text" id="header-division-title">BOCADELI - SV CENTRO</span>
             <span class="header-sub-text">Inteligencia comercial</span>
@@ -167,7 +167,7 @@
 
         <!-- ACORDEÓN 1: FILTROS Y SEGMENTACIÓN -->
         <div class="accordion-card open" id="acc-filtros">
-            <div class="accordion-header" onclick="toggleAccordion('acc-filtros')">
+            <div class="accordion-header" data-accordion-target="acc-filtros">
                 <span><i class="fa-solid fa-filter"></i> Filtros y Ubicación</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -215,7 +215,7 @@
 
         <!-- ACORDEÓN 2: MODOS DE CAPA Y CATEGORIZACIÓN -->
         <div class="accordion-card" id="acc-capas">
-            <div class="accordion-header" onclick="toggleAccordion('acc-capas')">
+            <div class="accordion-header" data-accordion-target="acc-capas">
                 <span><i class="fa-solid fa-layer-group"></i> Modos de Capa y Categorización</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -256,7 +256,7 @@
 
         <!-- ACORDEÓN 3: INDICADORES Y LISTADO DE CLIENTES -->
         <div class="accordion-card" id="acc-kpis">
-            <div class="accordion-header" onclick="toggleAccordion('acc-kpis')">
+            <div class="accordion-header" data-accordion-target="acc-kpis">
                 <span><i class="fa-solid fa-chart-pie"></i> Indicadores y Clientes</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -312,7 +312,7 @@
 
         <!-- ACORDEÓN 4: OPTIMIZACIÓN Y HERRAMIENTAS -->
         <div class="accordion-card" id="acc-acciones">
-            <div class="accordion-header" onclick="toggleAccordion('acc-acciones')">
+            <div class="accordion-header" data-accordion-target="acc-acciones">
                 <span><i class="fa-solid fa-route"></i> Optimización y Acciones</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -340,10 +340,10 @@
                         <span id="sim-time-display" style="font-size:0.68rem; color:#15803d;">08:00 AM</span>
                     </div>
                     <div class="simulation-controls-row">
-                        <button class="btn-sim-play" id="btn-sim-play-pause" onclick="toggleSimulacionRecorrido()" title="Reproducir / Pausar Simulación">
+                        <button class="btn-sim-play" id="btn-sim-play-pause" title="Reproducir / Pausar Simulación">
                             <i class="fa-solid fa-play" id="sim-play-icon"></i>
                         </button>
-                        <input type="range" id="sim-range-progress" class="simulation-slider" min="0" max="100" value="0" oninput="cambiarPasoSimulacion(this.value)">
+                        <input type="range" id="sim-range-progress" class="simulation-slider" min="0" max="100" value="0">
                     </div>
                     <div class="simulation-stats">
                         <span id="sim-parada-label">Parada: 0 / 0</span>
@@ -369,7 +369,7 @@
                         </button>
                     </div>
 
-                    <button class="btn-download btn-gmaps-redirect" id="btn-gmaps-redirect" onclick="abrirRutaEnGoogleMaps()" title="Abrir ruta optimizada en Google Maps">
+                    <button class="btn-download btn-gmaps-redirect" id="btn-gmaps-redirect" title="Abrir ruta optimizada en Google Maps">
                         <i class="fa-solid fa-map-location-dot"></i> Abrir en Google Maps (Guía GPS)
                     </button>
 
@@ -426,7 +426,7 @@
     <div class="visit-modal-card">
         <div class="modal-header">
             <h3><i class="fa-solid fa-clipboard-user"></i> Gestión de Visita y Datos</h3>
-            <button class="btn-close-modal" onclick="cerrarModalVisita()">&times;</button>
+            <button class="btn-close-modal" data-action="close-visit">&times;</button>
         </div>
         
         <div class="visit-form-body">
@@ -443,15 +443,15 @@
                     <div class="radio-options-row">
                         <span style="font-size: 0.82rem; font-weight: 700; color: #334155;">Visita efectiva:</span>
                         <label class="radio-label">
-                            <input type="radio" name="radio-visita" value="SI" onchange="gestionarCambioTipoVisita('SI')">
+                            <input type="radio" name="radio-visita" value="SI">
                             Sí
                         </label>
                         <label class="radio-label">
-                            <input type="radio" name="radio-visita" value="NO" onchange="gestionarCambioTipoVisita('NO')">
+                            <input type="radio" name="radio-visita" value="NO">
                             No
                         </label>
                         <label class="radio-label">
-                            <input type="radio" name="radio-visita" value="OTROS" onchange="gestionarCambioTipoVisita('OTROS')">
+                            <input type="radio" name="radio-visita" value="OTROS">
                             Otros
                         </label>
                     </div>
@@ -459,7 +459,7 @@
                     <div id="box-visita-si" style="display: none; flex-direction: column; gap: 8px; margin-top: 6px;">
                         <div class="input-form-group">
                             <label>Total Venta ($):</label>
-                            <input type="number" id="input-total-venta" class="input-form-control" placeholder="0.00" step="0.01" min="0" onblur="formatearDecimalesVenta(this)">
+                            <input type="number" id="input-total-venta" class="input-form-control" placeholder="0.00" step="0.01" min="0">
                         </div>
                         <span style="font-size:0.7rem; font-weight:700; color:#64748b; text-transform:uppercase; margin-top:2px;">Motivo de No Venta (Si aplica):</span>
                         <div class="checkbox-grid">
@@ -502,13 +502,13 @@
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <div class="input-form-group">
                         <label>Nombre de la tienda / Cliente:</label>
-                        <input type="text" id="edit-nombre-tienda" class="input-form-control" oninput="evaluarCambioDataCliente()">
+                        <input type="text" id="edit-nombre-tienda" class="input-form-control">
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                         <div class="input-form-group">
                             <label>Día de visita:</label>
-                            <select id="edit-dia-visita" class="input-form-control" onchange="evaluarCambioDataCliente()">
+                            <select id="edit-dia-visita" class="input-form-control">
                                 <option value="Lunes">Lunes</option>
                                 <option value="Martes">Martes</option>
                                 <option value="Miércoles">Miércoles</option>
@@ -519,13 +519,13 @@
                         </div>
                         <div class="input-form-group">
                             <label>Teléfono:</label>
-                            <input type="text" id="edit-telefono-cliente" class="input-form-control" placeholder="Ej: 7777-8888" oninput="evaluarCambioDataCliente()">
+                            <input type="text" id="edit-telefono-cliente" class="input-form-control" placeholder="Ej: 7777-8888">
                         </div>
                     </div>
 
                     <div class="input-form-group">
                         <label>Dirección:</label>
-                        <input type="text" id="edit-direccion-cliente" class="input-form-control" oninput="evaluarCambioDataCliente()">
+                        <input type="text" id="edit-direccion-cliente" class="input-form-control">
                     </div>
 
                     <div class="gps-capture-box">
@@ -533,7 +533,7 @@
                             <span style="font-size: 0.74rem; font-weight: 800; color: #1e3a8a;">Actualizar Coordenadas GPS</span>
                             <span style="font-size: 0.68rem; color: #64748b; margin-top: 1px;" id="txt-coords-actuales-display">Lat: -, Lng: -</span>
                         </div>
-                        <button type="button" class="btn-gps" onclick="capturarCoordenadasGPS()">
+                        <button type="button" class="btn-gps" data-action="capture-gps">
                             <i class="fa-solid fa-location-crosshairs"></i> Capturar GPS
                         </button>
                     </div>
@@ -542,8 +542,8 @@
         </div>
 
         <div class="modal-footer-actions">
-            <button type="button" class="btn-modal-cancel" onclick="cerrarModalVisita()">Cancelar</button>
-            <button type="button" class="btn-modal-save" id="btn-guardar-visita" onclick="solicitarConfirmacionGuardar()">Guardar</button>
+            <button type="button" class="btn-modal-cancel" data-action="close-visit">Cancelar</button>
+            <button type="button" class="btn-modal-save" id="btn-guardar-visita" data-action="request-save-visit">Guardar</button>
         </div>
     </div>
 </div>
@@ -554,8 +554,8 @@
         <h4>Confirmar Registro</h4>
         <p>¿Está seguro de guardar los cambios realizados en esta visita?</p>
         <div class="confirm-actions-row">
-            <button type="button" class="btn-confirm-cancel" onclick="cerrarModalConfirmacion()">Cancelar</button>
-            <button type="button" class="btn-confirm-ok" onclick="ejecutarGuardadoDefinitivo()">De acuerdo</button>
+            <button type="button" class="btn-confirm-cancel" data-action="close-confirmation">Cancelar</button>
+            <button type="button" class="btn-confirm-ok" data-action="confirm-save-visit">De acuerdo</button>
         </div>
     </div>
 </div>

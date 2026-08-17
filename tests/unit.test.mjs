@@ -11,6 +11,8 @@ const sources = ['js/01-core.js', 'js/06-routing.js']
 
 new vm.Script(sources, { filename: 'ruta360-domain.js' }).runInContext(context);
 
+assert.ok(!/pass\s*:\s*['"][^'"]+['"]/.test(sources), 'No debe haber contraseñas embebidas');
+
 const evaluate = (expression) => vm.runInContext(expression, context);
 
 assert.equal(evaluate("normalizarTexto('  División ÁÉÍÓÚ Ñ  ')"), 'division aeiou n');
@@ -18,6 +20,10 @@ assert.equal(evaluate("normalizarNombreGrupo('GRUPO_07')"), 'GRUPO 07');
 assert.equal(evaluate("normalizarNombreGrupo('sin grupo')"), 'Sin Grupo');
 assert.equal(evaluate("parsearFloatSeguro('13,7012')"), 13.7012);
 assert.equal(evaluate("parsearFloatSeguro('no-numero')"), null);
+assert.equal(
+  evaluate("escapeHTML('<img src=x onerror=alert(1)> & \\\"texto\\\"')"),
+  '&lt;img src=x onerror=alert(1)&gt; &amp; &quot;texto&quot;',
+);
 
 assert.equal(evaluate("coincidePais('el salvador', { _paisNorm: 'sv' })"), true);
 assert.equal(evaluate("coincideDivision('SV Centro', { division: 'Centro' })"), true);

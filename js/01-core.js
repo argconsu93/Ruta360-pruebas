@@ -120,11 +120,7 @@ const PAISES_MAPA_NOMBRES = {
     'HN': 'Honduras'
 };
 
-let USUARIOS_ROLES = [
-    { nombre: "JORGE LUIS PINEDA", rol: "Supervisor", pais: "El Salvador", division: "SV Centro", grupo: "GRUPO 01", pass: "G01" },
-    { nombre: "NOE HERNANDEZ", rol: "Jefatura", pais: "El Salvador", division: "SV Centro", grupo: "TODOS", pass: "BOCADELI" },
-    { nombre: "ISRAEL CONSUEGRA", rol: "Administrador", pais: "TODOS", division: "TODOS", grupo: "TODOS", pass: "SVCENTRO" }
-];
+let USUARIOS_ROLES = [];
 
 const MAPEO_RUTAS_GRUPOS = {
     '1.1.54': 'GRUPO 02',
@@ -164,6 +160,15 @@ function parsearFloatSeguro(val) {
     let str = String(val).trim().replace(',', '.');
     let num = parseFloat(str);
     return isNaN(num) ? null : num;
+}
+
+function escapeHTML(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 }
 
 function coincidePais(pSelNorm, c) {
