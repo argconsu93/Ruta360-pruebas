@@ -1,0 +1,40 @@
+const { chromium } = require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  const errors = [];
+
+  page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(`console: ${message.text()}`);
+  });
+
+  await page.goto('http://127.0.0.1:8000', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2500);
+
+  const checks = {
+    title: await page.title(),
+    loginVisible: await page.locator('#login-modal').isVisible(),
+    hasMapContainer: (await page.locator('#map').count()) === 1,
+    modulesLoaded: await page.evaluate(() => typeof seleccionarPais === 'function' && typeof aplicarFiltros === 'function'),
+  };
+
+  if (checks.title !== 'Ruta360 - Regional - Bocadeli') throw new Error(`Título inesperado: ${checks.title}`);
+  if (!checks.loginVisible || !checks.hasMapContainer || !checks.modulesLoaded) {
+    throw new Error(`Fallo de integración: ${JSON.stringify(checks)}`);
+  }
+
+  const relevantErrors = errors.filter((message) =>
+    !message.includes('404 (File not found)') &&
+    !message.includes('Failed to load resource') &&
+    !message.includes('ERR_CERT_AUTHORITY_INVALID'),
+  );
+
+  if (relevantErrors.length) throw new Error(relevantErrors.join('\n'));
+  console.log(`Prueba de navegador superada: ${JSON.stringify(checks)}`);
+  await browser.close();
+})().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

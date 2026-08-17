@@ -3,460 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- ETIQUETAS META ANTI-CACHÉ -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+
     <title>Ruta360 - Regional - Bocadeli</title>
     
-    <!-- Librerías externas -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* ================================================================
-           ESTILOS COMPLETOS
-           ================================================================ */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        html, body { height: 100vh; width: 100vw; margin: 0; padding: 0; overflow: hidden !important; background-color: #0b1e42; color: #1e293b; }
-        body { display: flex; flex-direction: column; position: relative; }
-        
-        #login-modal {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            width: 100vw; height: 100vh; background-color: #0b1e42;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 999999; padding: 16px;
-        }
-        .login-card-container {
-            background: #ffffff; width: 420px; max-width: 92%; padding: 26px 22px 20px 22px;
-            border-radius: 18px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            text-align: center; display: flex; flex-direction: column; gap: 12px; margin: auto;
-            position: relative; z-index: 1000000;
-        }
-        .login-card-container .login-logo {
-            height: 52px; object-fit: contain; margin: 0 auto;
-            filter: brightness(0) saturate(100%) invert(18%) sepia(87%) saturate(2445%) hue-rotate(212deg) brightness(92%) contrast(97%);
-        }
-        .login-card-container h2 { font-size: 1.15rem; font-weight: 700; color: #0b1e42; }
-        .login-card-container p { font-size: 0.8rem; color: #64748b; line-height: 1.3; }
-
-        .country-flags-row { display: flex; justify-content: center; gap: 12px; margin: 8px 0; }
-        .flag-card {
-            cursor: pointer; padding: 8px; border-radius: 12px; border: 2px solid #e2e8f0;
-            transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;
-            background: #f8fafc; user-select: none;
-        }
-        .flag-card:hover, .flag-card.selected { border-color: #1e3a8a; background: #eff6ff; transform: translateY(-2px); }
-        .flag-img { width: 46px; height: 30px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
-        .flag-label { font-size: 0.68rem; font-weight: 700; color: #1e293b; }
-
-        .btn-regional-access {
-            flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; background: #f8fafc;
-            border-radius: 8px; font-size: 0.8rem; font-weight: 700; color: #1e3a8a;
-            cursor: pointer; transition: all 0.2s ease; text-align: center;
-            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .btn-regional-access:hover { background: #1e3a8a; color: white; border-color: #1e3a8a; }
-
-        .divisions-grid { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 4px; }
-        .btn-division {
-            padding: 8px 12px; border: 1px solid #cbd5e1; background: #f8fafc;
-            border-radius: 8px; font-size: 0.78rem; font-weight: 700; color: #1e3a8a;
-            cursor: pointer; transition: all 0.2s ease; flex: 1; min-width: 90px; text-align: center;
-        }
-        .btn-division:hover, .btn-division.selected { background: #1e3a8a; color: white; border-color: #1e3a8a; }
-
-        .login-input-group { text-align: left; display: flex; flex-direction: column; gap: 4px; }
-        .login-input-group label { font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; }
-        .login-select, .login-input {
-            width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #cbd5e1;
-            font-size: 0.84rem; font-weight: 600; color: #0f172a; outline: none; background: #f8fafc;
-        }
-        .login-btn {
-            background: #1e3a8a; color: white; border: none; padding: 11px;
-            border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
-            transition: background 0.2s; box-shadow: 0 4px 6px rgba(30,58,138,0.2); margin-top: 4px;
-        }
-        .login-btn:hover { background: #0b1e42; }
-        .password-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
-        .password-wrapper .login-input { padding-right: 36px; }
-        .toggle-password-icon { position: absolute; right: 12px; cursor: pointer; color: rgba(100,116,139,0.75); font-size: 0.9rem; user-select: none; }
-        .toggle-password-icon:hover { color: #1e3a8a; }
-        .btn-back-step { background: none; border: none; color: #64748b; font-size: 0.72rem; font-weight: 600; cursor: pointer; text-decoration: underline; }
-        #login-error { color: #dc2626; font-size: 0.75rem; font-weight: 600; display: none; margin-top: -2px; }
-        .powered-by-card-text { margin-top: 8px; font-size: 0.68rem; font-weight: 600; color: #94a3b8; letter-spacing: 0.02em; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 10px; text-transform: lowercase; }
-
-        header {
-            background: linear-gradient(135deg, #0b1e42 0%, #1e3a8a 100%);
-            color: white; padding: 6px 16px; display: flex;
-            justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); z-index: 1000;
-            height: 50px; flex-shrink: 0; position: relative;
-        }
-        .header-brand { display: flex; align-items: center; gap: 12px; }
-        .header-logo { height: 34px; width: auto; max-width: 120px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); }
-        .header-title-text { font-size: 1rem; font-weight: 700; color: #ffffff; letter-spacing: -0.01em; line-height: 1.1; }
-        .header-sub-text { font-size: 0.72rem; font-weight: 500; color: #ffffff; opacity: 0.95; margin-top: 1px; }
-        .header-user-info { display: flex; align-items: center; gap: 8px; }
-        .user-pill {
-            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-            color: #ffffff; padding: 4px 9px; border-radius: 20px; font-size: 0.72rem;
-            font-weight: 600; display: flex; align-items: center; gap: 5px;
-        }
-        .btn-notification {
-            background: rgba(255,255,255,0.2); border: none; color: white;
-            width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; position: relative; transition: background 0.2s;
-        }
-        .btn-notification:hover { background: rgba(255,255,255,0.35); }
-        .notification-badge-dot { position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: none; border: 1px solid white; }
-        .btn-logout {
-            background: rgba(220,38,38,0.85); border: 1px solid rgba(255,255,255,0.3);
-            color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem;
-            font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;
-            transition: background 0.2s; border: none;
-        }
-        .btn-logout:hover { background: #dc2626; }
-        .badge-date {
-            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-            color: #ffffff; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem;
-            font-weight: 600; display: flex; align-items: center; gap: 5px;
-        }
-        .btn-mobile-menu {
-            display: none; background: rgba(255,255,255,0.2); border: none; color: white;
-            width: 32px; height: 32px; border-radius: 6px; font-size: 1.1rem; cursor: pointer;
-            align-items: center; justify-content: center; transition: background 0.2s;
-        }
-        .btn-mobile-menu:hover { background: rgba(255,255,255,0.35); }
-        .mobile-user-dropdown {
-            display: none; position: absolute; top: 52px; right: 12px;
-            background: #0b1e42; border: 1px solid #1e3a8a; border-radius: 12px;
-            padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            flex-direction: column; gap: 8px; z-index: 1005; min-width: 220px;
-        }
-        .mobile-user-dropdown.active { display: flex; }
-
-        .main-container { display: flex; flex: 1; position: relative; overflow: hidden; height: calc(100vh - 50px); }
-        
-        .sidebar {
-            width: 390px; background: #f8fafc; border-right: 1px solid #e2e8f0;
-            display: flex; flex-direction: column; gap: 8px; padding: 10px 12px;
-            overflow-y: auto; z-index: 500; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-        }
-        .admin-panel {
-            background: rgba(239, 246, 255, 0.9); border: 1px dashed #3b82f6; padding: 10px;
-            border-radius: 14px; display: none; flex-direction: column; gap: 6px; flex-shrink: 0;
-        }
-        .admin-panel label { font-size: 0.68rem; font-weight: 700; color: #1e40af; text-transform: uppercase; }
-        .admin-file-input { font-size: 0.7rem; color: #1e293b; width: 100%; }
-        
-        .drawer-handle {
-            display: none; background: #0f172a; color: white; padding: 10px 14px;
-            border-radius: 16px 16px 0 0; cursor: pointer;
-            font-size: 0.8rem; font-weight: 700; box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
-            user-select: none; flex-shrink: 0;
-        }
-        .drawer-handle .pill { width: 36px; height: 5px; background: rgba(255,255,255,0.4); border-radius: 10px; margin: 0 auto 6px auto; }
-
-        .accordion-card {
-            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02); overflow: hidden; transition: all 0.2s ease;
-            flex-shrink: 0;
-        }
-        .accordion-header {
-            padding: 10px 12px; background: #ffffff; display: flex; justify-content: space-between;
-            align-items: center; cursor: pointer; font-size: 0.75rem; font-weight: 800; color: #1e3a8a;
-            text-transform: uppercase; user-select: none; letter-spacing: 0.02em; border-bottom: 1px solid transparent;
-        }
-        .accordion-header:hover { background: #f8fafc; }
-        .accordion-header i.fa-chevron-down { transition: transform 0.3s ease; color: #64748b; }
-        .accordion-card.open .accordion-header { border-bottom: 1px solid #f1f5f9; background: #f8fafc; }
-        .accordion-card.open .accordion-header i.fa-chevron-down { transform: rotate(180deg); color: #1e3a8a; }
-        .accordion-body {
-            max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
-            padding: 0 12px; display: flex; flex-direction: column; gap: 8px; background: #ffffff;
-        }
-        .accordion-card.open .accordion-body { max-height: none; overflow-y: visible; padding: 10px 12px 12px 12px; }
-
-        .filter-section {
-            background: #f8fafc; padding: 8px 10px; border-radius: 10px;
-            border: 1px solid #e2e8f0;
-        }
-        .filter-section label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block; letter-spacing: 0.02em; }
-        
-        select, .search-input {
-            width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid #cbd5e1;
-            font-size: 0.8rem; font-weight: 600; color: #0f172a; outline: none; background: #f1f5f9;
-            transition: all 0.2s ease;
-        }
-        select:focus, .search-input:focus { background: #ffffff; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
-        select:disabled { background-color: #e2e8f0; color: #64748b; cursor: not-allowed; }
-
-        .chips-container { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
-        .chip-item {
-            background: #1e3a8a; color: white; padding: 3px 8px; border-radius: 14px;
-            font-size: 0.68rem; font-weight: 600; display: flex; align-items: center; gap: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-        .chip-item.chip-pais { background: #0369a1; }
-        .chip-item.chip-division { background: #0d9488; }
-        .chip-item .btn-remove-chip { cursor: pointer; opacity: 0.8; font-size: 0.75rem; font-weight: bold; }
-        .chip-item .btn-remove-chip:hover { opacity: 1; color: #fca5a5; }
-
-        .day-buttons {
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
-            background: #e2e8f0; padding: 3px; border-radius: 10px;
-        }
-        .btn-day {
-            padding: 6px 0; border: none; background: transparent;
-            border-radius: 8px; font-size: 0.68rem; font-weight: 600; cursor: pointer;
-            text-align: center; color: #475569; transition: all 0.2s; user-select: none;
-        }
-        .btn-day.active { background: #ffffff; color: #1e3a8a; font-weight: 800; box-shadow: 0 2px 5px rgba(0,0,0,0.12); }
-
-        .progress-container { background: #e2e8f0; border-radius: 12px; height: 14px; width: 100%; overflow: hidden; position: relative; margin-top: 2px; }
-        .progress-bar { background: linear-gradient(90deg, #15803d, #22c55e); height: 100%; width: 0%; transition: width 0.4s ease; border-radius: 12px; }
-        .progress-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; font-size: 0.58rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; justify-content: center; }
-
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .kpi-card {
-            background: #f8fafc; border: 1px solid #e2e8f0; padding: 7px 4px;
-            border-radius: 12px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
-        .kpi-card .val { font-size: 1.05rem; font-weight: 800; color: #1e3a8a; }
-        .kpi-card .lbl { font-size: 0.52rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-top: 2px; }
-        .kpi-card.alert .val { color: #dc2626; }
-        .kpi-card.success .val { color: #15803d; }
-        .kpi-card.info .val { color: #0369a1; }
-
-        .table-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; margin-top: 4px; }
-        .table-title { font-size: 0.72rem; font-weight: 700; color: #1e293b; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
-        .table-wrapper { max-height: 130px; overflow-y: auto; overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; background: white; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.68rem; }
-        th { background-color: #f8fafc; color: #475569; font-weight: 700; text-align: left; padding: 5px; position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; z-index: 2; }
-        td { padding: 5px; border-bottom: 1px solid #f1f5f9; color: #334155; }
-        tr.clickable-row { cursor: pointer; transition: background 0.15s; }
-        tr.clickable-row:hover { background-color: #e0f2fe !important; }
-        tr.visited-row { background-color: #f0fdf4; }
-        tr.outside-row { background-color: #fef2f2; }
-
-        #map { flex: 1; height: 100%; background: #e2e8f0; position: relative; }
-
-        .map-legend-box {
-            position: absolute; bottom: 24px; left: 16px; background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px); padding: 10px 12px; border-radius: 14px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 999; font-size: 0.72rem;
-            display: none; flex-direction: column; gap: 6px; min-width: 170px;
-            border: 1px solid #cbd5e1;
-        }
-        .map-legend-title { font-weight: 800; color: #0b1e42; font-size: 0.74rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; display: flex; align-items: center; gap: 5px; }
-        .legend-items-container { display: flex; flex-direction: column; gap: 4px; }
-        .legend-item-row { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; }
-        .legend-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-
-        .download-section { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
-        .btn-dual-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-
-        .btn-download {
-            width: 100%; padding: 9px 8px; border: none; border-radius: 10px;
-            font-size: 0.74rem; font-weight: 700; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            transition: all 0.2s ease; text-decoration: none; text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .btn-download:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn-download-visited { background-color: #15803d; color: white; }
-        .btn-download-visited:hover { background-color: #166534; }
-        .btn-download-itinerary { background-color: #0369a1; color: white; }
-        .btn-download-itinerary:hover { background-color: #075985; }
-        .btn-route-opt { background-color: #4f46e5; color: white; }
-        .btn-route-opt:hover { background-color: #4338ca; }
-        .btn-route-opt:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
-        .btn-route-download { background-color: #b45309; color: white; }
-        .btn-route-download:hover { background-color: #92400e; }
-        .btn-route-download:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
-        .btn-gmaps-redirect { background-color: #0284c7; color: white; display: none; }
-        .btn-gmaps-redirect:hover { background-color: #0369a1; }
-        .btn-compare { background-color: #0f172a; color: white; }
-        .btn-compare:hover { background-color: #1e293b; }
-
-        .route-simulation-card {
-            background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(10px);
-            border: 1px solid #cbd5e1; border-radius: 14px; padding: 10px 14px;
-            margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: none; flex-direction: column; gap: 8px;
-        }
-        .simulation-controls-row { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
-        .btn-sim-play {
-            background: #15803d; color: white; border: none; width: 34px; height: 34px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem;
-            box-shadow: 0 2px 6px rgba(21,128,61,0.3); transition: transform 0.2s; flex-shrink: 0;
-        }
-        .btn-sim-play:hover { transform: scale(1.05); background: #166534; }
-        .simulation-slider { flex: 1; accent-color: #2563eb; cursor: pointer; }
-        .simulation-stats { font-size: 0.7rem; font-weight: 700; color: #475569; display: flex; justify-content: space-between; }
-
-        .metrics-desglose-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px; }
-        .metric-card-item {
-            background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 4px;
-            border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .metric-card-item .val { font-size: 0.9rem; font-weight: 800; color: #1e3a8a; }
-        .metric-card-item .lbl { font-size: 0.52rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-top: 1px; }
-
-        .ios-switches-block { display: flex; flex-direction: column; gap: 8px; }
-        .ios-switch-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #f1f5f9; }
-        .ios-switch-row:last-child { border-bottom: none; }
-        .ios-switch-label { font-size: 0.8rem; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px; }
-        .ios-switch-label i { font-size: 0.95rem; width: 16px; text-align: center; }
-        .ios-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
-        .ios-switch input { opacity: 0; width: 0; height: 0; }
-        .ios-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 22px; }
-        .ios-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
-        input:checked + .ios-slider { background-color: #0369a1; }
-        input:checked + .ios-slider:before { transform: translateX(18px); }
-
-        .ios-notification-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
-            display: none; justify-content: center; align-items: center; z-index: 999999;
-        }
-        .ios-notification-card {
-            background: rgba(255, 255, 255, 0.96); width: 330px; max-width: 88%;
-            border-radius: 20px; padding: 22px 18px 16px 18px; text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.25); animation: iosPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes iosPop {
-            0% { transform: scale(0.85); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .ios-notification-icon { font-size: 2rem; color: #15803d; margin-bottom: 8px; }
-        .ios-notification-title { font-size: 0.98rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-        .ios-notification-body { font-size: 0.76rem; color: #475569; line-height: 1.4; max-height: 180px; overflow-y: auto; margin-bottom: 14px; text-align: left; }
-        .ios-btn-ok { background: #2563eb; color: white; border: none; width: 100%; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-        .ios-btn-ok:hover { background: #1d4ed8; }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
-            display: none; justify-content: center; align-items: center; z-index: 99999;
-        }
-        .modal-content {
-            background: white; border-radius: 16px; width: 500px; max-width: 90%; max-height: 80vh;
-            display: flex; flex-direction: column; padding: 18px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 10px; }
-        .modal-header h3 { font-size: 1rem; color: #0b1e42; }
-        .btn-close-modal { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; }
-
-        .visit-modal-card {
-            background: white; border-radius: 20px; width: 560px; max-width: 94%; max-height: 90vh;
-            display: flex; flex-direction: column; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            overflow: hidden;
-        }
-        .visit-form-body { overflow-y: auto; flex: 1; padding-right: 4px; display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
-
-        .form-section-title {
-            font-size: 0.78rem; font-weight: 800; color: #1e3a8a; text-transform: uppercase;
-            border-bottom: 2px solid #eff6ff; padding-bottom: 4px; margin-bottom: 8px;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .options-group-box {
-            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;
-            display: flex; flex-direction: column; gap: 8px;
-        }
-        .radio-options-row { display: flex; gap: 14px; align-items: center; margin-bottom: 4px; flex-wrap: wrap; }
-        .radio-label { font-size: 0.82rem; font-weight: 700; color: #334155; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
-        .radio-label input[type="radio"] { width: 16px; height: 16px; accent-color: #1e3a8a; cursor: pointer; }
-        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
-        .checkbox-label { font-size: 0.76rem; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 6px; cursor: pointer; }
-        .checkbox-label input[type="checkbox"] { width: 15px; height: 15px; accent-color: #2563eb; cursor: pointer; }
-
-        .input-form-group { display: flex; flex-direction: column; gap: 4px; }
-        .input-form-group label { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
-        .input-form-control {
-            width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid #cbd5e1;
-            font-size: 0.82rem; font-weight: 600; color: #0f172a; background: white; outline: none;
-        }
-        .input-form-control:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
-        textarea.input-form-control { resize: vertical; min-height: 52px; }
-
-        .gps-capture-box {
-            background: rgba(241, 245, 249, 0.8); border: 1px solid #cbd5e1; border-radius: 14px; padding: 10px 14px;
-            display: flex; justify-content: space-between; align-items: center; gap: 10px;
-        }
-        .btn-gps {
-            background: #2563eb; color: white; border: none; padding: 8px 14px; border-radius: 10px;
-            font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
-            display: flex; align-items: center; gap: 6px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(37,99,235,0.25);
-        }
-        .btn-gps:hover { background: #1d4ed8; transform: translateY(-1px); }
-
-        .modal-footer-actions { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 8px; }
-        .btn-modal-save {
-            background: #15803d; color: white; border: none; padding: 10px 18px; border-radius: 10px;
-            font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
-        }
-        .btn-modal-save:hover { background: #166534; }
-        .btn-modal-cancel {
-            background: #e2e8f0; color: #475569; border: none; padding: 10px 16px; border-radius: 10px;
-            font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
-        }
-        .btn-modal-cancel:hover { background: #cbd5e1; }
-
-        .confirm-dialog-card {
-            background: white; width: 340px; max-width: 90%; border-radius: 18px; padding: 20px;
-            text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 14px;
-        }
-        .confirm-dialog-card h4 { font-size: 1rem; color: #0f172a; font-weight: 800; }
-        .confirm-dialog-card p { font-size: 0.82rem; color: #64748b; line-height: 1.4; }
-        .confirm-actions-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; }
-        .btn-confirm-cancel { flex: 1; padding: 9px; background: #f1f5f9; color: #64748b; border: none; border-radius: 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
-        .btn-confirm-cancel:hover { background: #e2e8f0; }
-        .btn-confirm-ok { flex: 1; padding: 9px; background: #2563eb; color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
-        .btn-confirm-ok:hover { background: #1d4ed8; }
-
-        @media (max-width: 768px) {
-            .map-legend-box {
-                bottom: auto; top: 58px; right: 12px; left: auto; max-width: 160px; padding: 8px 10px;
-            }
-            .header-user-info .user-pill, 
-            .header-user-info .badge-date, 
-            .header-user-info .btn-logout { display: none; }
-            .btn-mobile-menu { display: flex; }
-
-            .main-container { flex-direction: column; position: relative; }
-            #map { height: 100%; width: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
-            .sidebar {
-                position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: 75vh; max-height: 75vh;
-                z-index: 1000; border-radius: 20px 20px 0 0; box-shadow: 0 -6px 25px rgba(0,0,0,0.3);
-                padding: 0 14px 20px 14px; border-right: none; background: rgba(248, 250, 252, 0.98); backdrop-filter: blur(12px);
-                overflow-y: auto !important; -webkit-overflow-scrolling: touch;
-            }
-            .sidebar.collapsed { transform: translateY(calc(100% - 48px)); overflow: hidden !important; }
-            .drawer-handle {
-                display: block; position: sticky; top: 0; background: #0f172a; color: white;
-                padding: 10px 14px; margin: 0 -14px 10px -14px; border-radius: 20px 20px 0 0;
-                cursor: pointer; z-index: 1010; user-select: none; min-height: 48px; box-sizing: border-box;
-            }
-            .header-title-text { font-size: 0.88rem; }
-            .header-sub-text { font-size: 0.68rem; }
-            .checkbox-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-<!-- ============================================================ -->
-<!-- HTML - ESTRUCTURA COMPLETA                                   -->
-<!-- ============================================================ -->
-
-<!-- LOGIN MODAL -->
 <div id="login-modal">
     <div class="login-card-container">
         <img src="assets/logo_bocadeli_blanco.png" class="login-logo" alt="Logo Bocadeli" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 320 80%22 fill=%22%231e3a8a%22><text x=%2210%22 y=%2255%22 font-family=%22Arial, sans-serif%22 font-size=%2246%22 font-weight=%22900%22 letter-spacing=%22-1%22>bocadeli</text><circle cx=%22290%22 cy=%2232%22 r=%228%22 fill=%22%23dc2626%22/></svg>'">
@@ -465,59 +33,58 @@
             <h2>Seleccione su País</h2>
             <p>Elija la región territorial para iniciar:</p>
             <div class="country-flags-row">
-                <div class="flag-card" data-pais="GT" data-nombre="Guatemala">
-                    <img src="https://flagcdn.com/w80/gt.png" class="flag-img" alt="Guatemala">
+                <div class="flag-card" onclick="seleccionarPais('GT', 'Guatemala')">
+                    <img src="https://flagcdn.com/w80/gt.png" class="flag-img" alt="Guatemala" onerror="this.src='https://flagcdn.com/w80/gt.png'">
                     <span class="flag-label">Guatemala</span>
                 </div>
-                <div class="flag-card" data-pais="SV" data-nombre="El Salvador">
-                    <img src="https://flagcdn.com/w80/sv.png" class="flag-img" alt="El Salvador">
+                <div class="flag-card" onclick="seleccionarPais('SV', 'El Salvador')">
+                    <img src="https://flagcdn.com/w80/sv.png" class="flag-img" alt="El Salvador" onerror="this.src='https://flagcdn.com/w80/sv.png'">
                     <span class="flag-label">El Salvador</span>
                 </div>
-                <div class="flag-card" data-pais="HN" data-nombre="Honduras">
-                    <img src="https://flagcdn.com/w80/hn.png" class="flag-img" alt="Honduras">
+                <div class="flag-card" onclick="seleccionarPais('HN', 'Honduras')">
+                    <img src="https://flagcdn.com/w80/hn.png" class="flag-img" alt="Honduras" onerror="this.src='https://flagcdn.com/w80/hn.png'">
                     <span class="flag-label">Honduras</span>
                 </div>
             </div>
+
             <div class="regional-button-row">
-                <button class="btn-regional-access" id="btn-acceso-regional">
+                <button class="btn-regional-access" onclick="seleccionarAccesoRegional()">
                     <i class="fa-solid fa-earth-americas"></i> Acceso Regional
                 </button>
             </div>
         </div>
 
-        <div id="step-division" style="display: none;">
-            <h2>Seleccione División</h2>
-            <p id="txt-sub-pais">Divisiones de la zona:</p>
+        <div id="step-division" style="display: none; text-align: center;">
+            <h2 style="text-align: center; margin-bottom: 4px;">Seleccione División</h2>
+            <p id="txt-sub-pais" style="text-align: center; margin-bottom: 10px;">Divisiones de la zona:</p>
             <div class="divisions-grid" id="container-divisiones"></div>
-            <div style="margin-top: 14px;">
-                <button class="btn-back-step" id="btn-back-to-pais">
-                    <i class="fa-solid fa-arrow-left"></i> Cambiar País
-                </button>
+            <div style="margin-top: 14px; text-align: center;">
+                <button class="btn-back-step" onclick="volverAPasoPais()"><i class="fa-solid fa-arrow-left"></i> Cambiar País</button>
             </div>
         </div>
 
-        <div id="step-credentials" style="display: none;">
-            <h2>Ruta360</h2>
-            <p id="txt-division-activa-label" style="font-weight:700; color:#1e3a8a;"></p>
-            <div class="login-input-group">
+        <div id="step-credentials" style="display: none; text-align: center;">
+            <h2 style="text-align: center; margin-bottom: 4px;">Ruta360</h2>
+            <p id="txt-division-activa-label" style="font-weight:700; color:#1e3a8a; text-align: center; margin-bottom: 12px;"></p>
+            
+            <div class="login-input-group" style="margin-bottom: 10px;">
                 <label><i class="fa-solid fa-user"></i> Usuario</label>
                 <select id="select-usuario-login" class="login-select">
                     <option value="" disabled selected hidden>Seleccione su nombre</option>
                 </select>
             </div>
-            <div class="login-input-group">
+            <div class="login-input-group" style="margin-bottom: 10px;">
                 <label><i class="fa-solid fa-key"></i> Contraseña</label>
                 <div class="password-wrapper">
                     <input type="password" id="input-password" class="login-input" placeholder="Ingrese su contraseña">
-                    <i class="fa-regular fa-eye toggle-password-icon" id="toggle-password-btn"></i>
+                    <i class="fa-regular fa-eye toggle-password-icon" id="toggle-password-btn" onclick="toggleMostrarPassword()"></i>
                 </div>
             </div>
-            <div id="login-error">⚠️ Contraseña incorrecta.</div>
-            <button class="login-btn" id="btn-login">Ingresar</button>
-            <div style="margin-top: 12px;">
-                <button class="btn-back-step" id="btn-back-from-login">
-                    <i class="fa-solid fa-arrow-left"></i> Volver Atrás
-                </button>
+            <div id="login-error">⚠️ Contraseña incorrecta. Intente nuevamente.</div>
+            <button class="login-btn" id="btn-login" style="margin-top: 14px;">Ingresar</button>
+            
+            <div style="margin-top: 12px; text-align: center;">
+                <button class="btn-back-step" id="btn-back-from-login" onclick="volverDesdeLogin()"><i class="fa-solid fa-arrow-left"></i> Volver Atrás</button>
             </div>
         </div>
 
@@ -525,7 +92,6 @@
     </div>
 </div>
 
-<!-- HEADER -->
 <header>
     <div class="header-brand">
         <img src="assets/logo_bocadeli_blanco.png" class="header-logo" alt="Logo Bocadeli" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 320 80%22 fill=%22%23ffffff%22><text x=%2210%22 y=%2255%22 font-family=%22Arial, sans-serif%22 font-size=%2246%22 font-weight=%22900%22 letter-spacing=%22-1%22>bocadeli</text><circle cx=%22290%22 cy=%2232%22 r=%228%22 fill=%22%23dc2626%22/></svg>'">
@@ -536,10 +102,11 @@
     </div>
     
     <div class="header-user-info">
-        <button class="btn-notification" id="btn-open-notifications" title="Ver Notificaciones">
+        <button class="btn-notification" id="btn-open-notifications" title="Ver Notificaciones de Ruta">
             <i class="fa-regular fa-bell"></i>
             <div class="notification-badge-dot" id="notif-dot"></div>
         </button>
+
         <div class="user-pill" id="user-session-display">
             <i class="fa-solid fa-user-shield"></i> <span id="txt-rol-activo">Invitado</span>
         </div>
@@ -550,69 +117,79 @@
         <button class="btn-logout" id="btn-logout" title="Cerrar Sesión">
             <i class="fa-solid fa-right-from-bracket"></i> Salir
         </button>
-        <button class="btn-mobile-menu" id="btn-toggle-mobile-user" title="Menú">
+
+        <button class="btn-mobile-menu" id="btn-toggle-mobile-user" title="Menú de Usuario">
             <i class="fa-solid fa-bars"></i>
         </button>
     </div>
 
     <div class="mobile-user-dropdown" id="mobile-user-dropdown">
-        <div class="user-pill"><i class="fa-solid fa-user-shield"></i> <span id="txt-rol-activo-mobile">Invitado</span></div>
-        <div class="badge-date"><i class="fa-regular fa-calendar-days"></i> <span id="fecha-actual-mobile">Cargando...</span></div>
-        <button class="btn-logout" id="btn-logout-mobile"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
+        <div class="user-pill" style="display:flex;">
+            <i class="fa-solid fa-user-shield"></i> <span id="txt-rol-activo-mobile">Invitado</span>
+        </div>
+        <div class="badge-date" style="display:flex;">
+            <i class="fa-regular fa-calendar-days"></i>
+            <span id="fecha-actual-mobile">Cargando...</span>
+        </div>
+        <button class="btn-logout" id="btn-logout-mobile" style="display:flex; justify-content:center; width:100%;">
+            <i class="fa-solid fa-right-from-bracket"></i> Salir
+        </button>
     </div>
 </header>
 
-<!-- MAIN CONTAINER -->
 <div class="main-container">
     <aside class="sidebar" id="mobile-drawer">
         <div class="drawer-handle" id="drawer-handle">
             <div class="pill"></div>
             <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                <span><i class="fa-solid fa-sliders"></i> Panel de Control</span>
-                <span id="drawer-btn-label" style="color: #38bdf8; font-size: 0.75rem;">
+                <span><i class="fa-solid fa-sliders"></i> Panel de Control y Filtros</span>
+                <span id="drawer-btn-label" style="color: #38bdf8; font-size: 0.75rem; font-weight: 600;">
                     <i class="fa-solid fa-chevron-down"></i> Ocultar
                 </span>
             </div>
         </div>
 
         <div class="admin-panel" id="panel-admin-actualizacion">
-            <label><i class="fa-solid fa-cloud-arrow-up"></i> Carga Temporal (Admin)</label>
+            <label><i class="fa-solid fa-cloud-arrow-up"></i> Carga Temporal / Pruebas (Admin)</label>
             <div>
-                <span style="font-size:0.68rem; color:#475569;">1. Clientes (CSV):</span>
+                <span style="font-size:0.68rem; color:#475569; display:block; margin-bottom:2px;">1. Clientes (CSV):</span>
                 <input type="file" id="file-csv-input" accept=".csv" class="admin-file-input">
             </div>
             <div>
-                <span style="font-size:0.68rem; color:#475569; margin-top:4px;">2. Geocercas Rutas (GeoJSON):</span>
+                <span style="font-size:0.68rem; color:#475569; display:block; margin-bottom:2px; margin-top:4px;">2. Geocercas Rutas (GeoJSON):</span>
                 <input type="file" id="file-geojson-input" accept=".geojson,.json" class="admin-file-input">
             </div>
             <div>
-                <span style="font-size:0.68rem; color:#475569; margin-top:4px;">3. Geocercas Distribuidoras (GeoJSON):</span>
+                <span style="font-size:0.68rem; color:#475569; display:block; margin-bottom:2px; margin-top:4px;">3. Geocercas Distribuidoras (GeoJSON):</span>
                 <input type="file" id="file-distribuidoras-input" accept=".geojson,.json" class="admin-file-input">
             </div>
         </div>
 
-        <!-- ACCORDION: FILTROS -->
+        <!-- ACORDEÓN 1: FILTROS Y SEGMENTACIÓN -->
         <div class="accordion-card open" id="acc-filtros">
-            <div class="accordion-header" data-accordion="acc-filtros">
+            <div class="accordion-header" onclick="toggleAccordion('acc-filtros')">
                 <span><i class="fa-solid fa-filter"></i> Filtros y Ubicación</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="accordion-body">
-                <div class="filter-section">
+                <div class="filter-section" id="section-filtro-pais">
                     <label><i class="fa-solid fa-earth-americas"></i> País</label>
                     <div class="chips-container" id="chips-paises"></div>
                     <select id="select-pais"></select>
                 </div>
-                <div class="filter-section">
+
+                <div class="filter-section" id="section-filtro-division">
                     <label><i class="fa-solid fa-map-location-dot"></i> División</label>
                     <div class="chips-container" id="chips-divisiones"></div>
                     <select id="select-division"></select>
                 </div>
+
                 <div class="filter-section">
                     <label><i class="fa-solid fa-layer-group"></i> Grupo Operativo</label>
                     <div class="chips-container" id="chips-grupos"></div>
                     <select id="select-grupo"></select>
                 </div>
+
                 <div class="filter-section">
                     <label><i class="fa-solid fa-route"></i> Ruta</label>
                     <div class="chips-container" id="chips-rutas"></div>
@@ -620,6 +197,7 @@
                         <option value="TODOS">Seleccionar Ruta</option>
                     </select>
                 </div>
+
                 <div class="filter-section">
                     <label><i class="fa-regular fa-calendar-days"></i> Día de Visita</label>
                     <div class="day-buttons">
@@ -635,30 +213,38 @@
             </div>
         </div>
 
-        <!-- ACCORDION: CAPAS -->
+        <!-- ACORDEÓN 2: MODOS DE CAPA Y CATEGORIZACIÓN -->
         <div class="accordion-card" id="acc-capas">
-            <div class="accordion-header" data-accordion="acc-capas">
-                <span><i class="fa-solid fa-layer-group"></i> Modos de Capa</span>
+            <div class="accordion-header" onclick="toggleAccordion('acc-capas')">
+                <span><i class="fa-solid fa-layer-group"></i> Modos de Capa y Categorización</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="accordion-body">
                 <div class="ios-switches-block">
                     <div class="ios-switch-row">
-                        <span class="ios-switch-label"><i class="fa-solid fa-cart-shopping"></i> Canales Masivos</span>
+                        <span class="ios-switch-label">
+                            <i class="fa-solid fa-cart-shopping" style="color:#047857;"></i> Canales Masivos
+                        </span>
                         <label class="ios-switch">
                             <input type="checkbox" id="switch-canales-masivos">
                             <span class="ios-slider"></span>
                         </label>
                     </div>
+
                     <div class="ios-switch-row">
-                        <span class="ios-switch-label"><i class="fa-solid fa-boxes-packing"></i> Canales Específicos</span>
+                        <span class="ios-switch-label">
+                            <i class="fa-solid fa-boxes-packing" style="color:#b45309;"></i> Canales Específicos
+                        </span>
                         <label class="ios-switch">
                             <input type="checkbox" id="switch-canales-especificos">
                             <span class="ios-slider"></span>
                         </label>
                     </div>
+
                     <div class="ios-switch-row">
-                        <span class="ios-switch-label"><i class="fa-solid fa-map-pin"></i> Tipo Zona</span>
+                        <span class="ios-switch-label">
+                            <i class="fa-solid fa-map-pin" style="color:#0369a1;"></i> Tipo Zona
+                        </span>
                         <label class="ios-switch">
                             <input type="checkbox" id="switch-tipo-zona">
                             <span class="ios-slider"></span>
@@ -668,9 +254,9 @@
             </div>
         </div>
 
-        <!-- ACCORDION: KPIS -->
+        <!-- ACORDEÓN 3: INDICADORES Y LISTADO DE CLIENTES -->
         <div class="accordion-card" id="acc-kpis">
-            <div class="accordion-header" data-accordion="acc-kpis">
+            <div class="accordion-header" onclick="toggleAccordion('acc-kpis')">
                 <span><i class="fa-solid fa-chart-pie"></i> Indicadores y Clientes</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -683,18 +269,21 @@
                     <div class="kpi-card info"><div class="val" id="kpi-pendientes">0</div><div class="lbl">Pendientes</div></div>
                     <div class="kpi-card success"><div class="val" id="kpi-porcentaje">0%</div><div class="lbl">% Avance</div></div>
                 </div>
+
                 <div class="progress-container">
                     <div class="progress-bar" id="progress-bar-fill"></div>
-                    <div class="progress-text" id="progress-text">AVANCE: 0%</div>
+                    <div class="progress-text" id="progress-text">AVANCE DE CUMPLIMIENTO: 0%</div>
                 </div>
-                <div class="filter-section">
-                    <label><i class="fa-solid fa-magnifying-glass"></i> Buscar Cliente</label>
-                    <input type="text" id="input-search-cliente" class="search-input" placeholder="Escriba para filtrar...">
+
+                <div class="filter-section" style="margin-top: 4px;">
+                    <label><i class="fa-solid fa-magnifying-glass"></i> Buscar Cliente (Nombre / Código)</label>
+                    <input type="text" id="input-search-cliente" class="search-input" placeholder="Escriba para filtrar lista...">
                 </div>
+
                 <div class="table-section">
                     <div class="table-title">
                         <span><i class="fa-solid fa-table-list"></i> Detalle de Clientes</span>
-                        <span style="font-size:0.6rem; color:#64748b;">(Clic para ubicar)</span>
+                        <span style="font-size:0.6rem; color:#64748b; font-weight:normal;">(Clic para ubicar)</span>
                     </div>
                     <div class="table-wrapper">
                         <table>
@@ -703,10 +292,11 @@
                         </table>
                     </div>
                 </div>
+
                 <div class="table-section">
                     <div class="table-title" style="color:#dc2626;">
                         <span><i class="fa-solid fa-triangle-exclamation"></i> Clientes Fuera de Geocerca</span>
-                        <button class="btn-download" id="btn-download-fuera" style="width: auto; padding: 3px 8px; font-size: 0.68rem; background-color: #dc2626; color: white;">
+                        <button class="btn-download" id="btn-download-fuera" style="width: auto; padding: 3px 8px; font-size: 0.68rem; margin: 0; background-color: #dc2626; color: white;" title="Descargar clientes fuera de geocerca">
                             <i class="fa-solid fa-file-arrow-down"></i> Descargar
                         </button>
                     </div>
@@ -720,46 +310,47 @@
             </div>
         </div>
 
-        <!-- ACCORDION: ACCIONES -->
+        <!-- ACORDEÓN 4: OPTIMIZACIÓN Y HERRAMIENTAS -->
         <div class="accordion-card" id="acc-acciones">
-            <div class="accordion-header" data-accordion="acc-acciones">
+            <div class="accordion-header" onclick="toggleAccordion('acc-acciones')">
                 <span><i class="fa-solid fa-route"></i> Optimización y Acciones</span>
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="accordion-body">
-                <div class="filter-section">
-                    <label><i class="fa-solid fa-gear"></i> Parámetros de Ruta</label>
+                <div class="filter-section" style="background:#f1f5f9; border: 1px solid #cbd5e1;">
+                    <label style="color:#1e3a8a;"><i class="fa-solid fa-gear"></i> Parámetros de Ruta & Waze Tráfico</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
-                        <div class="input-form-group">
-                            <span style="font-size:0.65rem; font-weight:700;">Minutos por parada:</span>
-                            <input type="number" id="input-tiempo-parada" class="input-form-control" value="10" min="1" max="60">
+                        <div class="input-form-group" style="display:flex; flex-direction:column; gap:2px;">
+                            <span style="font-size:0.65rem; font-weight:700; color:#475569;">Minutos por parada:</span>
+                            <input type="number" id="input-tiempo-parada" class="input-form-control" value="10" min="1" max="60" style="padding:6px; font-size:0.75rem;">
                         </div>
-                        <div class="input-form-group">
-                            <span style="font-size:0.65rem; font-weight:700;">Hora Salida (24h):</span>
-                            <input type="time" id="input-hora-salida" class="input-form-control" value="08:00">
+                        <div class="input-form-group" style="display:flex; flex-direction:column; gap:2px;">
+                            <span style="font-size:0.65rem; font-weight:700; color:#475569;">Hora Salida (24h):</span>
+                            <input type="time" id="input-hora-salida" class="input-form-control" value="08:00" style="padding:6px; font-size:0.75rem;">
                         </div>
                     </div>
-                    <div style="font-size:0.68rem; font-weight:700; color:#1e3a8a; margin-top:6px;">
-                        <i class="fa-solid fa-utensils"></i> Almuerzo: 12:00 PM - 1:00 PM
+                    <div style="font-size:0.68rem; font-weight:700; color:#1e3a8a; margin-top:6px; display:flex; align-items:center; gap:4px;">
+                        <i class="fa-solid fa-utensils"></i> Almuerzo obligatorio: 12:00 PM - 1:00 PM
                     </div>
                 </div>
 
                 <div class="route-simulation-card" id="route-simulation-container">
-                    <div style="font-size:0.74rem; font-weight:800; color:#1e3a8a; display:flex; justify-content:space-between;">
-                        <span><i class="fa-solid fa-truck"></i> Simulador</span>
-                        <span id="sim-time-display" style="color:#15803d;">08:00 AM</span>
+                    <div style="font-size:0.74rem; font-weight:800; color:#1e3a8a; display:flex; align-items:center; justify-content:space-between;">
+                        <span><i class="fa-solid fa-truck"></i> Simulador de Recorrido</span>
+                        <span id="sim-time-display" style="font-size:0.68rem; color:#15803d;">08:00 AM</span>
                     </div>
                     <div class="simulation-controls-row">
-                        <button class="btn-sim-play" id="btn-sim-play-pause">
+                        <button class="btn-sim-play" id="btn-sim-play-pause" onclick="toggleSimulacionRecorrido()" title="Reproducir / Pausar Simulación">
                             <i class="fa-solid fa-play" id="sim-play-icon"></i>
                         </button>
-                        <input type="range" id="sim-range-progress" class="simulation-slider" min="0" max="100" value="0">
+                        <input type="range" id="sim-range-progress" class="simulation-slider" min="0" max="100" value="0" oninput="cambiarPasoSimulacion(this.value)">
                     </div>
                     <div class="simulation-stats">
                         <span id="sim-parada-label">Parada: 0 / 0</span>
                         <span id="sim-duracion-total-lbl">Total Est: --</span>
                     </div>
-                    <div class="metrics-desglose-grid">
+                    
+                    <div class="metrics-desglose-grid" id="metrics-desglose-content">
                         <div class="metric-card-item"><div class="val" id="metric-t-total">--</div><div class="lbl">Tiempo Total</div></div>
                         <div class="metric-card-item"><div class="val" id="metric-t-visita">--</div><div class="lbl">Tiempo Visita</div></div>
                         <div class="metric-card-item"><div class="val" id="metric-t-geocerca">--</div><div class="lbl">En Geocerca</div></div>
@@ -770,24 +361,26 @@
 
                 <div class="download-section">
                     <div class="btn-dual-row">
-                        <button class="btn-download btn-route-opt" id="btn-trazar-ruta" disabled>
+                        <button class="btn-download btn-route-opt" id="btn-trazar-ruta" disabled title="Seleccione Ruta y Día específico o 'TODOS'">
                             <i class="fa-solid fa-route"></i> Optimizar ruta
                         </button>
-                        <button class="btn-download btn-route-download" id="btn-descargar-optimizacion" disabled>
+                        <button class="btn-download btn-route-download" id="btn-descargar-optimizacion" disabled title="Descargar orden de visita trazado">
                             <i class="fa-solid fa-file-arrow-down"></i> Descargar Excel
                         </button>
                     </div>
-                    <button class="btn-download btn-gmaps-redirect" id="btn-gmaps-redirect" style="display:none;">
-                        <i class="fa-solid fa-map-location-dot"></i> Abrir en Google Maps
+
+                    <button class="btn-download btn-gmaps-redirect" id="btn-gmaps-redirect" onclick="abrirRutaEnGoogleMaps()" title="Abrir ruta optimizada en Google Maps">
+                        <i class="fa-solid fa-map-location-dot"></i> Abrir en Google Maps (Guía GPS)
                     </button>
+
                     <button class="btn-download btn-compare" id="btn-abrir-comparativo">
-                        <i class="fa-solid fa-chart-column"></i> Ver Comparativo
+                        <i class="fa-solid fa-chart-column"></i> Ver Comparativo de Cumplimiento
                     </button>
                     <button class="btn-download btn-download-visited" id="btn-download-visited">
-                        <i class="fa-solid fa-file-excel"></i> Descargar Visitados
+                        <i class="fa-solid fa-file-excel"></i> Descargar Clientes Visitados
                     </button>
                     <button class="btn-download btn-download-itinerary" id="btn-download-itinerary">
-                        <i class="fa-solid fa-file-export"></i> Descargar Itinerario
+                        <i class="fa-solid fa-file-export"></i> Descargar Itinerario General
                     </button>
                 </div>
             </div>
@@ -796,18 +389,17 @@
 
     <div id="map">
         <div class="map-legend-box" id="map-legend-box">
-            <div class="map-legend-title"><i class="fa-solid fa-map"></i> Leyenda</div>
+            <div class="map-legend-title" id="legend-box-title"><i class="fa-solid fa-map"></i> Leyenda de Capa</div>
             <div class="legend-items-container" id="legend-items-list"></div>
         </div>
     </div>
 </div>
 
-<!-- MODALS -->
 <div class="ios-notification-overlay" id="ios-notif-overlay">
     <div class="ios-notification-card">
-        <div class="ios-notification-icon"><i class="fa-solid fa-circle-check"></i></div>
-        <div class="ios-notification-title" id="ios-notif-title">Notificación</div>
-        <div class="ios-notification-body" id="ios-notif-body">Mensaje</div>
+        <div class="ios-notification-icon"><i class="fa-solid fa-circle-check" style="color:#15803d;"></i></div>
+        <div class="ios-notification-title" id="ios-notif-title">Resumen de Enrutamiento</div>
+        <div class="ios-notification-body" id="ios-notif-body">Procesamiento completado con éxito.</div>
         <button class="ios-btn-ok" id="btn-close-ios-notif">OK</button>
     </div>
 </div>
@@ -820,21 +412,25 @@
         </div>
         <div style="overflow-y: auto; flex: 1;">
             <table style="width: 100%;">
-                <thead><tr><th>Grupo / Ruta</th><th>Total</th><th>Visitados</th><th>% Avance</th></tr></thead>
+                <thead>
+                    <tr><th>Grupo / Ruta</th><th>Total</th><th>Visitados</th><th>% Avance</th></tr>
+                </thead>
                 <tbody id="tabla-comparativo-body"></tbody>
             </table>
         </div>
     </div>
 </div>
 
+<!-- MODAL REGISTRO DE VISITA Y ACTUALIZACIÓN -->
 <div class="modal-overlay" id="modal-registro-visita">
     <div class="visit-modal-card">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-clipboard-user"></i> Gestión de Visita</h3>
-            <button class="btn-close-modal" id="btn-cerrar-modal-visita">&times;</button>
+            <h3><i class="fa-solid fa-clipboard-user"></i> Gestión de Visita y Datos</h3>
+            <button class="btn-close-modal" onclick="cerrarModalVisita()">&times;</button>
         </div>
+        
         <div class="visit-form-body">
-            <div style="background: #f1f5f9; padding: 10px 12px; border-radius: 12px;">
+            <div style="background: #f1f5f9; padding: 10px 12px; border-radius: 12px; font-size: 0.8rem; color: #334155;">
                 <b style="font-size: 0.92rem; color: #0b1e42; display:block;" id="visit-modal-client-name">Cliente</b>
                 <span><b>Código:</b> <span id="visit-modal-client-code">-</span></span> | 
                 <span><b>Ruta:</b> <span id="visit-modal-client-route">-</span></span>
@@ -842,58 +438,77 @@
 
             <div>
                 <div class="form-section-title"><i class="fa-solid fa-square-poll-vertical"></i> Resultado de la Visita</div>
+                
                 <div class="options-group-box">
                     <div class="radio-options-row">
-                        <label class="radio-label"><input type="radio" name="radio-visita" value="SI"> Sí</label>
-                        <label class="radio-label"><input type="radio" name="radio-visita" value="NO"> No</label>
-                        <label class="radio-label"><input type="radio" name="radio-visita" value="OTROS"> Otros</label>
+                        <span style="font-size: 0.82rem; font-weight: 700; color: #334155;">Visita efectiva:</span>
+                        <label class="radio-label">
+                            <input type="radio" name="radio-visita" value="SI" onchange="gestionarCambioTipoVisita('SI')">
+                            Sí
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="radio-visita" value="NO" onchange="gestionarCambioTipoVisita('NO')">
+                            No
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="radio-visita" value="OTROS" onchange="gestionarCambioTipoVisita('OTROS')">
+                            Otros
+                        </label>
                     </div>
-                    <div id="box-visita-si" style="display:none; flex-direction:column; gap:8px;">
+
+                    <div id="box-visita-si" style="display: none; flex-direction: column; gap: 8px; margin-top: 6px;">
                         <div class="input-form-group">
                             <label>Total Venta ($):</label>
-                            <input type="number" id="input-total-venta" class="input-form-control" placeholder="0.00" step="0.01">
+                            <input type="number" id="input-total-venta" class="input-form-control" placeholder="0.00" step="0.01" min="0" onblur="formatearDecimalesVenta(this)">
                         </div>
-                        <span style="font-size:0.7rem; font-weight:700; color:#64748b;">Motivo de No Venta:</span>
+                        <span style="font-size:0.7rem; font-weight:700; color:#64748b; text-transform:uppercase; margin-top:2px;">Motivo de No Venta (Si aplica):</span>
                         <div class="checkbox-grid">
                             <label class="checkbox-label"><input type="checkbox" class="chk-visita-si-motivo" value="Cambio de producto"> Cambio de producto</label>
                             <label class="checkbox-label"><input type="checkbox" class="chk-visita-si-motivo" value="Visita de cobro"> Visita de cobro</label>
                         </div>
                     </div>
-                    <div id="box-visita-no" style="display:none; flex-direction:column; gap:8px;">
-                        <span style="font-size:0.7rem; font-weight:700; color:#64748b;">Motivo:</span>
+
+                    <div id="box-visita-no" style="display: none; flex-direction: column; gap: 8px; margin-top: 6px;">
+                        <span style="font-size:0.7rem; font-weight:700; color:#64748b; text-transform:uppercase;">Seleccione motivo:</span>
                         <div class="checkbox-grid">
                             <label class="checkbox-label"><input type="checkbox" class="chk-visita-no-motivo" value="No compró"> No compró</label>
-                            <label class="checkbox-label"><input type="checkbox" class="chk-visita-no-motivo" value="Cliente con suficiente producto"> Con producto</label>
-                            <label class="checkbox-label"><input type="checkbox" class="chk-visita-no-motivo" value="Cliente cerrado"> Cerrado</label>
-                            <label class="checkbox-label"><input type="checkbox" class="chk-visita-no-motivo" value="No se encuentra encargado"> No hay encargado</label>
+                            <label class="checkbox-label"><input type="checkbox" class="chk-visita-no-motivo" value="Cliente con suficiente producto"> Cliente con suficiente producto</label>
+                            <label class="checkbox-label"><input type="checkbox" class="chk-visita-no-motivo" value="Cliente cerrado"> Cliente cerrado</label>
+                            <label class="checkbox-label"><input type="checkbox" class="chk-visita-no-motivo" value="Cerrado permanentemente"> Cerrado permanentemente</label>
+                            <label class="checkbox-label"><input type="checkbox" class="chk-visita-no-motivo" value="No se encuentra encargado"> No se encuentra encargado</label>
                         </div>
                     </div>
-                    <div id="box-visita-otros" style="display:none; flex-direction:column; gap:8px;">
-                        <span style="font-size:0.7rem; font-weight:700; color:#64748b;">Motivo:</span>
+
+                    <div id="box-visita-otros" style="display: none; flex-direction: column; gap: 8px; margin-top: 6px;">
+                        <span style="font-size:0.7rem; font-weight:700; color:#64748b; text-transform:uppercase;">Seleccione motivo:</span>
                         <div class="checkbox-grid">
                             <label class="checkbox-label"><input type="checkbox" class="chk-visita-otros-motivo" value="Daño Vehículo"> Daño Vehículo</label>
                             <label class="checkbox-label"><input type="checkbox" class="chk-visita-otros-motivo" value="Falta de tiempo"> Falta de tiempo</label>
                             <label class="checkbox-label"><input type="checkbox" class="chk-visita-otros-motivo" value="Zona sin acceso"> Zona sin acceso</label>
+                            <label class="checkbox-label"><input type="checkbox" class="chk-visita-otros-motivo" value="Siniestro"> Siniestro</label>
                         </div>
                     </div>
-                    <div class="input-form-group">
+
+                    <div class="input-form-group" style="margin-top: 4px;">
                         <label>Observación:</label>
-                        <textarea id="txt-observacion-visita" class="input-form-control" placeholder="Comentarios..."></textarea>
+                        <textarea id="txt-observacion-visita" class="input-form-control" placeholder="Escriba comentarios u observaciones del servicio..."></textarea>
                     </div>
                 </div>
             </div>
 
             <div>
-                <div class="form-section-title"><i class="fa-solid fa-user-pen"></i> Actualizar Información</div>
+                <div class="form-section-title"><i class="fa-solid fa-user-pen"></i> Actualizar Información del Cliente</div>
+                
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <div class="input-form-group">
-                        <label>Nombre:</label>
-                        <input type="text" id="edit-nombre-tienda" class="input-form-control">
+                        <label>Nombre de la tienda / Cliente:</label>
+                        <input type="text" id="edit-nombre-tienda" class="input-form-control" oninput="evaluarCambioDataCliente()">
                     </div>
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                         <div class="input-form-group">
                             <label>Día de visita:</label>
-                            <select id="edit-dia-visita" class="input-form-control">
+                            <select id="edit-dia-visita" class="input-form-control" onchange="evaluarCambioDataCliente()">
                                 <option value="Lunes">Lunes</option>
                                 <option value="Martes">Martes</option>
                                 <option value="Miércoles">Miércoles</option>
@@ -904,92 +519,53 @@
                         </div>
                         <div class="input-form-group">
                             <label>Teléfono:</label>
-                            <input type="text" id="edit-telefono-cliente" class="input-form-control">
+                            <input type="text" id="edit-telefono-cliente" class="input-form-control" placeholder="Ej: 7777-8888" oninput="evaluarCambioDataCliente()">
                         </div>
                     </div>
+
                     <div class="input-form-group">
                         <label>Dirección:</label>
-                        <input type="text" id="edit-direccion-cliente" class="input-form-control">
+                        <input type="text" id="edit-direccion-cliente" class="input-form-control" oninput="evaluarCambioDataCliente()">
                     </div>
+
                     <div class="gps-capture-box">
-                        <div>
-                            <span style="font-weight:800; color:#1e3a8a;">Coordenadas GPS</span>
-                            <span style="font-size:0.68rem; color:#64748b;" id="txt-coords-actuales-display">Lat: -, Lng: -</span>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-size: 0.74rem; font-weight: 800; color: #1e3a8a;">Actualizar Coordenadas GPS</span>
+                            <span style="font-size: 0.68rem; color: #64748b; margin-top: 1px;" id="txt-coords-actuales-display">Lat: -, Lng: -</span>
                         </div>
-                        <button type="button" class="btn-gps" id="btn-capturar-gps">
-                            <i class="fa-solid fa-location-crosshairs"></i> Capturar
+                        <button type="button" class="btn-gps" onclick="capturarCoordenadasGPS()">
+                            <i class="fa-solid fa-location-crosshairs"></i> Capturar GPS
                         </button>
                     </div>
                 </div>
             </div>
         </div>
+
         <div class="modal-footer-actions">
-            <button class="btn-modal-cancel" id="btn-cancelar-visita">Cancelar</button>
-            <button class="btn-modal-save" id="btn-guardar-visita">Guardar</button>
+            <button type="button" class="btn-modal-cancel" onclick="cerrarModalVisita()">Cancelar</button>
+            <button type="button" class="btn-modal-save" id="btn-guardar-visita" onclick="solicitarConfirmacionGuardar()">Guardar</button>
         </div>
     </div>
 </div>
 
-<div class="modal-overlay" id="modal-confirmar-guardar">
+<div class="modal-overlay" id="modal-confirmar-guardar" style="z-index: 9999999;">
     <div class="confirm-dialog-card">
         <div style="font-size: 2.2rem; color: #2563eb;"><i class="fa-solid fa-circle-question"></i></div>
         <h4>Confirmar Registro</h4>
-        <p>¿Está seguro de guardar los cambios?</p>
+        <p>¿Está seguro de guardar los cambios realizados en esta visita?</p>
         <div class="confirm-actions-row">
-            <button class="btn-confirm-cancel" id="btn-confirm-cancel">Cancelar</button>
-            <button class="btn-confirm-ok" id="btn-confirm-ok">De acuerdo</button>
+            <button type="button" class="btn-confirm-cancel" onclick="cerrarModalConfirmacion()">Cancelar</button>
+            <button type="button" class="btn-confirm-ok" onclick="ejecutarGuardadoDefinitivo()">De acuerdo</button>
         </div>
     </div>
 </div>
-
-<!-- ============================================================ -->
-<!-- SCRIPTS - CARGA DINÁMICA DE MÓDULOS                         -->
-<!-- ============================================================ -->
-<script>
-    // Función para cargar scripts de forma dinámica
-    function loadScript(src) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.type = 'module';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    }
-
-    // Cargar todos los módulos en orden
-    async function loadModules() {
-        try {
-            console.log('🚀 Cargando módulos...');
-            
-            // Cargar módulos en orden de dependencias
-            await loadScript('./js/utils/constants.js');
-            await loadScript('./js/utils/helpers.js');
-            await loadScript('./js/store/types.js');
-            await loadScript('./js/store/actions.js');
-            await loadScript('./js/store/index.js');
-            await loadScript('./js/services/geocoding.js');
-            await loadScript('./js/services/dataLoader.js');
-            await loadScript('./js/services/routingEngine.js');
-            await loadScript('./js/ui/loginHandler.js');
-            await loadScript('./js/ui/mapView.js');
-            await loadScript('./js/ui/tableViews.js');
-            await loadScript('./js/ui/filterControls.js');
-            await loadScript('./js/ui/modalManager.js');
-            await loadScript('./js/utils/eventListeners.js');
-            await loadScript('./js/app.js');
-            
-            console.log('✅ Todos los módulos cargados');
-        } catch (error) {
-            console.error('❌ Error cargando módulos:', error);
-            alert('Error al cargar la aplicación. Por favor, recargue la página.');
-        }
-    }
-
-    // Iniciar carga cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', loadModules);
-</script>
-
+    <script defer src="js/01-core.js"></script>
+    <script defer src="js/02-data.js"></script>
+    <script defer src="js/03-map.js"></script>
+    <script defer src="js/04-visits.js"></script>
+    <script defer src="js/05-filters.js"></script>
+    <script defer src="js/06-routing.js"></script>
+    <script defer src="js/07-session-export.js"></script>
+    <script defer src="js/08-bootstrap.js"></script>
 </body>
 </html>
