@@ -27,24 +27,28 @@ export class App {
         this.filterControls = new FilterControls(this.store);
         this.modalManager = new ModalManager(this.store);
         this.routingEngine = new RoutingEngine(this.store);
-        this.loginHandler = new LoginHandler(this.store);
+        this.loginHandler = new LoginHandler(this.store, this);
         
         // ============================================================
         // 2. EXPONER FUNCIONES GLOBALES PARA ONCLICK EN HTML
         // ============================================================
         // Login
-        window.APP.seleccionarPais = this.loginHandler.seleccionarPais.bind(this.loginHandler);
-        window.APP.seleccionarAccesoRegional = this.loginHandler.seleccionarAccesoRegional.bind(this.loginHandler);
-        window.APP.volverAPasoPais = this.loginHandler.volverAPasoPais.bind(this.loginHandler);
-        window.APP.volverDesdeLogin = this.loginHandler.volverDesdeLogin.bind(this.loginHandler);
-        window.APP.togglePasswordVisibility = this.loginHandler.togglePasswordVisibility.bind(this.loginHandler);
+        this.seleccionarPais = this.loginHandler.seleccionarPais.bind(this.loginHandler);
+        this.seleccionarAccesoRegional = this.loginHandler.seleccionarAccesoRegional.bind(this.loginHandler);
+        this.volverAPasoPais = this.loginHandler.volverAPasoPais.bind(this.loginHandler);
+        this.volverDesdeLogin = this.loginHandler.volverDesdeLogin.bind(this.loginHandler);
+        this.togglePasswordVisibility = this.loginHandler.togglePasswordVisibility.bind(this.loginHandler);
         
         // UI
-        window.APP.toggleAccordion = this.filterControls.toggleAccordion.bind(this.filterControls);
-        window.APP.cerrarModalVisita = this.modalManager.cerrarModalVisita.bind(this.modalManager);
-        window.APP.capturarCoordenadasGPS = this.modalManager.capturarCoordenadasGPS.bind(this.modalManager);
-        window.APP.cerrarModalConfirmacion = this.modalManager.cerrarModalConfirmacion.bind(this.modalManager);
-        window.APP.ejecutarGuardadoDefinitivo = this.modalManager.ejecutarGuardadoDefinitivo.bind(this.modalManager);
+        this.toggleAccordion = this.filterControls.toggleAccordion.bind(this.filterControls);
+        this.cerrarModalVisita = this.modalManager.cerrarModalVisita.bind(this.modalManager);
+        this.capturarCoordenadasGPS = this.modalManager.capturarCoordenadasGPS.bind(this.modalManager);
+        this.cerrarModalConfirmacion = this.modalManager.cerrarModalConfirmacion.bind(this.modalManager);
+        this.ejecutarGuardadoDefinitivo = this.modalManager.ejecutarGuardadoDefinitivo.bind(this.modalManager);
+        this.abrirModalVisitaCliente = this.modalManager.abrirModalVisitaCliente.bind(this.modalManager);
+        
+        // Exponer todo en window.APP
+        window.APP = this;
         
         // ============================================================
         // 3. CONFIGURAR EVENTOS Y ARRANCAR
