@@ -197,6 +197,11 @@ document.addEventListener('DOMContentLoaded', function() {
     cargarDatosIniciales().then(() => {
         console.log('Datos de sistema e itinerarios cargados correctamente.');
     }).catch(err => {
-        console.warn('Error durante la inicialización:', err);
+        console.error('Error durante la inicialización:', err);
+        mostrarNotificacioniOS(
+            'Datos no disponibles',
+            'No fue posible cargar los clientes. Revise la conexión y recargue la página.',
+            'warning'
+        );
     });
 });

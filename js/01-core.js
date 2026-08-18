@@ -99,6 +99,42 @@ function getAntiCacheUrl(url) {
     return url + separator + 'v=' + new Date().getTime();
 }
 
+class ErrorSolicitud extends Error {
+    constructor(mensaje, { url, estado = null, causa = null } = {}) {
+        super(mensaje);
+        this.name = 'ErrorSolicitud';
+        this.url = url;
+        this.estado = estado;
+        this.cause = causa;
+    }
+}
+
+async function solicitarRecurso(url, { tipo = 'text', timeoutMs = 15000, antiCache = false } = {}) {
+    const controller = new AbortController();
+    const temporizador = setTimeout(() => controller.abort(), timeoutMs);
+    const urlFinal = antiCache ? getAntiCacheUrl(url) : url;
+
+    try {
+        const respuesta = await fetch(urlFinal, { signal: controller.signal });
+        if (!respuesta.ok) {
+            throw new ErrorSolicitud(`La solicitud respondió HTTP ${respuesta.status}.`, {
+                url,
+                estado: respuesta.status
+            });
+        }
+        return tipo === 'json' ? await respuesta.json() : await respuesta.text();
+    } catch (error) {
+        if (error instanceof ErrorSolicitud) throw error;
+        const esTimeout = error && error.name === 'AbortError';
+        throw new ErrorSolicitud(
+            esTimeout ? `La solicitud excedió ${timeoutMs} ms.` : 'No fue posible completar la solicitud.',
+            { url, causa: error }
+        );
+    } finally {
+        clearTimeout(temporizador);
+    }
+}
+
 function toggleAccordion(id) {
     const card = document.getElementById(id);
     if (!card) return;

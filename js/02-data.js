@@ -1,9 +1,5 @@
 function cargarUsuariosDesdeCSV() {
-    return fetch(getAntiCacheUrl('data/usuarios.csv'))
-        .then(res => {
-            if (!res.ok) throw new Error("No data/usuarios.csv found");
-            return res.text();
-        })
+    return solicitarRecurso('data/usuarios.csv', { antiCache: true })
         .then(csvText => {
             Papa.parse(csvText, {
                 header: true,
@@ -102,11 +98,7 @@ function parsearFilasClientes(parsedData) {
 }
 
 function cargarClientes() {
-    return fetch(getAntiCacheUrl('clientes.csv'))
-        .then(res => {
-            if (!res.ok) throw new Error("No clientes.csv found en raíz");
-            return res.text();
-        })
+    return solicitarRecurso('clientes.csv', { antiCache: true })
         .then(csvText => {
             return new Promise((resolve) => {
                 Papa.parse(csvText, {
@@ -123,18 +115,16 @@ function cargarClientes() {
 }
 
 function cargarGeoJSON(url) {
-    return fetch(getAntiCacheUrl(url)).then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
+    return solicitarRecurso(url, { tipo: 'json', antiCache: true }).then(datos => {
+        if (!datos || datos.type !== 'FeatureCollection' || !Array.isArray(datos.features)) {
+            throw new ErrorSolicitud('El archivo GeoJSON no tiene una colección de elementos válida.', { url });
+        }
+        return datos;
     });
 }
 
 function cargarMapeoRutasDistribuidoras() {
-    return fetch(getAntiCacheUrl('data/rutas_distribuidoras.csv'))
-        .then(res => {
-            if (!res.ok) throw new Error("No data/rutas_distribuidoras.csv found");
-            return res.text();
-        })
+    return solicitarRecurso('data/rutas_distribuidoras.csv', { antiCache: true })
         .then(csvText => {
             const lineas = csvText.split(/\r?\n/);
             if (lineas.length === 0) return;

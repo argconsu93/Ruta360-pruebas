@@ -35,5 +35,10 @@ assert.ok(!/\blet\s+(rawClientes|usuarioActual|diaSeleccionado|simIntervalId)\b/
 assert.ok(!/getElementById\(['"][^'"]*appState\./.test(applicationSource), 'La refactorización no debe modificar IDs literales');
 assert.ok(!/L\.map\(['"]appState\./.test(applicationSource), 'La refactorización no debe modificar el ID del mapa');
 assert.ok(!/fa-appState\./.test(applicationSource), 'La refactorización no debe modificar clases de iconos');
+assert.equal(
+  [...applicationSource.matchAll(/\bfetch\s*\(/g)].length,
+  1,
+  'Las solicitudes HTTP deben pasar por solicitarRecurso',
+);
 
 console.log('Pruebas estructurales superadas');

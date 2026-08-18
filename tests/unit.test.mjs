@@ -4,7 +4,10 @@ import path from 'node:path';
 import vm from 'node:vm';
 
 const root = path.resolve(import.meta.dirname, '..');
-const context = vm.createContext({ console, Map, Set, Math, String, Number, Array, Object, Date });
+const context = vm.createContext({
+  console, Map, Set, Math, String, Number, Array, Object, Date,
+  AbortController, setTimeout, clearTimeout,
+});
 const sources = ['js/01-core.js', 'js/06-routing.js']
   .map((file) => fs.readFileSync(path.join(root, file), 'utf8'))
   .join('\n');
@@ -45,6 +48,23 @@ assert.ok(knownDistance > 170 && knownDistance < 190, `Distancia inesperada: ${k
 assert.equal(evaluate('formatearMinutosAHorasMinutos(135)'), '2h 15m');
 assert.equal(evaluate('formatearMinutosAHora12(0)'), '12:00 AM');
 assert.equal(evaluate('formatearMinutosAHora12(13 * 60 + 5)'), '01:05 PM');
+
+context.fetch = async () => ({ ok: true, status: 200, text: async () => 'contenido' });
+assert.equal(await evaluate("solicitarRecurso('/datos.csv')"), 'contenido');
+
+context.fetch = async () => ({ ok: false, status: 503, text: async () => '' });
+await assert.rejects(
+  evaluate("solicitarRecurso('/datos.csv')"),
+  (error) => error.name === 'ErrorSolicitud' && error.estado === 503,
+);
+
+context.fetch = (_url, { signal }) => new Promise((_resolve, reject) => {
+  signal.addEventListener('abort', () => reject(Object.assign(new Error('abortada'), { name: 'AbortError' })));
+});
+await assert.rejects(
+  evaluate("solicitarRecurso('/lento.csv', { timeoutMs: 5 })"),
+  (error) => error.name === 'ErrorSolicitud' && error.message.includes('excedió'),
+);
 
 const optimizedCodes = evaluate(`
   optimizarSecuenciaSweep2OPT(
