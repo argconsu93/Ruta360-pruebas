@@ -11,7 +11,7 @@ const context = vm.createContext({
 const stripModuleSyntax = (source) => source
   .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];\s*/gm, '')
   .replace(/\bexport\s+/g, '');
-const sources = ['js/01-core.js', 'js/06-routing.js']
+const sources = ['js/01-core.js', 'js/02-data.js', 'js/06-routing.js']
   .map((file) => fs.readFileSync(path.join(root, file), 'utf8'))
   .map(stripModuleSyntax)
   .join('\n');
@@ -35,6 +35,22 @@ assert.equal(evaluate("normalizarNombreGrupo('GRUPO_07')"), 'GRUPO 07');
 assert.equal(evaluate("normalizarNombreGrupo('sin grupo')"), 'Sin Grupo');
 assert.equal(evaluate("parsearFloatSeguro('13,7012')"), 13.7012);
 assert.equal(evaluate("parsearFloatSeguro('no-numero')"), null);
+assert.doesNotThrow(() => evaluate("validarArchivoCarga({ name: 'clientes.csv', size: 1024 }, { extensiones: ['.csv'], maxBytes: 2048 })"));
+assert.throws(
+  () => evaluate("validarArchivoCarga({ name: 'clientes.xlsx', size: 1024 }, { extensiones: ['.csv'], maxBytes: 2048 })"),
+  /Extensión no permitida/,
+);
+assert.throws(
+  () => evaluate("validarArchivoCarga({ name: 'clientes.csv', size: 4096 }, { extensiones: ['.csv'], maxBytes: 2048 })"),
+  /supera el límite/,
+);
+assert.throws(() => evaluate("validarColeccionGeoJSON({ type: 'FeatureCollection', features: [] })"), /no contiene elementos/);
+assert.doesNotThrow(() => evaluate("validarColeccionGeoJSON({ type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [[]] } }] })"));
+assert.throws(() => evaluate("validarClientesImportados([])"), /no contiene clientes/);
+assert.throws(
+  () => evaluate("validarClientesImportados([{ codigo: 'S/C' }])"),
+  /código de cliente/,
+);
 assert.equal(
   evaluate("escapeHTML('<img src=x onerror=alert(1)> & \\\"texto\\\"')"),
   '&lt;img src=x onerror=alert(1)&gt; &amp; &quot;texto&quot;',
