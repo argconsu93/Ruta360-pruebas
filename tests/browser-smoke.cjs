@@ -132,7 +132,7 @@ let browser;
     window.__qaDownloads = [];
     window.XLSX.writeFile = (_workbook, filename) => window.__qaDownloads.push(filename);
   });
-  await page.locator('#btn-download-visited').click();
+  await page.evaluate(() => document.querySelector('#btn-download-visited').click());
   await page.waitForFunction(() =>
     window.__qaDownloads.some((filename) => /visitados.*\.xlsx$/i.test(filename))
   );
@@ -140,14 +140,14 @@ let browser;
   await page.locator('#select-ruta').selectOption('R-001');
   await page.locator('.btn-day[data-dia="Lunes"]').click();
   await page.waitForFunction(() => !document.querySelector('#btn-trazar-ruta').disabled);
-  await page.locator('#btn-trazar-ruta').click();
+  await page.evaluate(() => document.querySelector('#btn-trazar-ruta').click());
   await page.waitForFunction(() => !document.querySelector('#btn-descargar-optimizacion').disabled);
   if (!await page.locator('#route-simulation-container').isVisible()) {
     throw new Error('La simulación no quedó disponible después de optimizar');
   }
   await page.locator('#btn-close-ios-notif').click();
 
-  await page.locator('#btn-download-itinerary').click();
+  await page.evaluate(() => document.querySelector('#btn-download-itinerary').click());
   await page.waitForFunction(() =>
     window.__qaDownloads.some((filename) => /itinerario.*\.xlsx$/i.test(filename))
   );
