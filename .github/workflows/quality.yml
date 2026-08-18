@@ -40,7 +40,7 @@ jobs:
       - name: Instalar dependencias
         run: npm install --no-audit --no-fund
       - name: Instalar Chromium
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
       - name: Iniciar servidor
         run: python3 -m http.server 8000 > /tmp/ruta360-server.log 2>&1 &
       - name: Ejecutar prueba de navegador
