@@ -2,7 +2,13 @@ const { chromium } = require('playwright');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 800 },
+    permissions: ['geolocation'],
+    geolocation: { latitude: 13.705, longitude: -89.205 },
+    acceptDownloads: true,
+  });
+  const page = await context.newPage();
   const errors = [];
 
   page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
@@ -15,12 +21,49 @@ const { chromium } = require('playwright');
     body: [
       'CodigoCliente,NombreCliente,Grupo,Ruta,Dia,Latitud,Longitud,Direccion,Telefono,Pais,Division',
       'QA-001,Cliente de prueba,GRUPO 01,R-001,Lunes,13.7000,-89.2000,Dirección QA,2222-2222,El Salvador,SV Centro',
+      'QA-002,Segundo cliente,GRUPO 01,R-001,Lunes,13.7100,-89.2100,Dirección QA 2,2222-2223,El Salvador,SV Centro',
     ].join('\n'),
   }));
 
   await page.route('**/data/usuarios.csv*', (route) => route.fulfill({
     contentType: 'text/csv; charset=utf-8',
     body: 'Nombres,Roles,Pais,Division,Grupo,Contraseña\nUsuario QA,Administrador,TODOS,TODOS,TODOS,prueba',
+  }));
+
+  await page.route('**/data/geocercas_rutas.geojson*', (route) => route.fulfill({
+    contentType: 'application/geo+json',
+    body: JSON.stringify({
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        properties: { Ruta: 'R-001', Grupo: 'GRUPO 01', Pais: 'El Salvador', Division: 'SV Centro' },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [-89.23, 13.68], [-89.18, 13.68], [-89.18, 13.73],
+            [-89.23, 13.73], [-89.23, 13.68],
+          ]],
+        },
+      }],
+    }),
+  }));
+
+  await page.route('**/data/geocercas_distribuidoras.geojson*', (route) => route.fulfill({
+    contentType: 'application/geo+json',
+    body: JSON.stringify({ type: 'FeatureCollection', features: [] }),
+  }));
+
+  await page.route('https://router.project-osrm.org/route/v1/driving/**', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({
+      code: 'Ok',
+      routes: [{
+        geometry: {
+          type: 'LineString',
+          coordinates: [[-89.205, 13.705], [-89.20, 13.70], [-89.21, 13.71], [-89.205, 13.705]],
+        },
+      }],
+    }),
   }));
 
   await page.goto('http://127.0.0.1:8000', { waitUntil: 'domcontentloaded', timeout: 60_000 });
@@ -61,6 +104,53 @@ const { chromium } = require('playwright');
     throw new Error(`Fallo después del login: ${JSON.stringify(authenticatedChecks)}`);
   }
 
+  await page.locator('#input-search-cliente').fill('Segundo cliente');
+  await page.waitForTimeout(250);
+  if (await page.locator('#tabla-clientes-body tr').count() !== 1) {
+    throw new Error('El buscador no filtró la tabla a un cliente');
+  }
+  await page.locator('#input-search-cliente').fill('');
+  await page.waitForTimeout(250);
+
+  await page.evaluate(async () => {
+    const { abrirModalVisitaCliente } = await import('/js/04-visits.js');
+    abrirModalVisitaCliente('QA-001');
+  });
+  await page.locator('[data-action="capture-gps"]').click();
+  await page.waitForFunction(() => document.querySelector('#txt-coords-actuales-display').textContent.includes('Nuevas GPS'));
+  await page.locator('#btn-close-ios-notif').click();
+  await page.locator('input[name="radio-visita"][value="SI"]').check();
+  await page.locator('#input-total-venta').fill('125.5');
+  await page.locator('[data-action="request-save-visit"]').click();
+  await page.locator('[data-action="confirm-save-visit"]').click();
+  await page.waitForFunction(() => document.querySelector('#kpi-visitados').textContent.trim() === '1');
+  await page.locator('#btn-close-ios-notif').click();
+
+  const visitedDownload = page.waitForEvent('download');
+  await page.locator('#btn-download-visited').click();
+  if (!(await visitedDownload).suggestedFilename().match(/\.xlsx$/i)) {
+    throw new Error('La descarga de visitados no generó un archivo Excel');
+  }
+
+  await page.locator('#select-ruta').selectOption('R-001');
+  await page.locator('.btn-day[data-dia="Lunes"]').click();
+  await page.waitForFunction(() => !document.querySelector('#btn-trazar-ruta').disabled);
+  await page.locator('#btn-trazar-ruta').click();
+  await page.waitForFunction(() => !document.querySelector('#btn-descargar-optimizacion').disabled);
+  if (!await page.locator('#route-simulation-container').isVisible()) {
+    throw new Error('La simulación no quedó disponible después de optimizar');
+  }
+  await page.locator('#btn-close-ios-notif').click();
+
+  const itineraryDownload = page.waitForEvent('download');
+  await page.locator('#btn-download-itinerary').click();
+  if (!(await itineraryDownload).suggestedFilename().match(/\.xlsx$/i)) {
+    throw new Error('La descarga del itinerario no generó un archivo Excel');
+  }
+
+  await page.locator('#btn-logout').click();
+  await page.locator('#login-modal').waitFor({ state: 'visible' });
+
   const relevantErrors = errors.filter((message) =>
     !message.includes('404 (File not found)') &&
     !message.includes('Failed to load resource') &&
@@ -69,6 +159,7 @@ const { chromium } = require('playwright');
 
   if (relevantErrors.length) throw new Error(relevantErrors.join('\n'));
   console.log(`Prueba de navegador superada: ${JSON.stringify(checks)}`);
+  await context.close();
   await browser.close();
 })().catch((error) => {
   console.error(error);
