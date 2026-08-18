@@ -1,10 +1,13 @@
-const PALETA_COLORES_SOLIDOS = [
+import { appState, escapeHTML } from './01-core.js';
+import { obtenerValorPropiedad } from './02-data.js';
+
+export const PALETA_COLORES_SOLIDOS = [
     '#0369a1', '#15803d', '#0d9488', '#b45309', '#5b21b6', '#be185d', 
     '#475569', '#374151', '#4f46e5', '#047857', '#0284c7', '#059669', 
     '#d97706', '#9333ea', '#e11d48', '#64748b', '#1e3a8a', '#7c2d12'
 ];
 
-const COLORES_PAIS_FIJOS = {
+export const COLORES_PAIS_FIJOS = {
     'EL SALVADOR': '#0369a1',
     'GUATEMALA': '#b45309',
     'HONDURAS': '#15803d',
@@ -13,12 +16,12 @@ const COLORES_PAIS_FIJOS = {
     'HN': '#15803d'
 };
 
-const COLORES_CANALES_MASIVOS = {
+export const COLORES_CANALES_MASIVOS = {
     'DETALLE': '#15803d',
     'PREFERENCIAL': '#0369a1'
 };
 
-const COLORES_CANALES_ESPECIFICOS = {
+export const COLORES_CANALES_ESPECIFICOS = {
     'MAYOREO': '#b45309',
     'SUPERMERCADOS': '#7c2d12',
     'SUPERMERCADO': '#7c2d12',
@@ -35,7 +38,7 @@ const COLORES_CANALES_ESPECIFICOS = {
     'PX': '#e11d48'
 };
 
-const COLORES_TIPO_ZONA_FIJOS = {
+export const COLORES_TIPO_ZONA_FIJOS = {
     'URBANA': '#0369a1',
     'URBANO': '#0369a1',
     'RURAL': '#15803d',
@@ -48,7 +51,7 @@ const COLORES_TIPO_ZONA_FIJOS = {
     'SIN ZONA': '#64748b'
 };
 
-function obtenerColorPorPais(paisStr) {
+export function obtenerColorPorPais(paisStr) {
     if (!paisStr) return '#4f46e5';
     const norm = String(paisStr).toUpperCase().trim();
     for (let key in COLORES_PAIS_FIJOS) {
@@ -57,7 +60,7 @@ function obtenerColorPorPais(paisStr) {
     return obtenerColorDinamico(paisStr);
 }
 
-function obtenerColorPorCanal(canalStr) {
+export function obtenerColorPorCanal(canalStr) {
     if (!canalStr) return '#64748b';
     const norm = String(canalStr).toUpperCase().trim();
     if (norm.includes('DETALLE')) return COLORES_CANALES_MASIVOS['DETALLE'];
@@ -69,7 +72,7 @@ function obtenerColorPorCanal(canalStr) {
     return obtenerColorDinamico(canalStr);
 }
 
-function obtenerColorPorTipoZona(tzStr) {
+export function obtenerColorPorTipoZona(tzStr) {
     if (!tzStr) return '#64748b';
     const norm = String(tzStr).toUpperCase().trim();
     for (let key in COLORES_TIPO_ZONA_FIJOS) {
@@ -78,7 +81,7 @@ function obtenerColorPorTipoZona(tzStr) {
     return obtenerColorDinamico(tzStr);
 }
 
-function obtenerColorDinamico(valor) {
+export function obtenerColorDinamico(valor) {
     if (!valor || valor === 'N/A' || valor === 'N/D') return '#0369a1';
     let hash = 0;
     const str = String(valor).toLowerCase().trim();
@@ -89,7 +92,7 @@ function obtenerColorDinamico(valor) {
     return PALETA_COLORES_SOLIDOS[index];
 }
 
-function actualizarLeyendaMapa() {
+export function actualizarLeyendaMapa() {
     const legendBox = document.getElementById('map-legend-box');
     const titleEl = document.getElementById('legend-box-title');
     const listEl = document.getElementById('legend-items-list');
@@ -137,7 +140,7 @@ function actualizarLeyendaMapa() {
     }
 }
 
-function renderizarGeocercas(featuresGeocercasFiltradas) {
+export function renderizarGeocercas(featuresGeocercasFiltradas) {
     appState.geocercasLayerGroup.clearLayers();
     appState.geocercasBBoxCache = [];
 
@@ -237,7 +240,7 @@ function renderizarGeocercas(featuresGeocercasFiltradas) {
     return geoJsonLayer.getBounds();
 }
 
-function renderizarDistribuidoras(distribuidorasData) {
+export function renderizarDistribuidoras(distribuidorasData) {
     appState.distribuidorasLayerGroup.clearLayers();
     if (!distribuidorasData || !distribuidorasData.features || distribuidorasData.features.length === 0) return;
     L.geoJSON(distribuidorasData, {
@@ -258,7 +261,7 @@ function renderizarDistribuidoras(distribuidorasData) {
     }).addTo(appState.distribuidorasLayerGroup);
 }
 
-function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
+export function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
     appState.clusterMarkersGroup.clearLayers();
     Object.keys(appState.clienteMarkersMap).forEach(key => delete appState.clienteMarkersMap[key]);
     let bounds = L.latLngBounds();
@@ -326,7 +329,7 @@ function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
     return { bounds, fuera };
 }
 
-function generarPopupHTML(c, isVisited, numeroParada = null, diaRuta = null) {
+export function generarPopupHTML(c, isVisited, numeroParada = null, diaRuta = null) {
     const safe = {
         codigo: escapeHTML(c.codigo),
         nombre: escapeHTML(c.nombre),
@@ -373,7 +376,7 @@ function generarPopupHTML(c, isVisited, numeroParada = null, diaRuta = null) {
     `;
 }
 
-function puntoEnPoligono(point, vs) {
+export function puntoEnPoligono(point, vs) {
     const x = point[0], y = point[1];
     let inside = false;
     for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
@@ -385,7 +388,7 @@ function puntoEnPoligono(point, vs) {
     return inside;
 }
 
-function estaDentroDeGeocercasOptimizado(lat, lng) {
+export function estaDentroDeGeocercasOptimizado(lat, lng) {
     if (!appState.geocercasBBoxCache || appState.geocercasBBoxCache.length === 0) return true;
     const pt = [lng, lat];
     for (let i = 0; i < appState.geocercasBBoxCache.length; i++) {

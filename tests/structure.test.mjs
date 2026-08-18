@@ -11,12 +11,19 @@ const expectedScripts = Array.from({ length: 8 }, (_, index) =>
   ][index]}.js`,
 );
 
-const loadedScripts = [...html.matchAll(/<script defer src="([^"]+)"><\/script>/g)].map((match) => match[1]);
-assert.deepEqual(loadedScripts, expectedScripts, 'Los módulos deben cargarse en el orden original');
+const loadedModules = [...html.matchAll(/<script type="module" src="([^"]+)"><\/script>/g)].map((match) => match[1]);
+assert.deepEqual(loadedModules, ['js/08-bootstrap.js'], 'Debe existir un único punto de entrada ES');
+
+const stripModuleSyntax = (source) => source
+  .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];\s*/gm, '')
+  .replace(/\bexport\s+/g, '');
 
 for (const relativePath of expectedScripts) {
   const source = fs.readFileSync(path.join(root, relativePath), 'utf8');
-  new vm.Script(source, { filename: relativePath });
+  new vm.Script(stripModuleSyntax(source), { filename: relativePath });
+  if (relativePath !== 'js/01-core.js') {
+    assert.match(source, /^import\s/m, relativePath + ' debe declarar sus dependencias');
+  }
 }
 
 const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
@@ -32,9 +39,11 @@ const applicationSource = expectedScripts
 assert.ok(!/<button[^>]+onclick=/i.test(applicationSource), 'Los templates no deben generar onclick inline');
 assert.ok(applicationSource.includes('const appState = crearEstadoInicial()'), 'Debe existir un estado centralizado');
 assert.ok(!/\blet\s+(rawClientes|usuarioActual|diaSeleccionado|simIntervalId)\b/.test(applicationSource), 'No deben reaparecer estados globales independientes');
+assert.ok(!/\blet\s+(USUARIOS_ROLES|paisSeleccionado|divisionSeleccionada|esAccesoRegionalGlobal)\b/.test(applicationSource), 'La sesión y selección territorial deben vivir en appState');
 assert.ok(!/getElementById\(['"][^'"]*appState\./.test(applicationSource), 'La refactorización no debe modificar IDs literales');
 assert.ok(!/L\.map\(['"]appState\./.test(applicationSource), 'La refactorización no debe modificar el ID del mapa');
 assert.ok(!/fa-appState\./.test(applicationSource), 'La refactorización no debe modificar clases de iconos');
+assert.ok(!/<script defer src="js\//.test(html), 'No deben reaparecer scripts globales ordenados manualmente');
 assert.equal(
   [...applicationSource.matchAll(/\bfetch\s*\(/g)].length,
   1,

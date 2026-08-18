@@ -1,12 +1,21 @@
-function esRolAvanzado() {
+import {
+    DIVISIONES_POR_PAIS, PAISES_MAPA_NOMBRES, appState, coincideDia,
+    coincideDivision, coincideGrupo, coincidePais, coincideRuta, escapeHTML,
+    normalizarNombreGrupo, normalizarTexto
+} from './01-core.js';
+import { renderizarDistribuidoras, renderizarGeocercas, renderizarMarcadores } from './03-map.js';
+import { detenerSimulacion } from './06-routing.js';
+import { mostrarNotificacioniOS, toggleDrawer } from './07-session-export.js';
+
+export function esRolAvanzado() {
     return appState.usuarioActual && ['Jefatura', 'Analista', 'Administrador'].includes(appState.usuarioActual.rol);
 }
 
-function poblarFiltrosPermitidos() {
+export function poblarFiltrosPermitidos() {
     poblarFiltroPais();
 }
 
-function poblarFiltroPais() {
+export function poblarFiltroPais() {
     const selectPais = document.getElementById('select-pais');
     selectPais.innerHTML = '';
 
@@ -33,7 +42,7 @@ function poblarFiltroPais() {
     actualizarOpcionesDivision();
 }
 
-function renderizarChipsPaises() {
+export function renderizarChipsPaises() {
     const container = document.getElementById('chips-paises');
     container.innerHTML = '';
     appState.paisesSeleccionadosMultiples.forEach(p => {
@@ -53,14 +62,14 @@ function renderizarChipsPaises() {
     });
 }
 
-function removerPaisMultiple(pais) {
+export function removerPaisMultiple(pais) {
     appState.paisesSeleccionadosMultiples = appState.paisesSeleccionadosMultiples.filter(p => p !== pais);
     renderizarChipsPaises();
     actualizarOpcionesDivision();
     aplicarFiltros();
 }
 
-function actualizarOpcionesDivision() {
+export function actualizarOpcionesDivision() {
     const selectDiv = document.getElementById('select-division');
     selectDiv.innerHTML = '';
 
@@ -103,7 +112,7 @@ function actualizarOpcionesDivision() {
     actualizarOpcionesGrupo();
 }
 
-function renderizarChipsDivisiones() {
+export function renderizarChipsDivisiones() {
     const container = document.getElementById('chips-divisiones');
     container.innerHTML = '';
     appState.divisionesSeleccionadasMultiples.forEach(d => {
@@ -123,14 +132,14 @@ function renderizarChipsDivisiones() {
     });
 }
 
-function removerDivisionMultiple(division) {
+export function removerDivisionMultiple(division) {
     appState.divisionesSeleccionadasMultiples = appState.divisionesSeleccionadasMultiples.filter(d => d !== division);
     renderizarChipsDivisiones();
     actualizarOpcionesGrupo();
     aplicarFiltros();
 }
 
-function actualizarOpcionesGrupo() {
+export function actualizarOpcionesGrupo() {
     const selectGrupo = document.getElementById('select-grupo');
     selectGrupo.innerHTML = '<option value="TODOS">Seleccionar Grupo</option>';
 
@@ -184,7 +193,7 @@ function actualizarOpcionesGrupo() {
     actualizarOpcionesRuta();
 }
 
-function renderizarChipsGrupos() {
+export function renderizarChipsGrupos() {
     const container = document.getElementById('chips-grupos');
     container.innerHTML = '';
     appState.gruposSeleccionadosMultiples.forEach(g => {
@@ -204,14 +213,14 @@ function renderizarChipsGrupos() {
     });
 }
 
-function removerGrupoMultiple(grupo) {
+export function removerGrupoMultiple(grupo) {
     appState.gruposSeleccionadosMultiples = appState.gruposSeleccionadosMultiples.filter(g => g !== grupo);
     renderizarChipsGrupos();
     actualizarOpcionesRuta();
     aplicarFiltros();
 }
 
-function actualizarOpcionesRuta() {
+export function actualizarOpcionesRuta() {
     const selectRuta = document.getElementById('select-ruta');
     selectRuta.innerHTML = '<option value="TODOS">Seleccionar Ruta</option>';
 
@@ -259,7 +268,7 @@ function actualizarOpcionesRuta() {
     renderizarChipsRutas();
 }
 
-function renderizarChipsRutas() {
+export function renderizarChipsRutas() {
     const container = document.getElementById('chips-rutas');
     container.innerHTML = '';
     appState.rutasSeleccionadasMultiples.forEach(r => {
@@ -277,7 +286,7 @@ function renderizarChipsRutas() {
     });
 }
 
-function removerRutaMultiple(ruta) {
+export function removerRutaMultiple(ruta) {
     appState.rutasSeleccionadasMultiples = appState.rutasSeleccionadasMultiples.filter(r => r !== ruta);
     renderizarChipsRutas();
     aplicarFiltros();
@@ -286,7 +295,7 @@ function removerRutaMultiple(ruta) {
 // ============================================================
 //  PROCESAMIENTO GENERAL DE FILTROS EN MAPA Y KPIS
 // ============================================================
-function aplicarFiltros() {
+export function aplicarFiltros() {
     if (appState.rutaOptimaLayerGroup) appState.rutaOptimaLayerGroup.clearLayers();
     appState.ultimaSecuenciaOptimizada = [];
     document.getElementById('btn-descargar-optimizacion').disabled = true;
@@ -392,7 +401,7 @@ function aplicarFiltros() {
     }
 }
 
-function filtrarTablaPorTexto() {
+export function filtrarTablaPorTexto() {
     clearTimeout(appState.searchDebounceTimeout);
     appState.searchDebounceTimeout = setTimeout(() => {
         const text = document.getElementById('input-search-cliente').value.toLowerCase().trim();
@@ -405,7 +414,7 @@ function filtrarTablaPorTexto() {
     }, 150);
 }
 
-function actualizarTablaClientes(clientes) {
+export function actualizarTablaClientes(clientes) {
     const tbody = document.getElementById('tabla-clientes-body');
     const subset = clientes.slice(0, 50);
     const rowsHtml = subset.map(c => {
@@ -426,7 +435,7 @@ function actualizarTablaClientes(clientes) {
     tbody.innerHTML = rowsHtml;
 }
 
-function actualizarTablaFuera(clientesFuera) {
+export function actualizarTablaFuera(clientesFuera) {
     const tbody = document.getElementById('tabla-fuera-body');
     tbody.innerHTML = '';
     const subsetFuera = clientesFuera.slice(0, 50);
@@ -445,7 +454,7 @@ function actualizarTablaFuera(clientesFuera) {
     });
 }
 
-function actualizarKPIsVisitas() {
+export function actualizarKPIsVisitas() {
     let total = appState.ultimoClientesFiltrados.length;
     let visitados = 0;
     appState.ultimoClientesFiltrados.forEach(c => { if (appState.clientesVisitadosMap.get(c.codigo) === true) visitados++; });
@@ -461,7 +470,7 @@ function actualizarKPIsVisitas() {
     pText.innerText = `AVANCE DE CUMPLIMIENTO: ${porcentaje}% (${visitados}/${total})`;
 }
 
-function seleccionarClienteEnMapa(codigo) {
+export function seleccionarClienteEnMapa(codigo) {
     const marker = appState.clienteMarkersMap[codigo];
     const clientObj = appState.rawClientes.find(c => c.codigo === codigo);
     if (marker && clientObj && clientObj.lat !== null && clientObj.lng !== null) {

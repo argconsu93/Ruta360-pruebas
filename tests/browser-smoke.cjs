@@ -30,7 +30,13 @@ const { chromium } = require('playwright');
     title: await page.title(),
     loginVisible: await page.locator('#login-modal').isVisible(),
     hasMapContainer: (await page.locator('#map').count()) === 1,
-    modulesLoaded: await page.evaluate(() => typeof seleccionarPais === 'function' && typeof aplicarFiltros === 'function'),
+    modulesLoaded: await page.evaluate(async () => {
+      const [core, filters] = await Promise.all([
+        import('/js/01-core.js'),
+        import('/js/05-filters.js'),
+      ]);
+      return typeof core.seleccionarPais === 'function' && typeof filters.aplicarFiltros === 'function';
+    }),
   };
 
   if (checks.title !== 'Ruta360 - Regional - Bocadeli') throw new Error(`Título inesperado: ${checks.title}`);

@@ -1,4 +1,14 @@
-function toggleMostrarPassword() {
+import {
+    PAISES_MAPA_NOMBRES, appState, coincideDivision, coincideGrupo, coincidePais,
+    escapeHTML, normalizarNombreGrupo, normalizarTexto
+} from './01-core.js';
+import {
+    inicializarMapa, parsearFilasClientes, procesarPropiedadesGeocercas,
+    sincronizarGruposClientes
+} from './02-data.js';
+import { aplicarFiltros, poblarFiltrosPermitidos } from './05-filters.js';
+
+export function toggleMostrarPassword() {
     const inputPass = document.getElementById('input-password');
     const iconPass = document.getElementById('toggle-password-btn');
     
@@ -13,7 +23,7 @@ function toggleMostrarPassword() {
     }
 }    
     
-function validarLogin() {
+export function validarLogin() {
     const nombreSel = document.getElementById('select-usuario-login').value;
     const passInput = document.getElementById('input-password').value.trim().toLowerCase();
     const errorDiv = document.getElementById('login-error');
@@ -23,7 +33,7 @@ function validarLogin() {
         errorDiv.style.display = 'block';
         return;
     }
-    const userObj = USUARIOS_ROLES.find(u => u.nombre === nombreSel);
+    const userObj = appState.usuariosRoles.find(u => u.nombre === nombreSel);
     if (userObj && userObj.pass && passInput && passInput === userObj.pass.toLowerCase()) {
         appState.usuarioActual = userObj;
         document.getElementById('login-modal').style.display = 'none';
@@ -38,13 +48,13 @@ function validarLogin() {
             document.getElementById('panel-admin-actualizacion').style.display = 'none';
         }
         
-        if (esAccesoRegionalGlobal || appState.usuarioActual.pais === 'TODOS') {
+        if (appState.esAccesoRegional || appState.usuarioActual.pais === 'TODOS') {
             appState.paisesSeleccionadosMultiples = [];
             appState.divisionesSeleccionadasMultiples = [];
         } else {
-            const nombrePaisModal = PAISES_MAPA_NOMBRES[paisSeleccionado] || "El Salvador";
+            const nombrePaisModal = PAISES_MAPA_NOMBRES[appState.paisSeleccionado] || "El Salvador";
             appState.paisesSeleccionadosMultiples = [nombrePaisModal];
-            appState.divisionesSeleccionadasMultiples = [divisionSeleccionada];
+            appState.divisionesSeleccionadasMultiples = [appState.divisionSeleccionada];
         }
 
         appState.gruposSeleccionadosMultiples = (appState.usuarioActual.grupo && appState.usuarioActual.grupo !== 'TODOS') ? [normalizarNombreGrupo(appState.usuarioActual.grupo)] : [];
@@ -64,13 +74,13 @@ function validarLogin() {
     }
 }
 
-function cerrarSesion() {
+export function cerrarSesion() {
     appState.usuarioActual = null;
     appState.paisesSeleccionadosMultiples = [];
     appState.divisionesSeleccionadasMultiples = [];
     appState.gruposSeleccionadosMultiples = [];
     appState.rutasSeleccionadasMultiples = [];
-    esAccesoRegionalGlobal = false;
+    appState.esAccesoRegional = false;
 
     document.getElementById('input-password').value = '';
     document.getElementById('login-error').style.display = 'none';
@@ -87,7 +97,7 @@ function cerrarSesion() {
 // ============================================================
 //  NOTIFICACIONES Y EXPORTACIONES
 // ============================================================
-function mostrarNotificacioniOS(titulo, contenido, tipoIcono = 'success', permitirHTML = false) {
+export function mostrarNotificacioniOS(titulo, contenido, tipoIcono = 'success', permitirHTML = false) {
     appState.ultimaNotificacionesiOS = contenido;
     document.getElementById('ios-notif-title').textContent = titulo;
     const body = document.getElementById('ios-notif-body');
@@ -107,11 +117,11 @@ function mostrarNotificacioniOS(titulo, contenido, tipoIcono = 'success', permit
     document.getElementById('notif-dot').style.display = 'block';
 }
 
-function cerrarNotificacioniOS() {
+export function cerrarNotificacioniOS() {
     document.getElementById('ios-notif-overlay').style.display = 'none';
 }
 
-function reabrirUltimaNotificacion() {
+export function reabrirUltimaNotificacion() {
     if (appState.ultimaNotificacionesiOS) {
         document.getElementById('ios-notif-overlay').style.display = 'flex';
     } else {
@@ -119,11 +129,11 @@ function reabrirUltimaNotificacion() {
     }
 }
 
-function toggleMobileUserDropdown() {
+export function toggleMobileUserDropdown() {
     document.getElementById('mobile-user-dropdown').classList.toggle('active');
 }
 
-function abrirModalComparativo() {
+export function abrirModalComparativo() {
     const tbody = document.getElementById('tabla-comparativo-body');
     tbody.innerHTML = '';
     
@@ -166,11 +176,11 @@ function abrirModalComparativo() {
     document.getElementById('modal-comparativo').style.display = 'flex';
 }
 
-function cerrarModalComparativo() {
+export function cerrarModalComparativo() {
     document.getElementById('modal-comparativo').style.display = 'none';
 }
 
-function descargarClientesVisitados() {
+export function descargarClientesVisitados() {
     const listVisitados = [];
     appState.rawClientes.forEach(c => {
         if (appState.clientesVisitadosMap.get(c.codigo) === true) {
@@ -204,7 +214,7 @@ function descargarClientesVisitados() {
     XLSX.writeFile(workbook, `Clientes_Visitados_Bocadeli_${fecha}.xlsx`);
 }
 
-function descargarItinerarioFiltrado() {
+export function descargarItinerarioFiltrado() {
     if (!appState.ultimoClientesFiltrados || appState.ultimoClientesFiltrados.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ No hay clientes disponibles en la lista con los filtros seleccionados.", "warning");
         return;
@@ -235,7 +245,7 @@ function descargarItinerarioFiltrado() {
     XLSX.writeFile(workbook, `Itinerario_Bocadeli.xlsx`);
 }
 
-function descargarClientesFueraGeocerca() {
+export function descargarClientesFueraGeocerca() {
     if (!appState.ultimoClientesFuera || appState.ultimoClientesFuera.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ No hay clientes fuera de geocerca en la selección actual.", "warning");
         return;
@@ -267,7 +277,7 @@ function descargarClientesFueraGeocerca() {
     mostrarNotificacioniOS("Descarga Exitosa", `✅ Se descargaron ${appState.ultimoClientesFuera.length} clientes fuera de geocerca.`, "success");
 }
 
-function subirNuevoCSV(file) {
+export function subirNuevoCSV(file) {
     if (!file) return;
     Papa.parse(file, {
         header: true,
@@ -283,7 +293,7 @@ function subirNuevoCSV(file) {
     });
 }
 
-function subirNuevoGeoJSON(file) {
+export function subirNuevoGeoJSON(file) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -301,7 +311,7 @@ function subirNuevoGeoJSON(file) {
     reader.readAsText(file);
 }
 
-function subirNuevoGeoJSONDistribuidoras(file) {
+export function subirNuevoGeoJSONDistribuidoras(file) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -316,7 +326,7 @@ function subirNuevoGeoJSONDistribuidoras(file) {
     reader.readAsText(file);
 }
 
-function actualizarFechaActual() {
+export function actualizarFechaActual() {
     const fecha = new Date();
     const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     let fechaTexto = fecha.toLocaleDateString('es-ES', opciones);
@@ -325,7 +335,7 @@ function actualizarFechaActual() {
     document.getElementById('fecha-actual-mobile').textContent = fechaTexto;
 }
 
-function toggleDrawer() {
+export function toggleDrawer() {
     const drawer = document.getElementById('mobile-drawer');
     const label = document.getElementById('drawer-btn-label');
     drawer.classList.toggle('collapsed');
