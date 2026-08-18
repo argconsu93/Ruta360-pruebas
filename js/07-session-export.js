@@ -3,8 +3,9 @@ import {
     escapeHTML, normalizarNombreGrupo, normalizarTexto
 } from './01-core.js';
 import {
-    inicializarMapa, parsearFilasClientes, procesarPropiedadesGeocercas,
-    sincronizarGruposClientes
+    LIMITES_CARGA, inicializarMapa, parsearFilasClientes, procesarPropiedadesGeocercas,
+    sincronizarGruposClientes, validarArchivoCarga, validarClientesImportados,
+    validarColeccionGeoJSON
 } from './02-data.js';
 import { aplicarFiltros, poblarFiltrosPermitidos } from './05-filters.js';
 
@@ -279,49 +280,81 @@ export function descargarClientesFueraGeocerca() {
 
 export function subirNuevoCSV(file) {
     if (!file) return;
+    try {
+        validarArchivoCarga(file, { extensiones: ['.csv'], maxBytes: LIMITES_CARGA.csvBytes });
+    } catch (error) {
+        mostrarNotificacioniOS('Archivo CSV rechazado', `❌ \${error.message}`, 'warning');
+        return;
+    }
     Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-            appState.rawClientes = parsearFilasClientes(results.data);
-            procesarPropiedadesGeocercas();
-            sincronizarGruposClientes();
-            poblarFiltrosPermitidos();
-            aplicarFiltros();
-            mostrarNotificacioniOS("Carga Exitosa", "✅ CSV cargado en memoria correctamente.", "success");
+            try {
+                const clientes = validarClientesImportados(parsearFilasClientes(results.data), results.errors);
+                appState.rawClientes = clientes;
+                procesarPropiedadesGeocercas();
+                sincronizarGruposClientes();
+                poblarFiltrosPermitidos();
+                aplicarFiltros();
+                mostrarNotificacioniOS("Carga Exitosa", `✅ \${clientes.length} clientes cargados en memoria.`, "success");
+            } catch (error) {
+                mostrarNotificacioniOS('CSV inválido', `❌ \${error.message}`, 'warning');
+            }
+        },
+        error: function() {
+            mostrarNotificacioniOS('Error de lectura', '❌ No fue posible leer el archivo CSV.', 'warning');
         }
     });
 }
 
 export function subirNuevoGeoJSON(file) {
     if (!file) return;
+    try {
+        validarArchivoCarga(file, { extensiones: ['.geojson', '.json'], maxBytes: LIMITES_CARGA.geojsonBytes });
+    } catch (error) {
+        mostrarNotificacioniOS('Archivo GeoJSON rechazado', `❌ \${error.message}`, 'warning');
+        return;
+    }
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            appState.rawGeocercas = JSON.parse(e.target.result);
+            appState.rawGeocercas = validarColeccionGeoJSON(JSON.parse(e.target.result));
             procesarPropiedadesGeocercas();
             sincronizarGruposClientes();
             poblarFiltrosPermitidos();
             aplicarFiltros();
             mostrarNotificacioniOS("Geocercas Cargadas", "✅ GeoJSON de rutas cargado correctamente.", "success");
-        } catch(err) { 
-            mostrarNotificacioniOS("Error GeoJSON", "❌ Error al procesar GeoJSON: " + err, "warning"); 
+        } catch(error) {
+            mostrarNotificacioniOS("Error GeoJSON", `❌ \${error.message}`, "warning");
         }
+    };
+    reader.onerror = function() {
+        mostrarNotificacioniOS('Error de lectura', '❌ No fue posible leer el archivo GeoJSON.', 'warning');
     };
     reader.readAsText(file);
 }
 
 export function subirNuevoGeoJSONDistribuidoras(file) {
     if (!file) return;
+    try {
+        validarArchivoCarga(file, { extensiones: ['.geojson', '.json'], maxBytes: LIMITES_CARGA.geojsonBytes });
+    } catch (error) {
+        mostrarNotificacioniOS('Archivo GeoJSON rechazado', `❌ \${error.message}`, 'warning');
+        return;
+    }
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            appState.rawDistribuidoras = JSON.parse(e.target.result);
+            appState.rawDistribuidoras = validarColeccionGeoJSON(JSON.parse(e.target.result));
             aplicarFiltros();
             mostrarNotificacioniOS("Distribuidoras Cargadas", "✅ GeoJSON de distribuidoras cargado correctamente.", "success");
-        } catch(err) { 
-            mostrarNotificacioniOS("Error GeoJSON", "❌ Error al procesar GeoJSON: " + err, "warning"); 
+        } catch(error) {
+            mostrarNotificacioniOS("Error GeoJSON", `❌ \${error.message}`, "warning");
         }
+    };
+    reader.onerror = function() {
+        mostrarNotificacioniOS('Error de lectura', '❌ No fue posible leer el archivo GeoJSON.', 'warning');
     };
     reader.readAsText(file);
 }

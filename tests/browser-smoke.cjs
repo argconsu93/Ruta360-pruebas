@@ -119,6 +119,19 @@ let browser;
     throw new Error(`Fallo después del login: ${JSON.stringify(authenticatedChecks)}`);
   }
 
+  await page.locator('#file-geojson-input').setInputFiles({
+    name: 'geocercas-invalidas.geojson',
+    mimeType: 'application/geo+json',
+    buffer: Buffer.from('{}'),
+  });
+  await page.waitForFunction(() =>
+    document.querySelector('#ios-notif-title').textContent.includes('Error GeoJSON')
+  );
+  if (await page.locator('#tabla-clientes-body tr').count() !== 2) {
+    throw new Error('Una carga inválida alteró los clientes activos');
+  }
+  await page.locator('#btn-close-ios-notif').click();
+
   await page.locator('#input-search-cliente').fill('QA-002');
   await page.waitForFunction(() => {
     const rows = [...document.querySelectorAll('#tabla-clientes-body tr')];

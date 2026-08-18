@@ -4,6 +4,59 @@ import {
 } from './01-core.js';
 import { aplicarFiltros } from './05-filters.js';
 
+export const LIMITES_CARGA = Object.freeze({
+    csvBytes: 75 * 1024 * 1024,
+    geojsonBytes: 30 * 1024 * 1024
+});
+
+export function validarArchivoCarga(file, { extensiones, maxBytes }) {
+    if (!file || typeof file.name !== 'string') {
+        throw new Error('No se recibió un archivo válido.');
+    }
+    const nombre = file.name.toLowerCase();
+    if (!extensiones.some(extension => nombre.endsWith(extension))) {
+        throw new Error(`Extensión no permitida. Use: \${extensiones.join(', ')}.`);
+    }
+    if (!Number.isFinite(file.size) || file.size <= 0) {
+        throw new Error('El archivo está vacío.');
+    }
+    if (file.size > maxBytes) {
+        const maxMb = Math.round(maxBytes / (1024 * 1024));
+        throw new Error(`El archivo supera el límite de \${maxMb} MB.`);
+    }
+}
+
+export function validarColeccionGeoJSON(datos) {
+    if (!datos || datos.type !== 'FeatureCollection' || !Array.isArray(datos.features)) {
+        throw new Error('El contenido debe ser una colección GeoJSON válida.');
+    }
+    if (datos.features.length === 0) {
+        throw new Error('El GeoJSON no contiene elementos.');
+    }
+    const geometriaInvalida = datos.features.some(feature =>
+        !feature || feature.type !== 'Feature' || !feature.geometry ||
+        !['Polygon', 'MultiPolygon'].includes(feature.geometry.type) ||
+        !Array.isArray(feature.geometry.coordinates)
+    );
+    if (geometriaInvalida) {
+        throw new Error('Todas las geocercas deben tener geometría Polygon o MultiPolygon.');
+    }
+    return datos;
+}
+
+export function validarClientesImportados(clientes, erroresParseo = []) {
+    if (erroresParseo.some(error => error && error.type === 'Quotes')) {
+        throw new Error('El CSV contiene comillas o columnas mal formadas.');
+    }
+    if (!Array.isArray(clientes) || clientes.length === 0) {
+        throw new Error('El CSV no contiene clientes.');
+    }
+    if (!clientes.some(cliente => cliente.codigo && cliente.codigo !== 'S/C')) {
+        throw new Error('No se encontró una columna válida de código de cliente.');
+    }
+    return clientes;
+}
+
 export function cargarUsuariosDesdeCSV() {
     return solicitarRecurso('data/usuarios.csv', { antiCache: true })
         .then(csvText => {
