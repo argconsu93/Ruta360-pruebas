@@ -45,6 +45,16 @@ assert.ok(!/getElementById\(['"][^'"]*appState\./.test(applicationSource), 'La r
 assert.ok(!/L\.map\(['"]appState\./.test(applicationSource), 'La refactorización no debe modificar el ID del mapa');
 assert.ok(!/fa-appState\./.test(applicationSource), 'La refactorización no debe modificar clases de iconos');
 assert.ok(!/<script defer src="js\//.test(html), 'No deben reaparecer scripts globales ordenados manualmente');
+const externalExecutableTags = [
+  ...html.matchAll(/<script\b[^>]*\bsrc="https:\/\/[^"]+"[^>]*>/g),
+  ...html.matchAll(/<link\b(?=[^>]*\brel="stylesheet")(?=[^>]*\bhref="https:\/\/(?!fonts\.googleapis\.com)[^"]+")[^>]*>/g),
+].map((match) => match[0]);
+assert.ok(externalExecutableTags.length >= 8, 'Deben detectarse las dependencias externas protegidas');
+for (const tag of externalExecutableTags) {
+  assert.match(tag, /\bintegrity="sha384-[A-Za-z0-9+/=]+"/, 'Cada dependencia estática debe declarar SRI');
+  assert.match(tag, /\bcrossorigin="anonymous"/, 'Cada dependencia con SRI debe usar CORS anónimo');
+  assert.match(tag, /\breferrerpolicy="no-referrer"/, 'Cada dependencia externa debe limitar el referente');
+}
 assert.equal(
   [...applicationSource.matchAll(/\bfetch\s*\(/g)].length,
   1,
