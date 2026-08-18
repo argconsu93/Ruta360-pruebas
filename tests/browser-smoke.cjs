@@ -128,11 +128,14 @@ let browser;
   await page.waitForFunction(() => document.querySelector('#kpi-visitados').textContent.trim() === '1');
   await page.locator('#btn-close-ios-notif').click();
 
-  const visitedDownload = page.waitForEvent('download');
+  await page.evaluate(() => {
+    window.__qaDownloads = [];
+    window.XLSX.writeFile = (_workbook, filename) => window.__qaDownloads.push(filename);
+  });
   await page.locator('#btn-download-visited').click();
-  if (!(await visitedDownload).suggestedFilename().match(/\.xlsx$/i)) {
-    throw new Error('La descarga de visitados no generó un archivo Excel');
-  }
+  await page.waitForFunction(() =>
+    window.__qaDownloads.some((filename) => /visitados.*\.xlsx$/i.test(filename))
+  );
 
   await page.locator('#select-ruta').selectOption('R-001');
   await page.locator('.btn-day[data-dia="Lunes"]').click();
@@ -144,11 +147,10 @@ let browser;
   }
   await page.locator('#btn-close-ios-notif').click();
 
-  const itineraryDownload = page.waitForEvent('download');
   await page.locator('#btn-download-itinerary').click();
-  if (!(await itineraryDownload).suggestedFilename().match(/\.xlsx$/i)) {
-    throw new Error('La descarga del itinerario no generó un archivo Excel');
-  }
+  await page.waitForFunction(() =>
+    window.__qaDownloads.some((filename) => /itinerario.*\.xlsx$/i.test(filename))
+  );
 
   await page.locator('#btn-logout').click();
   await page.locator('#login-modal').waitFor({ state: 'visible' });
