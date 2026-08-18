@@ -30,6 +30,14 @@ const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
 assert.equal(new Set(ids).size, ids.length, 'No debe haber IDs HTML duplicados');
 assert.ok(html.includes('css/styles.css'), 'El HTML debe cargar el CSS separado');
 assert.ok(html.includes('id="btn-restaurar-datos"'), 'La carga temporal debe poder revertirse');
+const csp = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)">/)?.[1] || '';
+assert.ok(csp, 'Debe existir una Política de Seguridad de Contenido');
+for (const directive of ['default-src', 'script-src', 'style-src', 'font-src', 'img-src', 'connect-src', 'object-src', 'base-uri']) {
+  assert.ok(csp.includes(directive + ' '), 'La CSP debe declarar ' + directive);
+}
+assert.ok(!csp.includes("'unsafe-eval'"), 'La CSP no debe permitir eval');
+assert.ok(!/script-src[^;]*'unsafe-inline'/.test(csp), 'La CSP no debe permitir JavaScript inline');
+assert.ok(csp.includes("object-src 'none'"), 'La CSP debe bloquear plugins');
 assert.ok(!html.includes('<style>'), 'El HTML no debe contener CSS embebido');
 assert.ok(!html.includes('http://{s}.google.com'), 'Las teselas no deben cargarse por HTTP');
 assert.ok(!/\son[a-z]+=/i.test(html), 'El HTML no debe contener manejadores de eventos inline');

@@ -41,6 +41,12 @@ npm run test:browser
 
 Cada `push` y pull request ejecuta estas comprobaciones automáticamente mediante GitHub Actions.
 
+## Seguridad del frontend
+
+Las dependencias estáticas externas están fijadas por versión y protegidas con SRI SHA-384. La Política de Seguridad de Contenido limita scripts, estilos, imágenes, fuentes y conexiones a los orígenes necesarios para Ruta360. El permiso unsafe-inline permanece únicamente en estilos porque la interfaz heredada todavía utiliza atributos style; no está permitido para scripts ni para eval.
+
+La autenticación y los datos continúan siendo estáticos en esta versión de pruebas. Antes de utilizarla como sistema productivo se requiere una API autenticada, autorización en servidor y almacenamiento privado.
+
 ## Estado de la aplicación
 
 El estado mutable compartido vive en appState, creado por crearEstadoInicial(). Los archivos JavaScript son módulos ES con importaciones y exportaciones explícitas; el navegador carga únicamente js/08-bootstrap.js, que resuelve el resto del grafo de dependencias.
