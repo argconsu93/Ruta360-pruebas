@@ -106,11 +106,11 @@ let browser;
     throw new Error(`Fallo después del login: ${JSON.stringify(authenticatedChecks)}`);
   }
 
-  await page.locator('#input-search-cliente').fill('Segundo cliente');
-  await page.waitForTimeout(250);
-  if (await page.locator('#tabla-clientes-body tr').count() !== 1) {
-    throw new Error('El buscador no filtró la tabla a un cliente');
-  }
+  await page.locator('#input-search-cliente').fill('QA-002');
+  await page.waitForFunction(() => {
+    const rows = [...document.querySelectorAll('#tabla-clientes-body tr')];
+    return rows.length === 1 && rows[0].textContent.includes('QA-002');
+  });
   await page.locator('#input-search-cliente').fill('');
   await page.waitForTimeout(250);
 
