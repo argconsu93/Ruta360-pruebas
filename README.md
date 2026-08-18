@@ -13,7 +13,7 @@ Esta rama conserva el comportamiento del archivo estable, pero separa presentaci
 - `js/05-filters.js`: filtros, tablas y KPI.
 - `js/06-routing.js`: optimización, simulación y Google Maps.
 - `js/07-session-export.js`: sesión, notificaciones y exportaciones.
-- `js/08-bootstrap.js`: eventos e inicialización.
+- js/08-bootstrap.js: único punto de entrada, eventos e inicialización.
 - `tests/structure.test.mjs`: comprobaciones de sintaxis, orden y estructura.
 
 ## Validación
@@ -43,4 +43,4 @@ Cada `push` y pull request ejecuta estas comprobaciones automáticamente mediant
 
 ## Estado de la aplicación
 
-El estado mutable compartido vive en `appState`, creado por `crearEstadoInicial()`. Los módulos funcionales leen y actualizan este objeto explícitamente, evitando decenas de variables globales independientes y facilitando futuras migraciones a módulos ES.
+El estado mutable compartido vive en appState, creado por crearEstadoInicial(). Los archivos JavaScript son módulos ES con importaciones y exportaciones explícitas; el navegador carga únicamente js/08-bootstrap.js, que resuelve el resto del grafo de dependencias.

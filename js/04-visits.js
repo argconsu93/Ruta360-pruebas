@@ -1,4 +1,9 @@
-function abrirModalVisitaCliente(codigo) {
+import { appState, normalizarTexto } from './01-core.js';
+import { generarPopupHTML } from './03-map.js';
+import { aplicarFiltros, actualizarKPIsVisitas } from './05-filters.js';
+import { mostrarNotificacioniOS } from './07-session-export.js';
+
+export function abrirModalVisitaCliente(codigo) {
     const client = appState.rawClientes.find(c => c.codigo === codigo);
     if (!client) return;
     
@@ -47,13 +52,13 @@ function abrirModalVisitaCliente(codigo) {
     document.getElementById('modal-registro-visita').style.display = 'flex';
 }
 
-function gestionarCambioTipoVisita(tipo) {
+export function gestionarCambioTipoVisita(tipo) {
     document.getElementById('box-visita-si').style.display = (tipo === 'SI') ? 'flex' : 'none';
     document.getElementById('box-visita-no').style.display = (tipo === 'NO') ? 'flex' : 'none';
     document.getElementById('box-visita-otros').style.display = (tipo === 'OTROS') ? 'flex' : 'none';
 }
 
-function formatearDecimalesVenta(input) {
+export function formatearDecimalesVenta(input) {
     if (input.value !== "") {
         let val = parseFloat(input.value);
         if (!isNaN(val)) {
@@ -62,7 +67,7 @@ function formatearDecimalesVenta(input) {
     }
 }
 
-function evaluarCambioDataCliente() {
+export function evaluarCambioDataCliente() {
     if (!appState.clienteEnEdicion) return;
     
     const nomNuevo = document.getElementById('edit-nombre-tienda').value.trim();
@@ -84,7 +89,7 @@ function evaluarCambioDataCliente() {
     }
 }
 
-function capturarCoordenadasGPS() {
+export function capturarCoordenadasGPS() {
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -104,19 +109,19 @@ function capturarCoordenadasGPS() {
     }
 }
 
-function cerrarModalVisita() {
+export function cerrarModalVisita() {
     document.getElementById('modal-registro-visita').style.display = 'none';
 }
 
-function solicitarConfirmacionGuardar() {
+export function solicitarConfirmacionGuardar() {
     document.getElementById('modal-confirmar-guardar').style.display = 'flex';
 }
 
-function cerrarModalConfirmacion() {
+export function cerrarModalConfirmacion() {
     document.getElementById('modal-confirmar-guardar').style.display = 'none';
 }
 
-function ejecutarGuardadoDefinitivo() {
+export function ejecutarGuardadoDefinitivo() {
     if (!appState.clienteEnEdicion) return;
     const cod = appState.clienteEnEdicion.codigo;
 
@@ -178,7 +183,7 @@ function ejecutarGuardadoDefinitivo() {
     mostrarNotificacioniOS("Registro Exitoso", notifText, 'success');
 }
 
-function cambiarEstadoVisitado(codigo, visitado) {
+export function cambiarEstadoVisitado(codigo, visitado) {
     appState.clientesVisitadosMap.set(codigo, visitado);
     const marker = appState.clienteMarkersMap[codigo];
     if (marker) {

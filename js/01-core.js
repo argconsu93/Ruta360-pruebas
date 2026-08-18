@@ -1,13 +1,9 @@
 // ============================================================
 //  DECLARACIÓN GLOBAL DE FUNCIONES DE NAVEGACIÓN Y LOGIN
 // ============================================================
-let paisSeleccionado = null;
-let divisionSeleccionada = null;
-let esAccesoRegionalGlobal = false;
-
-function seleccionarPais(codigoPais, nombrePais) {
-    paisSeleccionado = codigoPais;
-    esAccesoRegionalGlobal = false;
+export function seleccionarPais(codigoPais, nombrePais) {
+    appState.paisSeleccionado = codigoPais;
+    appState.esAccesoRegional = false;
     document.getElementById('step-pais').style.display = 'none';
     
     const containerDivs = document.getElementById('container-divisiones');
@@ -26,10 +22,10 @@ function seleccionarPais(codigoPais, nombrePais) {
     document.getElementById('step-division').style.display = 'block';
 }
 
-function seleccionarAccesoRegional() {
-    esAccesoRegionalGlobal = true;
-    paisSeleccionado = 'TODOS';
-    divisionSeleccionada = 'TODOS';
+export function seleccionarAccesoRegional() {
+    appState.esAccesoRegional = true;
+    appState.paisSeleccionado = 'TODOS';
+    appState.divisionSeleccionada = 'TODOS';
 
     document.getElementById('step-pais').style.display = 'none';
     document.getElementById('txt-division-activa-label').textContent = `Acceso Regional`;
@@ -39,8 +35,8 @@ function seleccionarAccesoRegional() {
     document.getElementById('step-credentials').style.display = 'block';
 }
 
-function seleccionarDivision(idDivision) {
-    divisionSeleccionada = idDivision;
+export function seleccionarDivision(idDivision) {
+    appState.divisionSeleccionada = idDivision;
     document.getElementById('step-division').style.display = 'none';
     
     document.getElementById('txt-division-activa-label').textContent = `División: ${idDivision}`;
@@ -50,37 +46,37 @@ function seleccionarDivision(idDivision) {
     document.getElementById('step-credentials').style.display = 'block';
 }
 
-function volverAPasoPais() {
+export function volverAPasoPais() {
     document.getElementById('step-division').style.display = 'none';
     document.getElementById('step-pais').style.display = 'block';
 }
 
-function volverDesdeLogin() {
+export function volverDesdeLogin() {
     document.getElementById('step-credentials').style.display = 'none';
-    if (esAccesoRegionalGlobal) {
+    if (appState.esAccesoRegional) {
         document.getElementById('step-pais').style.display = 'block';
     } else {
         document.getElementById('step-division').style.display = 'block';
     }
 }
 
-function poblarUsuariosPorDivision(division) {
+export function poblarUsuariosPorDivision(division) {
     const selectLogin = document.getElementById('select-usuario-login');
     selectLogin.innerHTML = '<option value="" disabled selected hidden>Seleccione su nombre</option>';
     
-    let filtrados = USUARIOS_ROLES.filter(u => {
-        if (esAccesoRegionalGlobal) {
+    let filtrados = appState.usuariosRoles.filter(u => {
+        if (appState.esAccesoRegional) {
             return (u.pais.toUpperCase() === 'TODOS' || u.division.toUpperCase() === 'TODOS' || u.rol === 'Administrador' || u.rol === 'Jefatura');
         }
         
-        const nombrePaisSel = PAISES_MAPA_NOMBRES[paisSeleccionado] || '';
-        const matchPais = (u.pais === 'TODOS' || u.pais.toLowerCase() === nombrePaisSel.toLowerCase() || u.pais.toLowerCase() === (paisSeleccionado || '').toLowerCase());
+        const nombrePaisSel = PAISES_MAPA_NOMBRES[appState.paisSeleccionado] || '';
+        const matchPais = (u.pais === 'TODOS' || u.pais.toLowerCase() === nombrePaisSel.toLowerCase() || u.pais.toLowerCase() === (appState.paisSeleccionado || '').toLowerCase());
         const matchDiv = (u.division === 'TODOS' || u.division.toLowerCase() === division.toLowerCase() || division === 'TODOS');
         return matchPais && matchDiv;
     });
 
     if (filtrados.length === 0) {
-        filtrados = USUARIOS_ROLES;
+        filtrados = appState.usuariosRoles;
     }
 
     const sorted = [...filtrados].sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -94,12 +90,12 @@ function poblarUsuariosPorDivision(division) {
     });
 }
 
-function getAntiCacheUrl(url) {
+export function getAntiCacheUrl(url) {
     const separator = url.includes('?') ? '&' : '?';
     return url + separator + 'v=' + new Date().getTime();
 }
 
-class ErrorSolicitud extends Error {
+export class ErrorSolicitud extends Error {
     constructor(mensaje, { url, estado = null, causa = null } = {}) {
         super(mensaje);
         this.name = 'ErrorSolicitud';
@@ -109,7 +105,7 @@ class ErrorSolicitud extends Error {
     }
 }
 
-async function solicitarRecurso(url, { tipo = 'text', timeoutMs = 15000, antiCache = false } = {}) {
+export async function solicitarRecurso(url, { tipo = 'text', timeoutMs = 15000, antiCache = false } = {}) {
     const controller = new AbortController();
     const temporizador = setTimeout(() => controller.abort(), timeoutMs);
     const urlFinal = antiCache ? getAntiCacheUrl(url) : url;
@@ -135,7 +131,7 @@ async function solicitarRecurso(url, { tipo = 'text', timeoutMs = 15000, antiCac
     }
 }
 
-function toggleAccordion(id) {
+export function toggleAccordion(id) {
     const card = document.getElementById(id);
     if (!card) return;
     card.classList.toggle('open');
@@ -144,28 +140,26 @@ function toggleAccordion(id) {
 // ============================================================
 //  CONFIGURACIÓN Y REGIONALIZACIÓN
 // ============================================================
-const DIVISIONES_POR_PAIS = {
+export const DIVISIONES_POR_PAIS = {
     'GT': [ { id: 'GT Centro', nombre: 'GT Centro' }, { id: 'GT Norte', nombre: 'GT Norte' }, { id: 'GT Sur', nombre: 'GT Sur' } ],
     'SV': [ { id: 'SV Occidente', nombre: 'SV Occidente' }, { id: 'SV Centro', nombre: 'SV Centro' }, { id: 'SV Oriente', nombre: 'SV Oriente' } ],
     'HN': [ { id: 'HN Centro', nombre: 'HN Centro' }, { id: 'HN Norte', nombre: 'HN Norte' } ]
 };
 
-const PAISES_MAPA_NOMBRES = {
+export const PAISES_MAPA_NOMBRES = {
     'GT': 'Guatemala',
     'SV': 'El Salvador',
     'HN': 'Honduras'
 };
 
-let USUARIOS_ROLES = [];
-
-const MAPEO_RUTAS_GRUPOS = {
+export const MAPEO_RUTAS_GRUPOS = {
     '1.1.54': 'GRUPO 02',
     '1.1.51': 'GRUPO 05',
     '1.2.45': 'GRUPO 06',
     '1.2.46': 'GRUPO 06'
 };
 
-function normalizarNombreGrupo(gRaw) {
+export function normalizarNombreGrupo(gRaw) {
     if (!gRaw) return "Sin Grupo";
     let str = String(gRaw).trim();
     if (MAPEO_RUTAS_GRUPOS[str]) return MAPEO_RUTAS_GRUPOS[str];
@@ -182,7 +176,7 @@ function normalizarNombreGrupo(gRaw) {
     return upperStr;
 }
 
-function normalizarTexto(str) {
+export function normalizarTexto(str) {
     if (!str) return '';
     return String(str)
         .trim()
@@ -191,14 +185,14 @@ function normalizarTexto(str) {
         .replace(/[-_]/g, ' ');
 }
 
-function parsearFloatSeguro(val) {
+export function parsearFloatSeguro(val) {
     if (val === null || val === undefined) return null;
     let str = String(val).trim().replace(',', '.');
     let num = parseFloat(str);
     return isNaN(num) ? null : num;
 }
 
-function escapeHTML(value) {
+export function escapeHTML(value) {
     return String(value ?? '')
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
@@ -207,7 +201,7 @@ function escapeHTML(value) {
         .replaceAll("'", '&#039;');
 }
 
-function coincidePais(pSelNorm, c) {
+export function coincidePais(pSelNorm, c) {
     if (!pSelNorm || pSelNorm === 'todos') return true;
     if (!c._paisNorm) return false;
     if (pSelNorm === c._paisNorm) return true;
@@ -217,7 +211,7 @@ function coincidePais(pSelNorm, c) {
     return pSelNorm.includes(c._paisNorm) || c._paisNorm.includes(pSelNorm);
 }
 
-function coincideDivision(dSelClean, c) {
+export function coincideDivision(dSelClean, c) {
     if (!dSelClean || dSelClean === 'todos') return true;
     if (!c._divClean && !c.division) return false;
     
@@ -232,21 +226,21 @@ function coincideDivision(dSelClean, c) {
     return palabraCliente.includes(palabraSel) || palabraSel.includes(palabraCliente);
 }
 
-function coincideGrupo(gSelNorm, c) {
+export function coincideGrupo(gSelNorm, c) {
     if (!gSelNorm || gSelNorm === 'TODOS' || gSelNorm === 'todos') return true;
     const g1 = normalizarTexto(gSelNorm);
     const g2 = normalizarTexto(c.grupo || c._grupoNorm);
     return g1 === g2 || g1.includes(g2) || g2.includes(g1);
 }
 
-function coincideRuta(rSelNorm, c) {
+export function coincideRuta(rSelNorm, c) {
     if (!rSelNorm || rSelNorm === 'todos' || rSelNorm === 'TODOS') return true;
     const r1 = normalizarTexto(rSelNorm);
     const r2 = normalizarTexto(c.ruta || c._rutaNorm);
     return r1 === r2 || r1.includes(r2) || r2.includes(r1);
 }
 
-function coincideDia(diaSelNorm, c) {
+export function coincideDia(diaSelNorm, c) {
     if (!diaSelNorm || diaSelNorm === 'ninguno') return false;
     if (diaSelNorm === 'todos') return true;
     if (!c._diaNorm) return false;
@@ -261,7 +255,7 @@ function coincideDia(diaSelNorm, c) {
     return false;
 }
 
-const COLORES_DIAS = {
+export const COLORES_DIAS = {
     'Lunes': '#b91c1c',
     'Martes': '#0369a1',
     'Miércoles': '#15803d',
@@ -273,8 +267,12 @@ const COLORES_DIAS = {
 // ============================================================
 //  ESTADO CENTRALIZADO DE LA APLICACIÓN
 // ============================================================
-function crearEstadoInicial() {
+export function crearEstadoInicial() {
     return {
+        usuariosRoles: [],
+        paisSeleccionado: null,
+        divisionSeleccionada: null,
+        esAccesoRegional: false,
         rawClientes: [],
         rawGeocercas: { type: "FeatureCollection", features: [] },
         rawDistribuidoras: { type: "FeatureCollection", features: [] },
@@ -316,7 +314,7 @@ function crearEstadoInicial() {
     };
 }
 
-const appState = crearEstadoInicial();
+export const appState = crearEstadoInicial();
 
 // ============================================================
 //  CARGA DE DATOS DESDE REPOSITORIO (RUTAS EXACTAS DEFINITIVAS)

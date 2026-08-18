@@ -8,8 +8,12 @@ const context = vm.createContext({
   console, Map, Set, Math, String, Number, Array, Object, Date,
   AbortController, setTimeout, clearTimeout,
 });
+const stripModuleSyntax = (source) => source
+  .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];\s*/gm, '')
+  .replace(/\bexport\s+/g, '');
 const sources = ['js/01-core.js', 'js/06-routing.js']
   .map((file) => fs.readFileSync(path.join(root, file), 'utf8'))
+  .map(stripModuleSyntax)
   .join('\n');
 
 new vm.Script(sources, { filename: 'ruta360-domain.js' }).runInContext(context);
@@ -19,6 +23,8 @@ const evaluate = (expression) => vm.runInContext(expression, context);
 assert.ok(!/pass\s*:\s*['"][^'"]+['"]/.test(sources), 'No debe haber contraseñas embebidas');
 assert.equal(evaluate('appState.rawClientes.length'), 0);
 assert.equal(evaluate('appState.usuarioActual'), null);
+assert.equal(evaluate('appState.usuariosRoles.length'), 0);
+assert.equal(evaluate('appState.esAccesoRegional'), false);
 assert.equal(evaluate("appState.diaSeleccionado"), 'TODOS');
 evaluate("appState.rawClientes.push({ codigo: 'QA-STATE' })");
 assert.equal(evaluate('appState.rawClientes[0].codigo'), 'QA-STATE');

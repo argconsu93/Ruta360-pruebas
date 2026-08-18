@@ -1,4 +1,12 @@
-function calcularDistancia(lat1, lon1, lat2, lon2) {
+import {
+    COLORES_DIAS, ErrorSolicitud, appState, coincideDia, escapeHTML,
+    normalizarTexto, solicitarRecurso
+} from './01-core.js';
+import { obtenerValorPropiedad } from './02-data.js';
+import { generarPopupHTML } from './03-map.js';
+import { mostrarNotificacioniOS } from './07-session-export.js';
+
+export function calcularDistancia(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -7,7 +15,7 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function obtenerCentroideDistribuidoraPorNombre(nombreDistribuidora) {
+export function obtenerCentroideDistribuidoraPorNombre(nombreDistribuidora) {
     if (!appState.rawDistribuidoras || !appState.rawDistribuidoras.features) return null;
     const targetNorm = normalizarTexto(nombreDistribuidora);
     
@@ -29,13 +37,13 @@ function obtenerCentroideDistribuidoraPorNombre(nombreDistribuidora) {
     return { lat: sumLat / coords.length, lng: sumLng / coords.length };
 }
 
-function formatearMinutosAHorasMinutos(totalMin) {
+export function formatearMinutosAHorasMinutos(totalMin) {
     const h = Math.floor(totalMin / 60);
     const m = Math.round(totalMin % 60);
     return `${h}h ${m}m`;
 }
 
-function formatearMinutosAHora12(totalMin) {
+export function formatearMinutosAHora12(totalMin) {
     let totalSegundos = Math.round(totalMin * 60);
     let mAbs = Math.floor(totalSegundos / 60);
     const mNorm = mAbs % 1440;
@@ -48,7 +56,7 @@ function formatearMinutosAHora12(totalMin) {
     return `${hStr}:${mStr} ${ampm}`;
 }
 
-function optimizarSecuenciaSweep2OPT(secuenciaOriginal, puntoOrigen) {
+export function optimizarSecuenciaSweep2OPT(secuenciaOriginal, puntoOrigen) {
     if (secuenciaOriginal.length <= 2) return secuenciaOriginal;
 
     // 1. Barrido Sectorial (Sweep): Ordenar estrictamente por ángulo polar (coordenadas polares) desde el depósito.
@@ -101,7 +109,7 @@ function optimizarSecuenciaSweep2OPT(secuenciaOriginal, puntoOrigen) {
     return rutaIndices.slice(1).map(idx => puntos[idx]);
 }
 
-async function trazarRutaOptima() {
+export async function trazarRutaOptima() {
     if (appState.rutaOptimaLayerGroup) appState.rutaOptimaLayerGroup.clearLayers();
     if (appState.clusterMarkersGroup) appState.clusterMarkersGroup.clearLayers();
     appState.ultimaSecuenciaOptimizada = [];
@@ -334,7 +342,7 @@ async function trazarRutaOptima() {
 // ============================================================
 //  FUNCIONES DE SIMULACIÓN DE CAMIÓN (Tolerancia 75 metros)
 // ============================================================
-function inicializarSimuladorRuta() {
+export function inicializarSimuladorRuta() {
     if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
     appState.simCurrentStep = 0;
     appState.simTotalSteps = appState.simPathCoordinates.length;
@@ -358,7 +366,7 @@ function inicializarSimuladorRuta() {
     appState.simTruckMarker = L.marker(appState.simPathCoordinates[0], { icon: truckIcon }).addTo(appState.map);
 }
 
-function toggleSimulacionRecorrido() {
+export function toggleSimulacionRecorrido() {
     if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
     const iconBtn = document.getElementById('sim-play-icon');
     
@@ -413,7 +421,7 @@ function toggleSimulacionRecorrido() {
     }
 }
 
-function detenerSimulacion() {
+export function detenerSimulacion() {
     appState.simIsPlaying = false;
     if (appState.simIntervalId) {
         clearInterval(appState.simIntervalId);
@@ -421,7 +429,7 @@ function detenerSimulacion() {
     }
 }
 
-function cambiarPasoSimulacion(valPercent) {
+export function cambiarPasoSimulacion(valPercent) {
     if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
     detenerSimulacion();
     document.getElementById('sim-play-icon').className = "fa-solid fa-play";
@@ -437,7 +445,7 @@ function cambiarPasoSimulacion(valPercent) {
 // ============================================================
 //  REDIRECCIÓN A GOOGLE MAPS MULTIPUNTO
 // ============================================================
-function abrirRutaEnGoogleMaps() {
+export function abrirRutaEnGoogleMaps() {
     if (!appState.ultimaSecuenciaOptimizada || appState.ultimaSecuenciaOptimizada.length === 0) {
         mostrarNotificacioniOS("Sin Ruta", "⚠️ Primero debe optimizar una ruta para generar la guía de Google Maps.", "warning");
         return;
@@ -465,7 +473,7 @@ function abrirRutaEnGoogleMaps() {
     window.open(gmapsUrl, '_blank');
 }
 
-function descargarOptimizacionRuta() {
+export function descargarOptimizacionRuta() {
     if (!appState.ultimaSecuenciaOptimizada || appState.ultimaSecuenciaOptimizada.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ Primero debe ejecutar la 'Optimización de ruta' para generar el listado ordenado.", "warning");
         return;

@@ -39,6 +39,7 @@ Revisión estática del archivo estable de 3,658 líneas y segmentación conserv
 - Sustitución de atributos de eventos inline por eventos registrados desde JavaScript.
 - Eliminación de las cuentas y contraseñas de respaldo embebidas; la carga de usuarios ahora falla de forma cerrada.
 - Centralización del estado mutable en `appState`, con una fábrica que crea colecciones aisladas para las pruebas.
+- Migración a módulos ES con importaciones explícitas y un único punto de entrada.
 - Documentación de ejecución local y mapa de módulos.
 
 ## Siguiente fase recomendada
@@ -46,5 +47,4 @@ Revisión estática del archivo estable de 3,658 líneas y segmentación conserv
 1. Ejecutar pruebas manuales con los datos reales: acceso por país/división, filtros, geocercas, visita, GPS, optimización, simulación y exportaciones.
 2. Incorporar pruebas de navegador con Playwright y datos reducidos de prueba.
 3. Eliminar interpolaciones no confiables en `innerHTML`.
-4. Convertir gradualmente a módulos ES con un almacén de estado explícito.
-5. Diseñar backend para autenticación, autorización, datos de clientes y visitas.
+4. Diseñar backend para autenticación, autorización, datos de clientes y visitas.

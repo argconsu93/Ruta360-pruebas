@@ -1,3 +1,32 @@
+import {
+    appState, seleccionarAccesoRegional, seleccionarPais, toggleAccordion,
+    volverAPasoPais, volverDesdeLogin
+} from './01-core.js';
+import { cargarDatosIniciales } from './02-data.js';
+import {
+    abrirModalVisitaCliente, capturarCoordenadasGPS, cerrarModalConfirmacion,
+    cerrarModalVisita, ejecutarGuardadoDefinitivo, evaluarCambioDataCliente,
+    formatearDecimalesVenta, gestionarCambioTipoVisita, solicitarConfirmacionGuardar
+} from './04-visits.js';
+import {
+    actualizarOpcionesDivision, actualizarOpcionesGrupo, actualizarOpcionesRuta,
+    aplicarFiltros, esRolAvanzado, filtrarTablaPorTexto, renderizarChipsDivisiones,
+    renderizarChipsGrupos, renderizarChipsPaises, renderizarChipsRutas,
+    seleccionarClienteEnMapa
+} from './05-filters.js';
+import {
+    abrirRutaEnGoogleMaps, cambiarPasoSimulacion, descargarOptimizacionRuta,
+    toggleSimulacionRecorrido, trazarRutaOptima
+} from './06-routing.js';
+import {
+    abrirModalComparativo, actualizarFechaActual, cerrarNotificacioniOS,
+    cerrarSesion, descargarClientesFueraGeocerca, descargarClientesVisitados,
+    descargarItinerarioFiltrado, mostrarNotificacioniOS, reabrirUltimaNotificacion,
+    subirNuevoCSV, subirNuevoGeoJSON, subirNuevoGeoJSONDistribuidoras,
+    toggleDrawer, toggleMobileUserDropdown, toggleMostrarPassword, validarLogin,
+    cerrarModalComparativo
+} from './07-session-export.js';
+
 document.addEventListener('DOMContentLoaded', function() {
     const chkMasivos = document.getElementById('switch-canales-masivos');
     const chkEspecificos = document.getElementById('switch-canales-especificos');

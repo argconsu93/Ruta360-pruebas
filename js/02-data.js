@@ -1,4 +1,10 @@
-function cargarUsuariosDesdeCSV() {
+import {
+    ErrorSolicitud, MAPEO_RUTAS_GRUPOS, appState, normalizarNombreGrupo,
+    normalizarTexto, parsearFloatSeguro, solicitarRecurso
+} from './01-core.js';
+import { aplicarFiltros } from './05-filters.js';
+
+export function cargarUsuariosDesdeCSV() {
     return solicitarRecurso('data/usuarios.csv', { antiCache: true })
         .then(csvText => {
             Papa.parse(csvText, {
@@ -6,7 +12,7 @@ function cargarUsuariosDesdeCSV() {
                 skipEmptyLines: true,
                 complete: function(results) {
                     if (results.data && results.data.length > 0) {
-                        USUARIOS_ROLES = results.data.map(u => {
+                        appState.usuariosRoles = results.data.map(u => {
                             const pRaw = (u.Pais || u.PAIS || u.pais || '').trim();
                             const dRaw = (u.Division || u.DIVISION || u.division || '').trim();
                             const gRaw = (u.Grupo || u.GRUPO || u.grupo || '').trim();
@@ -25,7 +31,7 @@ function cargarUsuariosDesdeCSV() {
             });
         })
         .catch(err => {
-            USUARIOS_ROLES = [];
+            appState.usuariosRoles = [];
             const errorDiv = document.getElementById('login-error');
             errorDiv.textContent = '⚠️ No fue posible cargar los usuarios. Recargue la página o contacte al administrador.';
             errorDiv.style.display = 'block';
@@ -33,7 +39,7 @@ function cargarUsuariosDesdeCSV() {
         });
 }
 
-function parsearFilasClientes(parsedData) {
+export function parsearFilasClientes(parsedData) {
     if (!parsedData || parsedData.length === 0) return [];
     
     return parsedData.map(row => {
@@ -97,7 +103,7 @@ function parsearFilasClientes(parsedData) {
     });
 }
 
-function cargarClientes() {
+export function cargarClientes() {
     return solicitarRecurso('clientes.csv', { antiCache: true })
         .then(csvText => {
             return new Promise((resolve) => {
@@ -114,7 +120,7 @@ function cargarClientes() {
         });
 }
 
-function cargarGeoJSON(url) {
+export function cargarGeoJSON(url) {
     return solicitarRecurso(url, { tipo: 'json', antiCache: true }).then(datos => {
         if (!datos || datos.type !== 'FeatureCollection' || !Array.isArray(datos.features)) {
             throw new ErrorSolicitud('El archivo GeoJSON no tiene una colección de elementos válida.', { url });
@@ -123,7 +129,7 @@ function cargarGeoJSON(url) {
     });
 }
 
-function cargarMapeoRutasDistribuidoras() {
+export function cargarMapeoRutasDistribuidoras() {
     return solicitarRecurso('data/rutas_distribuidoras.csv', { antiCache: true })
         .then(csvText => {
             const lineas = csvText.split(/\r?\n/);
@@ -156,7 +162,7 @@ function cargarMapeoRutasDistribuidoras() {
         .catch(err => console.warn('No se pudo cargar rutas_distribuidoras.csv:', err));
 }
 
-function sincronizarGruposClientes() {
+export function sincronizarGruposClientes() {
     if (!appState.rawClientes || !appState.rawGeocercas || !appState.rawGeocercas.features) return;
     const rutaToGrupoMap = {};
     for (let r in MAPEO_RUTAS_GRUPOS) {
@@ -179,7 +185,7 @@ function sincronizarGruposClientes() {
     });
 }
 
-function cargarDatosIniciales() {
+export function cargarDatosIniciales() {
     const promUsuarios = cargarUsuariosDesdeCSV();
     const promClientes = cargarClientes().catch(() => []);
     const promGeocercas = cargarGeoJSON('data/geocercas_rutas.geojson').catch(() => ({ type: "FeatureCollection", features: [] }));
@@ -197,7 +203,7 @@ function cargarDatosIniciales() {
         });
 }
 
-function obtenerValorPropiedad(props, ...nombresPosibles) {
+export function obtenerValorPropiedad(props, ...nombresPosibles) {
     if (!props) return '';
     for (let nombre of nombresPosibles) {
         if (props[nombre] !== undefined && props[nombre] !== null && String(props[nombre]).trim() !== '') {
@@ -218,7 +224,7 @@ function obtenerValorPropiedad(props, ...nombresPosibles) {
     return '';
 }
 
-function procesarPropiedadesGeocercas() {
+export function procesarPropiedadesGeocercas() {
     if (!appState.rawGeocercas || !appState.rawGeocercas.features) return;
     appState.rawGeocercas.features.forEach(feat => {
         const props = feat.properties || {};
@@ -272,7 +278,7 @@ function procesarPropiedadesGeocercas() {
 // ============================================================
 //  MAPA, CAPAS Y MARCADORES
 // ============================================================
-function inicializarMapa() {
+export function inicializarMapa() {
     if (appState.map) { appState.map.remove(); appState.map = null; }
     
     const googleRoad = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: '© Google Maps' });
