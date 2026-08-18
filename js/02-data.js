@@ -15,14 +15,14 @@ export function validarArchivoCarga(file, { extensiones, maxBytes }) {
     }
     const nombre = file.name.toLowerCase();
     if (!extensiones.some(extension => nombre.endsWith(extension))) {
-        throw new Error(`Extensión no permitida. Use: \${extensiones.join(', ')}.`);
+        throw new Error(`Extensión no permitida. Use: ${extensiones.join(', ')}.`);
     }
     if (!Number.isFinite(file.size) || file.size <= 0) {
         throw new Error('El archivo está vacío.');
     }
     if (file.size > maxBytes) {
         const maxMb = Math.round(maxBytes / (1024 * 1024));
-        throw new Error(`El archivo supera el límite de \${maxMb} MB.`);
+        throw new Error(`El archivo supera el límite de ${maxMb} MB.`);
     }
 }
 

@@ -25,6 +25,7 @@ assert.equal(evaluate('appState.rawClientes.length'), 0);
 assert.equal(evaluate('appState.usuarioActual'), null);
 assert.equal(evaluate('appState.usuariosRoles.length'), 0);
 assert.equal(evaluate('appState.esAccesoRegional'), false);
+assert.equal(evaluate('appState.respaldoCargaTemporal'), null);
 assert.equal(evaluate("appState.diaSeleccionado"), 'TODOS');
 evaluate("appState.rawClientes.push({ codigo: 'QA-STATE' })");
 assert.equal(evaluate('appState.rawClientes[0].codigo'), 'QA-STATE');

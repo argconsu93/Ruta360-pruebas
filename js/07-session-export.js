@@ -283,7 +283,7 @@ export function subirNuevoCSV(file) {
     try {
         validarArchivoCarga(file, { extensiones: ['.csv'], maxBytes: LIMITES_CARGA.csvBytes });
     } catch (error) {
-        mostrarNotificacioniOS('Archivo CSV rechazado', `❌ \${error.message}`, 'warning');
+        mostrarNotificacioniOS('Archivo CSV rechazado', `❌ ${error.message}`, 'warning');
         return;
     }
     Papa.parse(file, {
@@ -292,14 +292,15 @@ export function subirNuevoCSV(file) {
         complete: function(results) {
             try {
                 const clientes = validarClientesImportados(parsearFilasClientes(results.data), results.errors);
+                guardarRespaldoCargaTemporal();
                 appState.rawClientes = clientes;
                 procesarPropiedadesGeocercas();
                 sincronizarGruposClientes();
                 poblarFiltrosPermitidos();
                 aplicarFiltros();
-                mostrarNotificacioniOS("Carga Exitosa", `✅ \${clientes.length} clientes cargados en memoria.`, "success");
+                mostrarNotificacioniOS("Carga Exitosa", `✅ ${clientes.length} clientes cargados en memoria.`, "success");
             } catch (error) {
-                mostrarNotificacioniOS('CSV inválido', `❌ \${error.message}`, 'warning');
+                mostrarNotificacioniOS('CSV inválido', `❌ ${error.message}`, 'warning');
             }
         },
         error: function() {
@@ -313,20 +314,22 @@ export function subirNuevoGeoJSON(file) {
     try {
         validarArchivoCarga(file, { extensiones: ['.geojson', '.json'], maxBytes: LIMITES_CARGA.geojsonBytes });
     } catch (error) {
-        mostrarNotificacioniOS('Archivo GeoJSON rechazado', `❌ \${error.message}`, 'warning');
+        mostrarNotificacioniOS('Archivo GeoJSON rechazado', `❌ ${error.message}`, 'warning');
         return;
     }
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            appState.rawGeocercas = validarColeccionGeoJSON(JSON.parse(e.target.result));
+            const geocercas = validarColeccionGeoJSON(JSON.parse(e.target.result));
+            guardarRespaldoCargaTemporal();
+            appState.rawGeocercas = geocercas;
             procesarPropiedadesGeocercas();
             sincronizarGruposClientes();
             poblarFiltrosPermitidos();
             aplicarFiltros();
             mostrarNotificacioniOS("Geocercas Cargadas", "✅ GeoJSON de rutas cargado correctamente.", "success");
         } catch(error) {
-            mostrarNotificacioniOS("Error GeoJSON", `❌ \${error.message}`, "warning");
+            mostrarNotificacioniOS("Error GeoJSON", `❌ ${error.message}`, "warning");
         }
     };
     reader.onerror = function() {
@@ -340,23 +343,63 @@ export function subirNuevoGeoJSONDistribuidoras(file) {
     try {
         validarArchivoCarga(file, { extensiones: ['.geojson', '.json'], maxBytes: LIMITES_CARGA.geojsonBytes });
     } catch (error) {
-        mostrarNotificacioniOS('Archivo GeoJSON rechazado', `❌ \${error.message}`, 'warning');
+        mostrarNotificacioniOS('Archivo GeoJSON rechazado', `❌ ${error.message}`, 'warning');
         return;
     }
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            appState.rawDistribuidoras = validarColeccionGeoJSON(JSON.parse(e.target.result));
+            const distribuidoras = validarColeccionGeoJSON(JSON.parse(e.target.result));
+            guardarRespaldoCargaTemporal();
+            appState.rawDistribuidoras = distribuidoras;
             aplicarFiltros();
             mostrarNotificacioniOS("Distribuidoras Cargadas", "✅ GeoJSON de distribuidoras cargado correctamente.", "success");
         } catch(error) {
-            mostrarNotificacioniOS("Error GeoJSON", `❌ \${error.message}`, "warning");
+            mostrarNotificacioniOS("Error GeoJSON", `❌ ${error.message}`, "warning");
         }
     };
     reader.onerror = function() {
         mostrarNotificacioniOS('Error de lectura', '❌ No fue posible leer el archivo GeoJSON.', 'warning');
     };
     reader.readAsText(file);
+}
+
+function copiarDatos(datos) {
+    return JSON.parse(JSON.stringify(datos));
+}
+
+export function guardarRespaldoCargaTemporal() {
+    if (!appState.respaldoCargaTemporal) {
+        appState.respaldoCargaTemporal = {
+            clientes: copiarDatos(appState.rawClientes),
+            geocercas: copiarDatos(appState.rawGeocercas),
+            distribuidoras: copiarDatos(appState.rawDistribuidoras)
+        };
+    }
+    document.getElementById('btn-restaurar-datos').style.display = 'block';
+}
+
+export function restaurarDatosOriginales() {
+    const respaldo = appState.respaldoCargaTemporal;
+    if (!respaldo) {
+        mostrarNotificacioniOS('Sin respaldo', 'No hay una carga temporal activa.', 'warning');
+        return;
+    }
+    appState.rawClientes = copiarDatos(respaldo.clientes);
+    appState.rawGeocercas = copiarDatos(respaldo.geocercas);
+    appState.rawDistribuidoras = copiarDatos(respaldo.distribuidoras);
+    appState.respaldoCargaTemporal = null;
+
+    procesarPropiedadesGeocercas();
+    sincronizarGruposClientes();
+    poblarFiltrosPermitidos();
+    aplicarFiltros();
+
+    ['file-csv-input', 'file-geojson-input', 'file-distribuidoras-input'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('btn-restaurar-datos').style.display = 'none';
+    mostrarNotificacioniOS('Datos restaurados', '✅ Se restauraron los datos cargados al iniciar Ruta360.', 'success');
 }
 
 export function actualizarFechaActual() {

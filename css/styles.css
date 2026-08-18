@@ -140,6 +140,8 @@
         }
         .admin-panel label { font-size: 0.68rem; font-weight: 700; color: #1e40af; text-transform: uppercase; }
         .admin-file-input { font-size: 0.7rem; color: #1e293b; width: 100%; }
+        .btn-restaurar-datos { display:none; width:100%; margin-top:7px; padding:7px; border:1px solid #f59e0b; border-radius:6px; background:#fffbeb; color:#92400e; font-size:0.7rem; font-weight:800; cursor:pointer; }
+        .btn-restaurar-datos:hover { background:#fef3c7; }
         
         .drawer-handle {
             display: none; background: #0f172a; color: white; padding: 10px 14px;
