@@ -1,7 +1,9 @@
 const { chromium } = require('playwright');
 
+let browser;
+
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1280, height: 800 },
     permissions: ['geolocation'],
@@ -160,8 +162,9 @@ const { chromium } = require('playwright');
   if (relevantErrors.length) throw new Error(relevantErrors.join('\n'));
   console.log(`Prueba de navegador superada: ${JSON.stringify(checks)}`);
   await context.close();
-  await browser.close();
 })().catch((error) => {
   console.error(error);
   process.exitCode = 1;
+}).finally(async () => {
+  if (browser) await browser.close();
 });
