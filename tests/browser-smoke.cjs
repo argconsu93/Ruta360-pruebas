@@ -52,7 +52,20 @@ let browser;
 
   await page.route('**/data/geocercas_distribuidoras.geojson*', (route) => route.fulfill({
     contentType: 'application/geo+json',
-    body: JSON.stringify({ type: 'FeatureCollection', features: [] }),
+    body: JSON.stringify({
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        properties: { Nombre: 'Centro QA' },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [-89.207, 13.703], [-89.203, 13.703], [-89.203, 13.707],
+            [-89.207, 13.707], [-89.207, 13.703],
+          ]],
+        },
+      }],
+    }),
   }));
 
   await page.route('https://router.project-osrm.org/route/v1/driving/**', (route) => route.fulfill({
