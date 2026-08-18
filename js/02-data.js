@@ -1,3 +1,8 @@
+/**
+ * Carga y preparación de datos: valida archivos, interpreta CSV/GeoJSON y prepara las capas iniciales.
+ * Las funciones exportadas son utilizadas por otros módulos; appState concentra los datos compartidos.
+ */
+
 import {
     ErrorSolicitud, MAPEO_RUTAS_GRUPOS, appState, normalizarNombreGrupo,
     normalizarTexto, parsearFloatSeguro, solicitarRecurso
@@ -9,6 +14,9 @@ export const LIMITES_CARGA = Object.freeze({
     geojsonBytes: 30 * 1024 * 1024
 });
 
+/**
+ * Comprueba extensión y tamaño antes de leer un archivo proporcionado por el usuario.
+ */
 export function validarArchivoCarga(file, { extensiones, maxBytes }) {
     if (!file || typeof file.name !== 'string') {
         throw new Error('No se recibió un archivo válido.');
@@ -26,6 +34,9 @@ export function validarArchivoCarga(file, { extensiones, maxBytes }) {
     }
 }
 
+/**
+ * Verifica que el objeto tenga la estructura mínima de una colección GeoJSON.
+ */
 export function validarColeccionGeoJSON(datos) {
     if (!datos || datos.type !== 'FeatureCollection' || !Array.isArray(datos.features)) {
         throw new Error('El contenido debe ser una colección GeoJSON válida.');
@@ -44,6 +55,9 @@ export function validarColeccionGeoJSON(datos) {
     return datos;
 }
 
+/**
+ * Separa clientes válidos de filas rechazadas y conserva sus errores de lectura.
+ */
 export function validarClientesImportados(clientes, erroresParseo = []) {
     if (erroresParseo.some(error => error && error.type === 'Quotes')) {
         throw new Error('El CSV contiene comillas o columnas mal formadas.');
@@ -57,6 +71,9 @@ export function validarClientesImportados(clientes, erroresParseo = []) {
     return clientes;
 }
 
+/**
+ * Carga el catálogo de usuarios y organiza las cuentas por división.
+ */
 export function cargarUsuariosDesdeCSV() {
     return solicitarRecurso('data/usuarios.csv', { antiCache: true })
         .then(csvText => {
@@ -92,6 +109,9 @@ export function cargarUsuariosDesdeCSV() {
         });
 }
 
+/**
+ * Transforma las filas del CSV en objetos de cliente con campos normalizados.
+ */
 export function parsearFilasClientes(parsedData) {
     if (!parsedData || parsedData.length === 0) return [];
     
@@ -156,6 +176,9 @@ export function parsearFilasClientes(parsedData) {
     });
 }
 
+/**
+ * Descarga el CSV principal, lo interpreta y actualiza la colección de clientes.
+ */
 export function cargarClientes() {
     return solicitarRecurso('clientes.csv', { antiCache: true })
         .then(csvText => {
@@ -173,6 +196,9 @@ export function cargarClientes() {
         });
 }
 
+/**
+ * Descarga y valida una colección GeoJSON desde la dirección indicada.
+ */
 export function cargarGeoJSON(url) {
     return solicitarRecurso(url, { tipo: 'json', antiCache: true }).then(datos => {
         if (!datos || datos.type !== 'FeatureCollection' || !Array.isArray(datos.features)) {
@@ -182,6 +208,9 @@ export function cargarGeoJSON(url) {
     });
 }
 
+/**
+ * Carga la relación entre rutas y distribuidoras usada por la optimización.
+ */
 export function cargarMapeoRutasDistribuidoras() {
     return solicitarRecurso('data/rutas_distribuidoras.csv', { antiCache: true })
         .then(csvText => {
@@ -215,6 +244,9 @@ export function cargarMapeoRutasDistribuidoras() {
         .catch(err => console.warn('No se pudo cargar rutas_distribuidoras.csv:', err));
 }
 
+/**
+ * Completa los grupos de clientes usando la información territorial disponible.
+ */
 export function sincronizarGruposClientes() {
     if (!appState.rawClientes || !appState.rawGeocercas || !appState.rawGeocercas.features) return;
     const rutaToGrupoMap = {};
@@ -238,6 +270,9 @@ export function sincronizarGruposClientes() {
     });
 }
 
+/**
+ * Coordina todas las cargas iniciales y solo después prepara la interfaz.
+ */
 export function cargarDatosIniciales() {
     const promUsuarios = cargarUsuariosDesdeCSV();
     const promClientes = cargarClientes().catch(() => []);
@@ -256,6 +291,9 @@ export function cargarDatosIniciales() {
         });
 }
 
+/**
+ * Busca una propiedad aunque el archivo use distintas variantes de su nombre.
+ */
 export function obtenerValorPropiedad(props, ...nombresPosibles) {
     if (!props) return '';
     for (let nombre of nombresPosibles) {
@@ -277,6 +315,9 @@ export function obtenerValorPropiedad(props, ...nombresPosibles) {
     return '';
 }
 
+/**
+ * Extrae y normaliza los atributos relevantes de cada geocerca.
+ */
 export function procesarPropiedadesGeocercas() {
     if (!appState.rawGeocercas || !appState.rawGeocercas.features) return;
     appState.rawGeocercas.features.forEach(feat => {
@@ -331,6 +372,9 @@ export function procesarPropiedadesGeocercas() {
 // ============================================================
 //  MAPA, CAPAS Y MARCADORES
 // ============================================================
+/**
+ * Crea el mapa Leaflet, sus capas y la vista inicial de la aplicación.
+ */
 export function inicializarMapa() {
     if (appState.map) { appState.map.remove(); appState.map = null; }
     

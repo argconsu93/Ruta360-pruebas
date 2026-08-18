@@ -1,3 +1,8 @@
+/**
+ * Sesión e intercambio de archivos: login, notificaciones, exportaciones y cargas temporales reversibles.
+ * Las funciones exportadas son utilizadas por otros módulos; appState concentra los datos compartidos.
+ */
+
 import {
     PAISES_MAPA_NOMBRES, appState, coincideDivision, coincideGrupo, coincidePais,
     escapeHTML, normalizarNombreGrupo, normalizarTexto
@@ -9,6 +14,9 @@ import {
 } from './02-data.js';
 import { aplicarFiltros, poblarFiltrosPermitidos } from './05-filters.js';
 
+/**
+ * Alterna la contraseña entre texto visible y campo protegido.
+ */
 export function toggleMostrarPassword() {
     const inputPass = document.getElementById('input-password');
     const iconPass = document.getElementById('toggle-password-btn');
@@ -24,6 +32,9 @@ export function toggleMostrarPassword() {
     }
 }    
     
+/**
+ * Comprueba las credenciales cargadas y habilita la aplicación para el usuario válido.
+ */
 export function validarLogin() {
     const nombreSel = document.getElementById('select-usuario-login').value;
     const passInput = document.getElementById('input-password').value.trim().toLowerCase();
@@ -75,6 +86,9 @@ export function validarLogin() {
     }
 }
 
+/**
+ * Limpia la sesión actual y devuelve la interfaz al acceso inicial.
+ */
 export function cerrarSesion() {
     appState.usuarioActual = null;
     appState.paisesSeleccionadosMultiples = [];
@@ -98,6 +112,9 @@ export function cerrarSesion() {
 // ============================================================
 //  NOTIFICACIONES Y EXPORTACIONES
 // ============================================================
+/**
+ * Presenta una notificación reutilizable con texto seguro o HTML expresamente permitido.
+ */
 export function mostrarNotificacioniOS(titulo, contenido, tipoIcono = 'success', permitirHTML = false) {
     appState.ultimaNotificacionesiOS = contenido;
     document.getElementById('ios-notif-title').textContent = titulo;
@@ -118,10 +135,16 @@ export function mostrarNotificacioniOS(titulo, contenido, tipoIcono = 'success',
     document.getElementById('notif-dot').style.display = 'block';
 }
 
+/**
+ * Oculta la notificación actualmente visible.
+ */
 export function cerrarNotificacioniOS() {
     document.getElementById('ios-notif-overlay').style.display = 'none';
 }
 
+/**
+ * Vuelve a mostrar el último mensaje almacenado.
+ */
 export function reabrirUltimaNotificacion() {
     if (appState.ultimaNotificacionesiOS) {
         document.getElementById('ios-notif-overlay').style.display = 'flex';
@@ -130,10 +153,16 @@ export function reabrirUltimaNotificacion() {
     }
 }
 
+/**
+ * Abre o cierra el menú del usuario en pantallas pequeñas.
+ */
 export function toggleMobileUserDropdown() {
     document.getElementById('mobile-user-dropdown').classList.toggle('active');
 }
 
+/**
+ * Calcula diferencias de visita y abre el resumen comparativo.
+ */
 export function abrirModalComparativo() {
     const tbody = document.getElementById('tabla-comparativo-body');
     tbody.innerHTML = '';
@@ -177,10 +206,16 @@ export function abrirModalComparativo() {
     document.getElementById('modal-comparativo').style.display = 'flex';
 }
 
+/**
+ * Cierra el resumen comparativo de resultados.
+ */
 export function cerrarModalComparativo() {
     document.getElementById('modal-comparativo').style.display = 'none';
 }
 
+/**
+ * Exporta a Excel los clientes marcados como visitados.
+ */
 export function descargarClientesVisitados() {
     const listVisitados = [];
     appState.rawClientes.forEach(c => {
@@ -215,6 +250,9 @@ export function descargarClientesVisitados() {
     XLSX.writeFile(workbook, `Clientes_Visitados_Bocadeli_${fecha}.xlsx`);
 }
 
+/**
+ * Exporta a Excel el itinerario correspondiente a los filtros actuales.
+ */
 export function descargarItinerarioFiltrado() {
     if (!appState.ultimoClientesFiltrados || appState.ultimoClientesFiltrados.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ No hay clientes disponibles en la lista con los filtros seleccionados.", "warning");
@@ -246,6 +284,9 @@ export function descargarItinerarioFiltrado() {
     XLSX.writeFile(workbook, `Itinerario_Bocadeli.xlsx`);
 }
 
+/**
+ * Exporta a Excel los clientes detectados fuera de geocercas.
+ */
 export function descargarClientesFueraGeocerca() {
     if (!appState.ultimoClientesFuera || appState.ultimoClientesFuera.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ No hay clientes fuera de geocerca en la selección actual.", "warning");
@@ -278,6 +319,9 @@ export function descargarClientesFueraGeocerca() {
     mostrarNotificacioniOS("Descarga Exitosa", `✅ Se descargaron ${appState.ultimoClientesFuera.length} clientes fuera de geocerca.`, "success");
 }
 
+/**
+ * Valida y aplica temporalmente un archivo CSV de clientes.
+ */
 export function subirNuevoCSV(file) {
     if (!file) return;
     try {
@@ -309,6 +353,9 @@ export function subirNuevoCSV(file) {
     });
 }
 
+/**
+ * Valida y aplica temporalmente un archivo de geocercas.
+ */
 export function subirNuevoGeoJSON(file) {
     if (!file) return;
     try {
@@ -338,6 +385,9 @@ export function subirNuevoGeoJSON(file) {
     reader.readAsText(file);
 }
 
+/**
+ * Valida y aplica temporalmente un archivo de distribuidoras.
+ */
 export function subirNuevoGeoJSONDistribuidoras(file) {
     if (!file) return;
     try {
@@ -364,10 +414,16 @@ export function subirNuevoGeoJSONDistribuidoras(file) {
     reader.readAsText(file);
 }
 
+/**
+ * Crea una copia independiente para evitar modificaciones involuntarias del respaldo.
+ */
 function copiarDatos(datos) {
     return JSON.parse(JSON.stringify(datos));
 }
 
+/**
+ * Conserva una sola copia de los datos originales antes de una carga temporal.
+ */
 export function guardarRespaldoCargaTemporal() {
     if (!appState.respaldoCargaTemporal) {
         appState.respaldoCargaTemporal = {
@@ -379,6 +435,9 @@ export function guardarRespaldoCargaTemporal() {
     document.getElementById('btn-restaurar-datos').style.display = 'block';
 }
 
+/**
+ * Recupera los datos previos y vuelve a construir filtros y mapa.
+ */
 export function restaurarDatosOriginales() {
     const respaldo = appState.respaldoCargaTemporal;
     if (!respaldo) {
@@ -402,6 +461,9 @@ export function restaurarDatosOriginales() {
     mostrarNotificacioniOS('Datos restaurados', '✅ Se restauraron los datos cargados al iniciar Ruta360.', 'success');
 }
 
+/**
+ * Muestra en la cabecera la fecha local del dispositivo.
+ */
 export function actualizarFechaActual() {
     const fecha = new Date();
     const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -411,6 +473,9 @@ export function actualizarFechaActual() {
     document.getElementById('fecha-actual-mobile').textContent = fechaTexto;
 }
 
+/**
+ * Abre o cierra el panel lateral en la versión móvil.
+ */
 export function toggleDrawer() {
     const drawer = document.getElementById('mobile-drawer');
     const label = document.getElementById('drawer-btn-label');

@@ -1,3 +1,8 @@
+/**
+ * Presentación cartográfica: colores, leyenda, geocercas, marcadores, ventanas emergentes y cálculos espaciales.
+ * Las funciones exportadas son utilizadas por otros módulos; appState concentra los datos compartidos.
+ */
+
 import { appState, escapeHTML } from './01-core.js';
 import { obtenerValorPropiedad } from './02-data.js';
 
@@ -51,6 +56,9 @@ export const COLORES_TIPO_ZONA_FIJOS = {
     'SIN ZONA': '#64748b'
 };
 
+/**
+ * Devuelve el color visual asignado a un país.
+ */
 export function obtenerColorPorPais(paisStr) {
     if (!paisStr) return '#4f46e5';
     const norm = String(paisStr).toUpperCase().trim();
@@ -60,6 +68,9 @@ export function obtenerColorPorPais(paisStr) {
     return obtenerColorDinamico(paisStr);
 }
 
+/**
+ * Devuelve el color visual asignado a un canal comercial.
+ */
 export function obtenerColorPorCanal(canalStr) {
     if (!canalStr) return '#64748b';
     const norm = String(canalStr).toUpperCase().trim();
@@ -72,6 +83,9 @@ export function obtenerColorPorCanal(canalStr) {
     return obtenerColorDinamico(canalStr);
 }
 
+/**
+ * Devuelve el color visual asignado a un tipo de zona.
+ */
 export function obtenerColorPorTipoZona(tzStr) {
     if (!tzStr) return '#64748b';
     const norm = String(tzStr).toUpperCase().trim();
@@ -81,6 +95,9 @@ export function obtenerColorPorTipoZona(tzStr) {
     return obtenerColorDinamico(tzStr);
 }
 
+/**
+ * Genera un color estable para categorías que no tienen uno predefinido.
+ */
 export function obtenerColorDinamico(valor) {
     if (!valor || valor === 'N/A' || valor === 'N/D') return '#0369a1';
     let hash = 0;
@@ -92,6 +109,9 @@ export function obtenerColorDinamico(valor) {
     return PALETA_COLORES_SOLIDOS[index];
 }
 
+/**
+ * Reconstruye la leyenda de acuerdo con el modo de color actualmente activo.
+ */
 export function actualizarLeyendaMapa() {
     const legendBox = document.getElementById('map-legend-box');
     const titleEl = document.getElementById('legend-box-title');
@@ -140,6 +160,9 @@ export function actualizarLeyendaMapa() {
     }
 }
 
+/**
+ * Dibuja en el mapa las geocercas filtradas y configura su información emergente.
+ */
 export function renderizarGeocercas(featuresGeocercasFiltradas) {
     appState.geocercasLayerGroup.clearLayers();
     appState.geocercasBBoxCache = [];
@@ -240,6 +263,9 @@ export function renderizarGeocercas(featuresGeocercasFiltradas) {
     return geoJsonLayer.getBounds();
 }
 
+/**
+ * Dibuja los puntos de distribuidoras que sirven como origen de las rutas.
+ */
 export function renderizarDistribuidoras(distribuidorasData) {
     appState.distribuidorasLayerGroup.clearLayers();
     if (!distribuidorasData || !distribuidorasData.features || distribuidorasData.features.length === 0) return;
@@ -261,6 +287,9 @@ export function renderizarDistribuidoras(distribuidorasData) {
     }).addTo(appState.distribuidorasLayerGroup);
 }
 
+/**
+ * Agrupa y dibuja clientes, diferenciando estado, categoría y pertenencia a geocercas.
+ */
 export function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltradas) {
     appState.clusterMarkersGroup.clearLayers();
     Object.keys(appState.clienteMarkersMap).forEach(key => delete appState.clienteMarkersMap[key]);
@@ -329,6 +358,9 @@ export function renderizarMarcadores(clientesFiltrados, featuresGeocercasFiltrad
     return { bounds, fuera };
 }
 
+/**
+ * Construye de forma segura el contenido mostrado al seleccionar un cliente.
+ */
 export function generarPopupHTML(c, isVisited, numeroParada = null, diaRuta = null) {
     const safe = {
         codigo: escapeHTML(c.codigo),
@@ -376,6 +408,9 @@ export function generarPopupHTML(c, isVisited, numeroParada = null, diaRuta = nu
     `;
 }
 
+/**
+ * Determina si un punto está dentro de un polígono mediante cruce de rayos.
+ */
 export function puntoEnPoligono(point, vs) {
     const x = point[0], y = point[1];
     let inside = false;
@@ -388,6 +423,9 @@ export function puntoEnPoligono(point, vs) {
     return inside;
 }
 
+/**
+ * Comprueba pertenencia a geocercas usando límites previos para reducir cálculos.
+ */
 export function estaDentroDeGeocercasOptimizado(lat, lng) {
     if (!appState.geocercasBBoxCache || appState.geocercasBBoxCache.length === 0) return true;
     const pt = [lng, lat];

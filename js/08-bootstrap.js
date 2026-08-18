@@ -1,3 +1,8 @@
+/**
+ * Punto de entrada: conecta los controles de la página con los módulos y arranca la carga de datos.
+ * Las funciones exportadas son utilizadas por otros módulos; appState concentra los datos compartidos.
+ */
+
 import {
     appState, seleccionarAccesoRegional, seleccionarPais, toggleAccordion,
     volverAPasoPais, volverDesdeLogin
@@ -28,6 +33,7 @@ import {
 } from './07-session-export.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Los tres modos de color son excluyentes: al activar uno se apagan los demás.
     const chkMasivos = document.getElementById('switch-canales-masivos');
     const chkEspecificos = document.getElementById('switch-canales-especificos');
     const chkTipoZona = document.getElementById('switch-tipo-zona');
@@ -71,8 +77,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // La fecha se presenta inmediatamente, sin esperar a que terminen las cargas de red.
     actualizarFechaActual();
 
+    // Delegación de clics: un solo listener atiende elementos creados ahora o dinámicamente.
     document.addEventListener('click', function(event) {
         const countryCard = event.target.closest('[data-country-code]');
         if (countryCard) {
@@ -109,6 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Controles permanentes de sesión, simulación, filtros, modales y exportaciones.
     document.getElementById('btn-login').addEventListener('click', validarLogin);
     document.getElementById('toggle-password-btn').addEventListener('click', toggleMostrarPassword);
     document.getElementById('input-password').addEventListener('keydown', function(e) {

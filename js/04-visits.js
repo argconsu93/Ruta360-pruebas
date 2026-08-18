@@ -1,8 +1,16 @@
+/**
+ * Registro de visitas: administra el formulario, captura GPS, confirmaciones y actualización del cliente.
+ * Las funciones exportadas son utilizadas por otros módulos; appState concentra los datos compartidos.
+ */
+
 import { appState, normalizarTexto } from './01-core.js';
 import { generarPopupHTML } from './03-map.js';
 import { aplicarFiltros, actualizarKPIsVisitas } from './05-filters.js';
 import { mostrarNotificacioniOS } from './07-session-export.js';
 
+/**
+ * Carga los datos de un cliente y abre el formulario de registro de visita.
+ */
 export function abrirModalVisitaCliente(codigo) {
     const client = appState.rawClientes.find(c => c.codigo === codigo);
     if (!client) return;
@@ -52,12 +60,18 @@ export function abrirModalVisitaCliente(codigo) {
     document.getElementById('modal-registro-visita').style.display = 'flex';
 }
 
+/**
+ * Muestra los campos correspondientes al resultado de visita elegido.
+ */
 export function gestionarCambioTipoVisita(tipo) {
     document.getElementById('box-visita-si').style.display = (tipo === 'SI') ? 'flex' : 'none';
     document.getElementById('box-visita-no').style.display = (tipo === 'NO') ? 'flex' : 'none';
     document.getElementById('box-visita-otros').style.display = (tipo === 'OTROS') ? 'flex' : 'none';
 }
 
+/**
+ * Normaliza el importe de venta introducido a dos posiciones decimales.
+ */
 export function formatearDecimalesVenta(input) {
     if (input.value !== "") {
         let val = parseFloat(input.value);
@@ -67,6 +81,9 @@ export function formatearDecimalesVenta(input) {
     }
 }
 
+/**
+ * Detecta si el formulario contiene cambios que deban guardarse.
+ */
 export function evaluarCambioDataCliente() {
     if (!appState.clienteEnEdicion) return;
     
@@ -89,6 +106,9 @@ export function evaluarCambioDataCliente() {
     }
 }
 
+/**
+ * Solicita la ubicación del dispositivo y la guarda temporalmente en el formulario.
+ */
 export function capturarCoordenadasGPS() {
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -109,18 +129,30 @@ export function capturarCoordenadasGPS() {
     }
 }
 
+/**
+ * Cierra el formulario de visita sin aplicar cambios pendientes.
+ */
 export function cerrarModalVisita() {
     document.getElementById('modal-registro-visita').style.display = 'none';
 }
 
+/**
+ * Valida el formulario y abre la confirmación antes de modificar datos.
+ */
 export function solicitarConfirmacionGuardar() {
     document.getElementById('modal-confirmar-guardar').style.display = 'flex';
 }
 
+/**
+ * Cierra la confirmación y permite seguir editando la visita.
+ */
 export function cerrarModalConfirmacion() {
     document.getElementById('modal-confirmar-guardar').style.display = 'none';
 }
 
+/**
+ * Aplica al estado los cambios confirmados y refresca las vistas relacionadas.
+ */
 export function ejecutarGuardadoDefinitivo() {
     if (!appState.clienteEnEdicion) return;
     const cod = appState.clienteEnEdicion.codigo;
@@ -183,6 +215,9 @@ export function ejecutarGuardadoDefinitivo() {
     mostrarNotificacioniOS("Registro Exitoso", notifText, 'success');
 }
 
+/**
+ * Actualiza el indicador de visita de un cliente y vuelve a aplicar los filtros.
+ */
 export function cambiarEstadoVisitado(codigo, visitado) {
     appState.clientesVisitadosMap.set(codigo, visitado);
     const marker = appState.clienteMarkersMap[codigo];
