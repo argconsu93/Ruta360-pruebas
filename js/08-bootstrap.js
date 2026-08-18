@@ -22,7 +22,7 @@ import {
     abrirModalComparativo, actualizarFechaActual, cerrarNotificacioniOS,
     cerrarSesion, descargarClientesFueraGeocerca, descargarClientesVisitados,
     descargarItinerarioFiltrado, mostrarNotificacioniOS, reabrirUltimaNotificacion,
-    subirNuevoCSV, subirNuevoGeoJSON, subirNuevoGeoJSONDistribuidoras,
+    restaurarDatosOriginales, subirNuevoCSV, subirNuevoGeoJSON, subirNuevoGeoJSONDistribuidoras,
     toggleDrawer, toggleMobileUserDropdown, toggleMostrarPassword, validarLogin,
     cerrarModalComparativo
 } from './07-session-export.js';
@@ -222,6 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('file-distribuidoras-input').addEventListener('change', function(e) {
         if (this.files[0]) subirNuevoGeoJSONDistribuidoras(this.files[0]);
     });
+    document.getElementById('btn-restaurar-datos').addEventListener('click', restaurarDatosOriginales);
 
     cargarDatosIniciales().then(() => {
         console.log('Datos de sistema e itinerarios cargados correctamente.');

@@ -132,6 +132,29 @@ let browser;
   }
   await page.locator('#btn-close-ios-notif').click();
 
+  await page.locator('#file-csv-input').setInputFiles({
+    name: 'clientes-temporales.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from([
+      'CodigoCliente,NombreCliente,Grupo,Ruta,Dia,Latitud,Longitud,Direccion,Telefono,Pais,Division',
+      'TMP-001,Cliente temporal,GRUPO 09,TMP-01,Martes,13.7200,-89.2200,Dirección temporal,2222-9999,El Salvador,SV Centro',
+    ].join('\n')),
+  });
+  await page.waitForFunction(() =>
+    document.querySelector('#ios-notif-title').textContent.includes('Carga Exitosa')
+  );
+  await page.waitForFunction(() => document.querySelectorAll('#tabla-clientes-body tr').length === 1);
+  if (!await page.locator('#btn-restaurar-datos').isVisible()) {
+    throw new Error('No se habilitó la restauración después de la carga temporal');
+  }
+  await page.locator('#btn-close-ios-notif').click();
+  await page.locator('#btn-restaurar-datos').click();
+  await page.waitForFunction(() =>
+    document.querySelector('#ios-notif-title').textContent.includes('Datos restaurados')
+  );
+  await page.waitForFunction(() => document.querySelectorAll('#tabla-clientes-body tr').length === 2);
+  await page.locator('#btn-close-ios-notif').click();
+
   await page.locator('#input-search-cliente').fill('QA-002');
   await page.waitForFunction(() => {
     const rows = [...document.querySelectorAll('#tabla-clientes-body tr')];

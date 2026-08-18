@@ -273,6 +273,7 @@ export function crearEstadoInicial() {
         paisSeleccionado: null,
         divisionSeleccionada: null,
         esAccesoRegional: false,
+        respaldoCargaTemporal: null,
         rawClientes: [],
         rawGeocercas: { type: "FeatureCollection", features: [] },
         rawDistribuidoras: { type: "FeatureCollection", features: [] },
