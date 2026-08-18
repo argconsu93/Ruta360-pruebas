@@ -1,6 +1,14 @@
+/**
+ * Núcleo compartido: contiene el estado global controlado, utilidades de texto y navegación del acceso inicial.
+ * Las funciones exportadas son utilizadas por otros módulos; appState concentra los datos compartidos.
+ */
+
 // ============================================================
 //  DECLARACIÓN GLOBAL DE FUNCIONES DE NAVEGACIÓN Y LOGIN
 // ============================================================
+/**
+ * Guarda el país elegido y avanza al paso de selección de división.
+ */
 export function seleccionarPais(codigoPais, nombrePais) {
     appState.paisSeleccionado = codigoPais;
     appState.esAccesoRegional = false;
@@ -22,6 +30,9 @@ export function seleccionarPais(codigoPais, nombrePais) {
     document.getElementById('step-division').style.display = 'block';
 }
 
+/**
+ * Configura el acceso regional, que permite consultar todas las divisiones disponibles.
+ */
 export function seleccionarAccesoRegional() {
     appState.esAccesoRegional = true;
     appState.paisSeleccionado = 'TODOS';
@@ -35,6 +46,9 @@ export function seleccionarAccesoRegional() {
     document.getElementById('step-credentials').style.display = 'block';
 }
 
+/**
+ * Guarda la división elegida y prepara los usuarios permitidos para iniciar sesión.
+ */
 export function seleccionarDivision(idDivision) {
     appState.divisionSeleccionada = idDivision;
     document.getElementById('step-division').style.display = 'none';
@@ -46,11 +60,17 @@ export function seleccionarDivision(idDivision) {
     document.getElementById('step-credentials').style.display = 'block';
 }
 
+/**
+ * Regresa al primer paso del acceso y limpia la selección temporal.
+ */
 export function volverAPasoPais() {
     document.getElementById('step-division').style.display = 'none';
     document.getElementById('step-pais').style.display = 'block';
 }
 
+/**
+ * Vuelve desde las credenciales al paso apropiado de selección territorial.
+ */
 export function volverDesdeLogin() {
     document.getElementById('step-credentials').style.display = 'none';
     if (appState.esAccesoRegional) {
@@ -60,6 +80,9 @@ export function volverDesdeLogin() {
     }
 }
 
+/**
+ * Llena el selector de usuarios con las cuentas asociadas a una división.
+ */
 export function poblarUsuariosPorDivision(division) {
     const selectLogin = document.getElementById('select-usuario-login');
     selectLogin.innerHTML = '<option value="" disabled selected hidden>Seleccione su nombre</option>';
@@ -90,6 +113,9 @@ export function poblarUsuariosPorDivision(division) {
     });
 }
 
+/**
+ * Agrega un parámetro único a una URL para solicitar una copia reciente del archivo.
+ */
 export function getAntiCacheUrl(url) {
     const separator = url.includes('?') ? '&' : '?';
     return url + separator + 'v=' + new Date().getTime();
@@ -105,6 +131,9 @@ export class ErrorSolicitud extends Error {
     }
 }
 
+/**
+ * Solicita un recurso con tiempo límite, mensajes de error claros y conversión al tipo solicitado.
+ */
 export async function solicitarRecurso(url, { tipo = 'text', timeoutMs = 15000, antiCache = false } = {}) {
     const controller = new AbortController();
     const temporizador = setTimeout(() => controller.abort(), timeoutMs);
@@ -131,6 +160,9 @@ export async function solicitarRecurso(url, { tipo = 'text', timeoutMs = 15000, 
     }
 }
 
+/**
+ * Abre o cierra una sección lateral y actualiza el icono que indica su estado.
+ */
 export function toggleAccordion(id) {
     const card = document.getElementById(id);
     if (!card) return;
@@ -159,6 +191,9 @@ export const MAPEO_RUTAS_GRUPOS = {
     '1.2.46': 'GRUPO 06'
 };
 
+/**
+ * Unifica nombres de grupos para que variantes equivalentes puedan compararse.
+ */
 export function normalizarNombreGrupo(gRaw) {
     if (!gRaw) return "Sin Grupo";
     let str = String(gRaw).trim();
@@ -176,6 +211,9 @@ export function normalizarNombreGrupo(gRaw) {
     return upperStr;
 }
 
+/**
+ * Convierte texto a una forma comparable: mayúsculas, sin tildes y sin espacios sobrantes.
+ */
 export function normalizarTexto(str) {
     if (!str) return '';
     return String(str)
@@ -185,6 +223,9 @@ export function normalizarTexto(str) {
         .replace(/[-_]/g, ' ');
 }
 
+/**
+ * Convierte un valor a número decimal y devuelve null cuando no es válido.
+ */
 export function parsearFloatSeguro(val) {
     if (val === null || val === undefined) return null;
     let str = String(val).trim().replace(',', '.');
@@ -192,6 +233,9 @@ export function parsearFloatSeguro(val) {
     return isNaN(num) ? null : num;
 }
 
+/**
+ * Escapa caracteres especiales antes de insertar datos externos dentro del HTML.
+ */
 export function escapeHTML(value) {
     return String(value ?? '')
         .replaceAll('&', '&amp;')
@@ -201,6 +245,9 @@ export function escapeHTML(value) {
         .replaceAll("'", '&#039;');
 }
 
+/**
+ * Indica si un cliente pertenece al país seleccionado.
+ */
 export function coincidePais(pSelNorm, c) {
     if (!pSelNorm || pSelNorm === 'todos') return true;
     if (!c._paisNorm) return false;
@@ -211,6 +258,9 @@ export function coincidePais(pSelNorm, c) {
     return pSelNorm.includes(c._paisNorm) || c._paisNorm.includes(pSelNorm);
 }
 
+/**
+ * Indica si un cliente pertenece a la división seleccionada.
+ */
 export function coincideDivision(dSelClean, c) {
     if (!dSelClean || dSelClean === 'todos') return true;
     if (!c._divClean && !c.division) return false;
@@ -226,6 +276,9 @@ export function coincideDivision(dSelClean, c) {
     return palabraCliente.includes(palabraSel) || palabraSel.includes(palabraCliente);
 }
 
+/**
+ * Indica si un cliente coincide con el grupo seleccionado.
+ */
 export function coincideGrupo(gSelNorm, c) {
     if (!gSelNorm || gSelNorm === 'TODOS' || gSelNorm === 'todos') return true;
     const g1 = normalizarTexto(gSelNorm);
@@ -233,6 +286,9 @@ export function coincideGrupo(gSelNorm, c) {
     return g1 === g2 || g1.includes(g2) || g2.includes(g1);
 }
 
+/**
+ * Indica si un cliente coincide con la ruta seleccionada.
+ */
 export function coincideRuta(rSelNorm, c) {
     if (!rSelNorm || rSelNorm === 'todos' || rSelNorm === 'TODOS') return true;
     const r1 = normalizarTexto(rSelNorm);
@@ -240,6 +296,9 @@ export function coincideRuta(rSelNorm, c) {
     return r1 === r2 || r1.includes(r2) || r2.includes(r1);
 }
 
+/**
+ * Indica si un cliente está programado para el día seleccionado.
+ */
 export function coincideDia(diaSelNorm, c) {
     if (!diaSelNorm || diaSelNorm === 'ninguno') return false;
     if (diaSelNorm === 'todos') return true;
@@ -267,6 +326,9 @@ export const COLORES_DIAS = {
 // ============================================================
 //  ESTADO CENTRALIZADO DE LA APLICACIÓN
 // ============================================================
+/**
+ * Crea el estado inicial de la aplicación en un único objeto predecible.
+ */
 export function crearEstadoInicial() {
     return {
         usuariosRoles: [],

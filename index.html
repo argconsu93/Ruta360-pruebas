@@ -26,6 +26,7 @@
 </head>
 <body>
 
+<!-- Acceso por pasos. Se mantiene visible hasta validar una sesión. -->
 <div id="login-modal">
     <div class="login-card-container">
         <img src="assets/logo_bocadeli_blanco.png" class="login-logo" alt="Logo Bocadeli">
@@ -93,6 +94,7 @@
     </div>
 </div>
 
+<!-- Cabecera de la aplicación autenticada y accesos de sesión. -->
 <header>
     <div class="header-brand">
         <img src="assets/logo_bocadeli_blanco.png" class="header-logo" alt="Logo Bocadeli">
@@ -138,6 +140,7 @@
     </div>
 </header>
 
+<!-- Área de trabajo: controles y tablas en el panel; visualización en el mapa. -->
 <div class="main-container">
     <aside class="sidebar" id="mobile-drawer">
         <div class="drawer-handle" id="drawer-handle">
@@ -425,6 +428,7 @@
     </div>
 </div>
 
+<!-- Ventanas superpuestas para mensajes, comparación y registro de visita. -->
 <!-- MODAL REGISTRO DE VISITA Y ACTUALIZACIÓN -->
 <div class="modal-overlay" id="modal-registro-visita">
     <div class="visit-modal-card">
@@ -563,6 +567,7 @@
         </div>
     </div>
 </div>
+<!-- El módulo de arranque importa el resto y conecta todos los eventos. -->
 <script type="module" src="js/08-bootstrap.js"></script>
 </body>
 </html>

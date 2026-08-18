@@ -1,3 +1,8 @@
+/**
+ * Optimización de rutas: calcula distancias, consulta OSRM, simula recorridos y genera las descargas.
+ * Las funciones exportadas son utilizadas por otros módulos; appState concentra los datos compartidos.
+ */
+
 import {
     COLORES_DIAS, ErrorSolicitud, appState, coincideDia, escapeHTML,
     normalizarTexto, solicitarRecurso
@@ -6,6 +11,9 @@ import { obtenerValorPropiedad } from './02-data.js';
 import { generarPopupHTML } from './03-map.js';
 import { mostrarNotificacioniOS } from './07-session-export.js';
 
+/**
+ * Calcula distancia aproximada entre dos coordenadas mediante la fórmula de Haversine.
+ */
 export function calcularDistancia(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -15,6 +23,9 @@ export function calcularDistancia(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+/**
+ * Localiza el punto de partida asociado al nombre de una distribuidora.
+ */
 export function obtenerCentroideDistribuidoraPorNombre(nombreDistribuidora) {
     if (!appState.rawDistribuidoras || !appState.rawDistribuidoras.features) return null;
     const targetNorm = normalizarTexto(nombreDistribuidora);
@@ -37,12 +48,18 @@ export function obtenerCentroideDistribuidoraPorNombre(nombreDistribuidora) {
     return { lat: sumLat / coords.length, lng: sumLng / coords.length };
 }
 
+/**
+ * Convierte una duración en minutos a un texto de horas y minutos.
+ */
 export function formatearMinutosAHorasMinutos(totalMin) {
     const h = Math.floor(totalMin / 60);
     const m = Math.round(totalMin % 60);
     return `${h}h ${m}m`;
 }
 
+/**
+ * Convierte minutos desde medianoche a una hora legible de 12 horas.
+ */
 export function formatearMinutosAHora12(totalMin) {
     let totalSegundos = Math.round(totalMin * 60);
     let mAbs = Math.floor(totalSegundos / 60);
@@ -56,6 +73,9 @@ export function formatearMinutosAHora12(totalMin) {
     return `${hStr}:${mStr} ${ampm}`;
 }
 
+/**
+ * Ordena paradas y mejora el recorrido localmente para reducir distancia.
+ */
 export function optimizarSecuenciaSweep2OPT(secuenciaOriginal, puntoOrigen) {
     if (secuenciaOriginal.length <= 2) return secuenciaOriginal;
 
@@ -109,6 +129,9 @@ export function optimizarSecuenciaSweep2OPT(secuenciaOriginal, puntoOrigen) {
     return rutaIndices.slice(1).map(idx => puntos[idx]);
 }
 
+/**
+ * Prepara las paradas, consulta OSRM por día y representa el itinerario calculado.
+ */
 export async function trazarRutaOptima() {
     if (appState.rutaOptimaLayerGroup) appState.rutaOptimaLayerGroup.clearLayers();
     if (appState.clusterMarkersGroup) appState.clusterMarkersGroup.clearLayers();
@@ -342,6 +365,9 @@ export async function trazarRutaOptima() {
 // ============================================================
 //  FUNCIONES DE SIMULACIÓN DE CAMIÓN (Tolerancia 75 metros)
 // ============================================================
+/**
+ * Prepara controles, marcadores y tiempos para reproducir el recorrido.
+ */
 export function inicializarSimuladorRuta() {
     if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
     appState.simCurrentStep = 0;
@@ -366,6 +392,9 @@ export function inicializarSimuladorRuta() {
     appState.simTruckMarker = L.marker(appState.simPathCoordinates[0], { icon: truckIcon }).addTo(appState.map);
 }
 
+/**
+ * Alterna entre reproducir y pausar la simulación del vehículo.
+ */
 export function toggleSimulacionRecorrido() {
     if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
     const iconBtn = document.getElementById('sim-play-icon');
@@ -421,6 +450,9 @@ export function toggleSimulacionRecorrido() {
     }
 }
 
+/**
+ * Detiene la simulación y devuelve sus controles al estado inicial.
+ */
 export function detenerSimulacion() {
     appState.simIsPlaying = false;
     if (appState.simIntervalId) {
@@ -429,6 +461,9 @@ export function detenerSimulacion() {
     }
 }
 
+/**
+ * Mueve la simulación a la posición elegida en la barra de progreso.
+ */
 export function cambiarPasoSimulacion(valPercent) {
     if (!appState.simPathCoordinates || appState.simPathCoordinates.length === 0) return;
     detenerSimulacion();
@@ -445,6 +480,9 @@ export function cambiarPasoSimulacion(valPercent) {
 // ============================================================
 //  REDIRECCIÓN A GOOGLE MAPS MULTIPUNTO
 // ============================================================
+/**
+ * Abre el itinerario actual en Google Maps usando las paradas disponibles.
+ */
 export function abrirRutaEnGoogleMaps() {
     if (!appState.ultimaSecuenciaOptimizada || appState.ultimaSecuenciaOptimizada.length === 0) {
         mostrarNotificacioniOS("Sin Ruta", "⚠️ Primero debe optimizar una ruta para generar la guía de Google Maps.", "warning");
@@ -473,6 +511,9 @@ export function abrirRutaEnGoogleMaps() {
     window.open(gmapsUrl, '_blank');
 }
 
+/**
+ * Genera un archivo Excel con el orden y tiempos de la ruta calculada.
+ */
 export function descargarOptimizacionRuta() {
     if (!appState.ultimaSecuenciaOptimizada || appState.ultimaSecuenciaOptimizada.length === 0) {
         mostrarNotificacioniOS("Sin Datos", "⚠️ Primero debe ejecutar la 'Optimización de ruta' para generar el listado ordenado.", "warning");

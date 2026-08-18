@@ -1,3 +1,8 @@
+/**
+ * Filtros y tablas: construye opciones según permisos, aplica selecciones y actualiza indicadores y listados.
+ * Las funciones exportadas son utilizadas por otros módulos; appState concentra los datos compartidos.
+ */
+
 import {
     DIVISIONES_POR_PAIS, PAISES_MAPA_NOMBRES, appState, coincideDia,
     coincideDivision, coincideGrupo, coincidePais, coincideRuta, escapeHTML,
@@ -7,14 +12,23 @@ import { renderizarDistribuidoras, renderizarGeocercas, renderizarMarcadores } f
 import { detenerSimulacion } from './06-routing.js';
 import { mostrarNotificacioniOS, toggleDrawer } from './07-session-export.js';
 
+/**
+ * Indica si el usuario actual puede consultar más de una región o división.
+ */
 export function esRolAvanzado() {
     return appState.usuarioActual && ['Jefatura', 'Analista', 'Administrador'].includes(appState.usuarioActual.rol);
 }
 
+/**
+ * Inicializa los filtros respetando el territorio autorizado para la sesión.
+ */
 export function poblarFiltrosPermitidos() {
     poblarFiltroPais();
 }
 
+/**
+ * Construye las opciones de país disponibles para el usuario.
+ */
 export function poblarFiltroPais() {
     const selectPais = document.getElementById('select-pais');
     selectPais.innerHTML = '';
@@ -42,6 +56,9 @@ export function poblarFiltroPais() {
     actualizarOpcionesDivision();
 }
 
+/**
+ * Muestra las selecciones de país como etiquetas removibles.
+ */
 export function renderizarChipsPaises() {
     const container = document.getElementById('chips-paises');
     container.innerHTML = '';
@@ -62,6 +79,9 @@ export function renderizarChipsPaises() {
     });
 }
 
+/**
+ * Quita un país de la selección múltiple y actualiza filtros dependientes.
+ */
 export function removerPaisMultiple(pais) {
     appState.paisesSeleccionadosMultiples = appState.paisesSeleccionadosMultiples.filter(p => p !== pais);
     renderizarChipsPaises();
@@ -69,6 +89,9 @@ export function removerPaisMultiple(pais) {
     aplicarFiltros();
 }
 
+/**
+ * Recalcula divisiones válidas según los países seleccionados.
+ */
 export function actualizarOpcionesDivision() {
     const selectDiv = document.getElementById('select-division');
     selectDiv.innerHTML = '';
@@ -112,6 +135,9 @@ export function actualizarOpcionesDivision() {
     actualizarOpcionesGrupo();
 }
 
+/**
+ * Muestra las divisiones seleccionadas como etiquetas removibles.
+ */
 export function renderizarChipsDivisiones() {
     const container = document.getElementById('chips-divisiones');
     container.innerHTML = '';
@@ -132,6 +158,9 @@ export function renderizarChipsDivisiones() {
     });
 }
 
+/**
+ * Quita una división y recalcula los filtros que dependen de ella.
+ */
 export function removerDivisionMultiple(division) {
     appState.divisionesSeleccionadasMultiples = appState.divisionesSeleccionadasMultiples.filter(d => d !== division);
     renderizarChipsDivisiones();
@@ -139,6 +168,9 @@ export function removerDivisionMultiple(division) {
     aplicarFiltros();
 }
 
+/**
+ * Recalcula los grupos disponibles según el territorio seleccionado.
+ */
 export function actualizarOpcionesGrupo() {
     const selectGrupo = document.getElementById('select-grupo');
     selectGrupo.innerHTML = '<option value="TODOS">Seleccionar Grupo</option>';
@@ -193,6 +225,9 @@ export function actualizarOpcionesGrupo() {
     actualizarOpcionesRuta();
 }
 
+/**
+ * Muestra los grupos seleccionados como etiquetas removibles.
+ */
 export function renderizarChipsGrupos() {
     const container = document.getElementById('chips-grupos');
     container.innerHTML = '';
@@ -213,6 +248,9 @@ export function renderizarChipsGrupos() {
     });
 }
 
+/**
+ * Quita un grupo y refresca las rutas disponibles.
+ */
 export function removerGrupoMultiple(grupo) {
     appState.gruposSeleccionadosMultiples = appState.gruposSeleccionadosMultiples.filter(g => g !== grupo);
     renderizarChipsGrupos();
@@ -220,6 +258,9 @@ export function removerGrupoMultiple(grupo) {
     aplicarFiltros();
 }
 
+/**
+ * Recalcula las rutas que corresponden a los filtros superiores.
+ */
 export function actualizarOpcionesRuta() {
     const selectRuta = document.getElementById('select-ruta');
     selectRuta.innerHTML = '<option value="TODOS">Seleccionar Ruta</option>';
@@ -268,6 +309,9 @@ export function actualizarOpcionesRuta() {
     renderizarChipsRutas();
 }
 
+/**
+ * Muestra las rutas seleccionadas como etiquetas removibles.
+ */
 export function renderizarChipsRutas() {
     const container = document.getElementById('chips-rutas');
     container.innerHTML = '';
@@ -286,6 +330,9 @@ export function renderizarChipsRutas() {
     });
 }
 
+/**
+ * Quita una ruta de la selección y vuelve a filtrar la información.
+ */
 export function removerRutaMultiple(ruta) {
     appState.rutasSeleccionadasMultiples = appState.rutasSeleccionadasMultiples.filter(r => r !== ruta);
     renderizarChipsRutas();
@@ -295,6 +342,9 @@ export function removerRutaMultiple(ruta) {
 // ============================================================
 //  PROCESAMIENTO GENERAL DE FILTROS EN MAPA Y KPIS
 // ============================================================
+/**
+ * Ejecuta la cadena central de filtrado y actualiza mapa, tablas, leyenda e indicadores.
+ */
 export function aplicarFiltros() {
     if (appState.rutaOptimaLayerGroup) appState.rutaOptimaLayerGroup.clearLayers();
     appState.ultimaSecuenciaOptimizada = [];
@@ -401,6 +451,9 @@ export function aplicarFiltros() {
     }
 }
 
+/**
+ * Oculta filas de las tablas que no coinciden con el texto de búsqueda.
+ */
 export function filtrarTablaPorTexto() {
     clearTimeout(appState.searchDebounceTimeout);
     appState.searchDebounceTimeout = setTimeout(() => {
@@ -414,6 +467,9 @@ export function filtrarTablaPorTexto() {
     }, 150);
 }
 
+/**
+ * Reconstruye la tabla principal con los clientes filtrados.
+ */
 export function actualizarTablaClientes(clientes) {
     const tbody = document.getElementById('tabla-clientes-body');
     const subset = clientes.slice(0, 50);
@@ -435,6 +491,9 @@ export function actualizarTablaClientes(clientes) {
     tbody.innerHTML = rowsHtml;
 }
 
+/**
+ * Reconstruye la tabla de clientes ubicados fuera de las geocercas.
+ */
 export function actualizarTablaFuera(clientesFuera) {
     const tbody = document.getElementById('tabla-fuera-body');
     tbody.innerHTML = '';
@@ -454,6 +513,9 @@ export function actualizarTablaFuera(clientesFuera) {
     });
 }
 
+/**
+ * Calcula y presenta totales, visitados y porcentaje de avance.
+ */
 export function actualizarKPIsVisitas() {
     let total = appState.ultimoClientesFiltrados.length;
     let visitados = 0;
@@ -470,6 +532,9 @@ export function actualizarKPIsVisitas() {
     pText.innerText = `AVANCE DE CUMPLIMIENTO: ${porcentaje}% (${visitados}/${total})`;
 }
 
+/**
+ * Centra el mapa en un cliente y abre su marcador informativo.
+ */
 export function seleccionarClienteEnMapa(codigo) {
     const marker = appState.clienteMarkersMap[codigo];
     const clientObj = appState.rawClientes.find(c => c.codigo === codigo);
