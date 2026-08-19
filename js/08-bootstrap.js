@@ -34,6 +34,10 @@ import {
 } from './07-session-export.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+    const btnLogin = document.getElementById('btn-login');
+    btnLogin.disabled = true;
+    btnLogin.textContent = 'Cargando datos…';
+
     // Los tres modos de color son excluyentes: al activar uno se apagan los demás.
     const chkMasivos = document.getElementById('switch-canales-masivos');
     const chkEspecificos = document.getElementById('switch-canales-especificos');
@@ -241,10 +245,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-restaurar-datos').addEventListener('click', restaurarDatosOriginales);
 
     cargarDatosIniciales().then(() => {
+        appState.datosInicialesListos = true;
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Ingresar';
         const restaurados = restaurarProgresoLocal();
+
+        // Protección adicional: si una sesión ya estuviera activa al concluir
+        // la descarga, vuelve a crear grupo, ruta y la tabla con los datos reales.
+        if (appState.usuarioActual) {
+            poblarFiltrosPermitidos();
+            aplicarFiltros();
+        }
         console.log('Datos de sistema e itinerarios cargados correctamente.');
         if (restaurados > 0) console.log(`${restaurados} cambios locales restaurados.`);
     }).catch(err => {
+        appState.datosInicialesListos = false;
+        btnLogin.disabled = true;
+        btnLogin.textContent = 'Datos no disponibles';
         console.error('Error durante la inicialización:', err);
         mostrarNotificacioniOS(
             'Datos no disponibles',

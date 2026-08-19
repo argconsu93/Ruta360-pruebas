@@ -353,6 +353,7 @@ export function crearEstadoInicial() {
         rawGeocercas: { type: "FeatureCollection", features: [] },
         rawDistribuidoras: { type: "FeatureCollection", features: [] },
         rawRutasDistribuidoras: {},
+        datosInicialesListos: false,
         usuarioActual: null,
         swMasivos: false,
         swEspecificos: false,

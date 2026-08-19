@@ -275,7 +275,9 @@ export function sincronizarGruposClientes() {
  */
 export function cargarDatosIniciales() {
     const promUsuarios = cargarUsuariosDesdeCSV();
-    const promClientes = cargarClientes().catch(() => []);
+    // Los clientes son indispensables. No se oculta este error porque habilitar
+    // el acceso con una colección vacía deja grupo, ruta y tabla sin opciones.
+    const promClientes = cargarClientes();
     const promGeocercas = cargarGeoJSON('data/geocercas_rutas.geojson').catch(() => ({ type: "FeatureCollection", features: [] }));
     const promDistribuidoras = cargarGeoJSON('data/geocercas_distribuidoras.geojson').catch(() => ({ type: "FeatureCollection", features: [] }));
     const promRutasDist = cargarMapeoRutasDistribuidoras();

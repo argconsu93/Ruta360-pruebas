@@ -112,10 +112,17 @@ let browser;
   const authenticatedChecks = {
     mapInitialized: await page.locator('#map.leaflet-container').isVisible(),
     countryFilterEnabled: await page.locator('#select-pais').isEnabled(),
+    groupFilterEnabled: await page.locator('#select-grupo').isEnabled(),
+    routeFilterEnabled: await page.locator('#select-ruta').isEnabled(),
+    groupOptions: await page.locator('#select-grupo option').count(),
+    routeOptions: await page.locator('#select-ruta option').count(),
     clientRows: await page.locator('#tabla-clientes-body tr').count(),
   };
 
-  if (!authenticatedChecks.mapInitialized || !authenticatedChecks.countryFilterEnabled || authenticatedChecks.clientRows < 1) {
+  if (!authenticatedChecks.mapInitialized || !authenticatedChecks.countryFilterEnabled ||
+      !authenticatedChecks.groupFilterEnabled || !authenticatedChecks.routeFilterEnabled ||
+      authenticatedChecks.groupOptions < 2 || authenticatedChecks.routeOptions < 2 ||
+      authenticatedChecks.clientRows < 1) {
     throw new Error(`Fallo después del login: ${JSON.stringify(authenticatedChecks)}`);
   }
 

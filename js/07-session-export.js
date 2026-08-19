@@ -39,6 +39,14 @@ export function validarLogin() {
     const nombreSel = document.getElementById('select-usuario-login').value;
     const passInput = document.getElementById('input-password').value.trim().toLowerCase();
     const errorDiv = document.getElementById('login-error');
+
+    // clientes.csv puede tardar por su tamaño. Evita construir filtros vacíos
+    // si el usuario intenta ingresar antes de que finalice la carga principal.
+    if (!appState.datosInicialesListos) {
+        errorDiv.textContent = "⏳ Los clientes todavía se están cargando. Espere un momento e intente nuevamente.";
+        errorDiv.style.display = 'block';
+        return;
+    }
     
     if (!nombreSel) {
         errorDiv.textContent = "⚠️ Por favor seleccione su nombre.";
