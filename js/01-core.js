@@ -358,7 +358,9 @@ export function crearEstadoInicial() {
         swMasivos: false,
         swEspecificos: false,
         swTipoZona: false,
-        diaSeleccionado: 'TODOS',
+        // Ningún día se filtra al arrancar para evitar renderizar todos los
+        // clientes antes de que el usuario indique qué jornada necesita.
+        diaSeleccionado: 'NINGUNO',
         map: null,
         clusterMarkersGroup: null,
         geocercasLayerGroup: null,

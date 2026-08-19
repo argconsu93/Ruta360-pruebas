@@ -79,6 +79,8 @@ export function validarLogin() {
 
         appState.gruposSeleccionadosMultiples = (appState.usuarioActual.grupo && appState.usuarioActual.grupo !== 'TODOS') ? [normalizarNombreGrupo(appState.usuarioActual.grupo)] : [];
         appState.rutasSeleccionadasMultiples = [];
+        appState.diaSeleccionado = 'NINGUNO';
+        document.querySelectorAll('.btn-day').forEach(btn => btn.classList.remove('active'));
 
         inicializarMapa();
         poblarFiltrosPermitidos();

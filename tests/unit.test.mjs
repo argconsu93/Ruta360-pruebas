@@ -26,7 +26,7 @@ assert.equal(evaluate('appState.usuarioActual'), null);
 assert.equal(evaluate('appState.usuariosRoles.length'), 0);
 assert.equal(evaluate('appState.esAccesoRegional'), false);
 assert.equal(evaluate('appState.respaldoCargaTemporal'), null);
-assert.equal(evaluate("appState.diaSeleccionado"), 'TODOS');
+assert.equal(evaluate("appState.diaSeleccionado"), 'NINGUNO');
 evaluate("appState.rawClientes.push({ codigo: 'QA-STATE' })");
 assert.equal(evaluate('appState.rawClientes[0].codigo'), 'QA-STATE');
 assert.equal(evaluate('crearEstadoInicial().rawClientes.length'), 0, 'El estado inicial no debe compartir arreglos mutados');
@@ -123,5 +123,16 @@ const optimizedCodes = evaluate(`
   ).map((cliente) => cliente.codigo).sort().join(',')
 `);
 assert.equal(optimizedCodes, 'A,B,C');
+
+const farthestFirst = evaluate(`
+  optimizarSecuenciaSweep2OPT(
+    [
+      { codigo: 'CERCA', lat: 0, lng: 0.01 },
+      { codigo: 'LEJOS', lat: 0, lng: 0.10 }
+    ],
+    { lat: 0, lng: 0 }
+  ).map((cliente) => cliente.codigo).join(',')
+`);
+assert.equal(farthestFirst, 'LEJOS,CERCA', 'La ruta debe iniciar lejos y terminar cerca de la distribuidora');
 
 console.log('Pruebas unitarias superadas');
