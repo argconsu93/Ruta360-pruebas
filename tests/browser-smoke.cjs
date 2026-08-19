@@ -103,7 +103,7 @@ let browser;
   }
 
   await page.locator('[data-action="regional-access"]').click();
-  await page.locator('#select-usuario-login').selectOption({ label: 'Usuario QA (Administrador - TODOS)' });
+  await page.locator('#select-usuario-login').selectOption({ value: 'Usuario QA' });
   await page.locator('#input-password').fill('prueba');
   await page.locator('#btn-login').click();
   await page.locator('#login-modal').waitFor({ state: 'hidden' });

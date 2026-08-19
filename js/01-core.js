@@ -107,7 +107,9 @@ export function poblarUsuariosPorDivision(division) {
     sorted.forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.nombre;
-        opt.textContent = `${u.nombre} (${u.rol} - ${u.division})`;
+        // El selector solo presenta el nombre; rol y división permanecen en el estado
+        // para validar permisos después de que el usuario inicia sesión.
+        opt.textContent = u.nombre;
         opt.style.color = '#0f172a';
         selectLogin.appendChild(opt);
     });

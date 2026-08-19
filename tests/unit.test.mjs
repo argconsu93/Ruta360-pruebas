@@ -63,6 +63,27 @@ assert.equal(evaluate("coincideGrupo('GRUPO 04', { grupo: 'GRUPO_04' })"), true)
 assert.equal(evaluate("coincideRuta('r-101', { ruta: 'R-101' })"), true);
 assert.equal(evaluate("coincideDia('miercoles', { _diaNorm: '3' })"), true);
 
+context.loginSelect = {
+  innerHTML: '',
+  children: [],
+  appendChild(option) { this.children.push(option); },
+};
+context.document = {
+  getElementById: () => context.loginSelect,
+  createElement: () => ({ style: {} }),
+};
+evaluate(`
+  appState.esAccesoRegional = true;
+  appState.usuariosRoles = [{
+    nombre: 'Usuario QA', pais: 'TODOS', division: 'SV Centro', rol: 'Supervisor'
+  }];
+  poblarUsuariosPorDivision('TODOS');
+`);
+assert.equal(evaluate('loginSelect.children[0].value'), 'Usuario QA');
+assert.equal(evaluate('loginSelect.children[0].textContent'), 'Usuario QA', 'El login solo debe mostrar el nombre');
+assert.ok(!evaluate("loginSelect.children[0].textContent.includes('Supervisor')"), 'El login no debe mostrar el rol');
+assert.ok(!evaluate("loginSelect.children[0].textContent.includes('SV Centro')"), 'El login no debe mostrar la división');
+
 const zeroDistance = evaluate('calcularDistancia(13.7, -89.2, 13.7, -89.2)');
 assert.equal(zeroDistance, 0);
 const knownDistance = evaluate('calcularDistancia(13.6929, -89.2182, 14.6349, -90.5069)');
