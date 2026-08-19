@@ -11,7 +11,8 @@ import { cargarDatosIniciales } from './02-data.js';
 import {
     abrirModalVisitaCliente, capturarCoordenadasGPS, cerrarModalConfirmacion,
     cerrarModalVisita, ejecutarGuardadoDefinitivo, evaluarCambioDataCliente,
-    formatearDecimalesVenta, gestionarCambioTipoVisita, solicitarConfirmacionGuardar
+    formatearDecimalesVenta, gestionarCambioEstadoCliente, gestionarCambioTipoVisita,
+    restaurarProgresoLocal, solicitarConfirmacionGuardar, toggleResultadoVisita
 } from './04-visits.js';
 import {
     actualizarOpcionesDivision, actualizarOpcionesGrupo, actualizarOpcionesRuta,
@@ -33,6 +34,10 @@ import {
 } from './07-session-export.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+    const btnLogin = document.getElementById('btn-login');
+    btnLogin.disabled = true;
+    btnLogin.textContent = 'Cargando datos…';
+
     // Los tres modos de color son excluyentes: al activar uno se apagan los demás.
     const chkMasivos = document.getElementById('switch-canales-masivos');
     const chkEspecificos = document.getElementById('switch-canales-especificos');
@@ -106,6 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'request-save-visit': solicitarConfirmacionGuardar,
             'close-confirmation': cerrarModalConfirmacion,
             'confirm-save-visit': ejecutarGuardadoDefinitivo,
+            'toggle-visit-result': toggleResultadoVisita,
         };
 
         if (actionElement.dataset.action === 'select-client') {
@@ -137,6 +143,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="radio-visita"]').forEach(input => {
         input.addEventListener('change', function() {
             gestionarCambioTipoVisita(this.value);
+        });
+    });
+    document.querySelectorAll('input[name="radio-estado-cliente"]').forEach(input => {
+        input.addEventListener('change', function() {
+            gestionarCambioEstadoCliente(this.value);
         });
     });
     ['edit-dia-visita', 'edit-nombre-tienda', 'edit-telefono-cliente', 'edit-direccion-cliente'].forEach(id => {
@@ -234,8 +245,23 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-restaurar-datos').addEventListener('click', restaurarDatosOriginales);
 
     cargarDatosIniciales().then(() => {
+        appState.datosInicialesListos = true;
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Ingresar';
+        const restaurados = restaurarProgresoLocal();
+
+        // Protección adicional: si una sesión ya estuviera activa al concluir
+        // la descarga, vuelve a crear grupo, ruta y la tabla con los datos reales.
+        if (appState.usuarioActual) {
+            poblarFiltrosPermitidos();
+            aplicarFiltros();
+        }
         console.log('Datos de sistema e itinerarios cargados correctamente.');
+        if (restaurados > 0) console.log(`${restaurados} cambios locales restaurados.`);
     }).catch(err => {
+        appState.datosInicialesListos = false;
+        btnLogin.disabled = true;
+        btnLogin.textContent = 'Datos no disponibles';
         console.error('Error durante la inicialización:', err);
         mostrarNotificacioniOS(
             'Datos no disponibles',

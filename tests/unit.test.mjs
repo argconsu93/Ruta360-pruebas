@@ -36,6 +36,8 @@ assert.equal(evaluate("normalizarNombreGrupo('GRUPO_07')"), 'GRUPO 07');
 assert.equal(evaluate("normalizarNombreGrupo('sin grupo')"), 'Sin Grupo');
 assert.equal(evaluate("parsearFloatSeguro('13,7012')"), 13.7012);
 assert.equal(evaluate("parsearFloatSeguro('no-numero')"), null);
+assert.equal(evaluate("crearEtiquetaRutas([{ ruta: '1.1.21' }])"), '1.1.21');
+assert.equal(evaluate("crearEtiquetaRutas([{ ruta: 'Ruta / Especial' }])"), 'Ruta_Especial');
 assert.doesNotThrow(() => evaluate("validarArchivoCarga({ name: 'clientes.csv', size: 1024 }, { extensiones: ['.csv'], maxBytes: 2048 })"));
 assert.throws(
   () => evaluate("validarArchivoCarga({ name: 'clientes.xlsx', size: 1024 }, { extensiones: ['.csv'], maxBytes: 2048 })"),

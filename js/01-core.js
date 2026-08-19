@@ -248,6 +248,17 @@ export function escapeHTML(value) {
 }
 
 /**
+ * Crea una etiqueta segura con las rutas presentes para incorporarla a archivos descargados.
+ */
+export function crearEtiquetaRutas(clientes = []) {
+    const rutasFiltro = appState.rutasSeleccionadasMultiples || [];
+    const rutasDatos = clientes.map(cliente => cliente?.ruta).filter(Boolean);
+    const rutas = [...new Set((rutasFiltro.length ? rutasFiltro : rutasDatos).map(String))].sort();
+    const texto = rutas.length === 0 ? 'Sin_Ruta' : rutas.length <= 3 ? rutas.join('-') : 'Multiples_Rutas';
+    return texto.replace(/[^a-zA-Z0-9._-]+/g, '_');
+}
+
+/**
  * Indica si un cliente pertenece al país seleccionado.
  */
 export function coincidePais(pSelNorm, c) {
@@ -342,6 +353,7 @@ export function crearEstadoInicial() {
         rawGeocercas: { type: "FeatureCollection", features: [] },
         rawDistribuidoras: { type: "FeatureCollection", features: [] },
         rawRutasDistribuidoras: {},
+        datosInicialesListos: false,
         usuarioActual: null,
         swMasivos: false,
         swEspecificos: false,

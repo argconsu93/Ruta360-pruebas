@@ -83,7 +83,7 @@
                 </div>
             </div>
             <div id="login-error">⚠️ Contraseña incorrecta. Intente nuevamente.</div>
-            <button class="login-btn" id="btn-login" style="margin-top: 14px;">Ingresar</button>
+            <button class="login-btn" id="btn-login" style="margin-top: 14px;" disabled>Cargando datos…</button>
             
             <div style="margin-top: 12px; text-align: center;">
                 <button class="btn-back-step" id="btn-back-from-login" data-action="back-login"><i class="fa-solid fa-arrow-left"></i> Volver Atrás</button>
@@ -445,9 +445,21 @@
             </div>
 
             <div>
-                <div class="form-section-title"><i class="fa-solid fa-square-poll-vertical"></i> Resultado de la Visita</div>
-                
-                <div class="options-group-box">
+                <div class="form-section-title"><i class="fa-solid fa-store"></i> Estado actual del cliente</div>
+                <div class="client-status-grid">
+                    <label class="client-status-option"><input type="radio" name="radio-estado-cliente" value="ACTIVO"> Cliente aún activo</label>
+                    <label class="client-status-option"><input type="radio" name="radio-estado-cliente" value="NO_EXISTE"> Cliente ya no existe</label>
+                    <label class="client-status-option"><input type="radio" name="radio-estado-cliente" value="DUPLICADO"> Cliente duplicado</label>
+                    <label class="client-status-option"><input type="radio" name="radio-estado-cliente" value="OTRA_RUTA"> Cliente de otra ruta</label>
+                </div>
+            </div>
+
+            <div>
+                <button type="button" class="visit-accordion-toggle" data-action="toggle-visit-result" aria-expanded="false">
+                    <span><i class="fa-solid fa-square-poll-vertical"></i> Resultado de la visita <small>(opcional)</small></span>
+                    <i class="fa-solid fa-chevron-down visit-accordion-icon"></i>
+                </button>
+                <div class="options-group-box visit-accordion-content" id="visit-result-content">
                     <div class="radio-options-row">
                         <span style="font-size: 0.82rem; font-weight: 700; color: #334155;">Visita efectiva:</span>
                         <label class="radio-label">
@@ -504,7 +516,7 @@
                 </div>
             </div>
 
-            <div>
+            <div id="section-cliente-activo" class="client-status-detail">
                 <div class="form-section-title"><i class="fa-solid fa-user-pen"></i> Actualizar Información del Cliente</div>
                 
                 <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -545,6 +557,30 @@
                             <i class="fa-solid fa-location-crosshairs"></i> Capturar GPS
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <div id="section-cliente-duplicado" class="client-status-detail options-group-box">
+                <div class="form-section-title"><i class="fa-solid fa-clone"></i> Información del cliente duplicado</div>
+                <div class="input-form-group">
+                    <label>Código del cliente duplicado:</label>
+                    <input type="text" id="duplicado-codigo" class="input-form-control" placeholder="Ingrese el código relacionado">
+                </div>
+                <div class="input-form-group">
+                    <label>Nombre del cliente duplicado:</label>
+                    <input type="text" id="duplicado-nombre" class="input-form-control" placeholder="Ingrese el nombre relacionado">
+                </div>
+            </div>
+
+            <div id="section-cliente-otra-ruta" class="client-status-detail options-group-box">
+                <div class="form-section-title"><i class="fa-solid fa-route"></i> Ruta correcta del cliente</div>
+                <div class="input-form-group">
+                    <label>Código de la ruta:</label>
+                    <input type="text" id="otra-ruta-codigo" class="input-form-control" placeholder="Ej: 1.1.21">
+                </div>
+                <div class="input-form-group">
+                    <label>Nombre de la ruta:</label>
+                    <input type="text" id="otra-ruta-nombre" class="input-form-control" placeholder="Ingrese el nombre de la ruta">
                 </div>
             </div>
         </div>
