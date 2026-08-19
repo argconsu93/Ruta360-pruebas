@@ -152,7 +152,7 @@ let browser;
     mimeType: 'text/csv',
     buffer: Buffer.from([
       'CodigoCliente,NombreCliente,Grupo,Ruta,Dia,Latitud,Longitud,Direccion,Telefono,Pais,Division',
-      'TMP-001,Cliente temporal,GRUPO 09,TMP-01,Martes,13.7200,-89.2200,Dirección temporal,2222-9999,El Salvador,SV Centro',
+      'TMP-001,Cliente temporal,GRUPO 09,TMP-01,Lunes,13.7200,-89.2200,Dirección temporal,2222-9999,El Salvador,SV Centro',
     ].join('\n')),
   });
   await page.waitForFunction(() =>
