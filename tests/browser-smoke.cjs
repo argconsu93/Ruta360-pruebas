@@ -167,6 +167,9 @@ let browser;
     const { abrirModalVisitaCliente } = await import('/js/04-visits.js');
     abrirModalVisitaCliente('QA-001');
   });
+  if (await page.locator('#visit-result-content').isVisible()) {
+    throw new Error('El resultado de visita debe iniciar cerrado');
+  }
   await page.locator('input[name="radio-estado-cliente"][value="DUPLICADO"]').check();
   if (!await page.locator('#section-cliente-duplicado').isVisible()) throw new Error('No se mostró el formulario de duplicado');
   await page.locator('input[name="radio-estado-cliente"][value="OTRA_RUTA"]').check();
@@ -184,6 +187,12 @@ let browser;
   await page.locator('[data-action="confirm-save-visit"]').click();
   await page.waitForFunction(() => document.querySelector('#kpi-visitados').textContent.trim() === '1');
   await page.waitForFunction(() => document.querySelector('#ios-notif-title').textContent.includes('Registro Exitoso'));
+  if (!await page.locator('#ios-notif-overlay').isVisible()) {
+    throw new Error('La confirmación de guardado no quedó visible');
+  }
+  if (!await page.locator('#ios-notif-body').textContent().then(text => text.includes('quedó guardado'))) {
+    throw new Error('La confirmación no informó que el cambio quedó guardado');
+  }
   if (!await page.evaluate(() => Boolean(localStorage.getItem('ruta360-progreso-visitas-v1')))) {
     throw new Error('El progreso de visita no quedó guardado en el navegador');
   }

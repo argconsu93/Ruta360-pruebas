@@ -378,8 +378,9 @@
         .visit-accordion-toggle small { color: #64748b; font-size: 0.62rem; }
         .visit-accordion-icon { transition: transform 0.2s ease; }
         .visit-accordion-toggle[aria-expanded="true"] .visit-accordion-icon { transform: rotate(180deg); }
-        .visit-accordion-content { display: none; margin-top: 8px; }
-        .visit-accordion-content.open { display: flex; }
+        /* La especificidad evita que .options-group-box vuelva a mostrar el panel cerrado. */
+        .options-group-box.visit-accordion-content { display: none; margin-top: 8px; }
+        .options-group-box.visit-accordion-content.open { display: flex; }
         .options-group-box {
             background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;
             display: flex; flex-direction: column; gap: 8px;

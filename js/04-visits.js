@@ -308,11 +308,12 @@ export function ejecutarGuardadoDefinitivo() {
     appState.clienteEnEdicion._diaNorm = normalizarTexto(appState.clienteEnEdicion.dia);
     appState.clienteEnEdicion._searchCache = (appState.clienteEnEdicion.nombre + ' ' + appState.clienteEnEdicion.codigo).toLowerCase();
 
-    cambiarEstadoVisitado(cod, true);
+    // Primero se conserva el dato y se confirma al usuario. Las actualizaciones
+    // visuales posteriores no deben impedir que aparezca el mensaje de éxito.
+    appState.clientesVisitadosMap.set(cod, true);
     guardarProgresoLocal();
     cerrarModalConfirmacion();
     cerrarModalVisita();
-    aplicarFiltros();
 
     const mensajesEstado = {
         ACTIVO: huboActualizacionCliente ? 'Cliente activo y datos actualizados' : 'Cliente activo confirmado',
@@ -323,6 +324,13 @@ export function ejecutarGuardadoDefinitivo() {
     const notifText = `${mensajesEstado[estadoCliente]}. El cambio del cliente ${cod} quedó guardado en este navegador.`;
 
     mostrarNotificacioniOS("Registro Exitoso", notifText, 'success');
+
+    try {
+        cambiarEstadoVisitado(cod, true);
+        aplicarFiltros();
+    } catch (error) {
+        console.error('El registro se guardó, pero no fue posible refrescar toda la interfaz:', error);
+    }
 }
 
 /**
