@@ -227,8 +227,8 @@ const camposGestionCliente = (detalle = {}) => ({
     "Estado actual del cliente": detalle.estadoCliente || '',
     "Código cliente duplicado": detalle.duplicadoCodigo || '',
     "Nombre cliente duplicado": detalle.duplicadoNombre || '',
-    "Código ruta correcta": detalle.otraRutaCodigo || '',
-    "Nombre ruta correcta": detalle.otraRutaNombre || ''
+    "Código cliente de otra ruta": detalle.otraRutaCodigo || '',
+    "Nombre cliente de otra ruta": detalle.otraRutaNombre || ''
 });
 
 /**
