@@ -360,6 +360,26 @@
             border-bottom: 2px solid #eff6ff; padding-bottom: 4px; margin-bottom: 8px;
             display: flex; align-items: center; gap: 6px;
         }
+        .client-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .client-status-option {
+            border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #f8fafc;
+            color: #334155; font-size: 0.76rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 7px; transition: all 0.2s ease;
+        }
+        .client-status-option:has(input:checked) { border-color: #2563eb; background: #eff6ff; color: #1e3a8a; }
+        .client-status-option input { accent-color: #2563eb; }
+        .client-status-detail { display: none; flex-direction: column; gap: 8px; }
+        .visit-accordion-toggle {
+            width: 100%; border: none; border-bottom: 2px solid #eff6ff; background: transparent;
+            color: #1e3a8a; padding: 4px 0 7px; display: flex; align-items: center;
+            justify-content: space-between; font-size: 0.78rem; font-weight: 800;
+            text-transform: uppercase; cursor: pointer;
+        }
+        .visit-accordion-toggle small { color: #64748b; font-size: 0.62rem; }
+        .visit-accordion-icon { transition: transform 0.2s ease; }
+        .visit-accordion-toggle[aria-expanded="true"] .visit-accordion-icon { transform: rotate(180deg); }
+        .visit-accordion-content { display: none; margin-top: 8px; }
+        .visit-accordion-content.open { display: flex; }
         .options-group-box {
             background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;
             display: flex; flex-direction: column; gap: 8px;
@@ -441,6 +461,7 @@
             .header-title-text { font-size: 0.88rem; }
             .header-sub-text { font-size: 0.68rem; }
             .checkbox-grid { grid-template-columns: 1fr; }
+            .client-status-grid { grid-template-columns: 1fr; }
         }
     
         /* Interruptores visuales para elegir una sola categorización del mapa. */

@@ -8,6 +8,72 @@ import { generarPopupHTML } from './03-map.js';
 import { aplicarFiltros, actualizarKPIsVisitas } from './05-filters.js';
 import { mostrarNotificacioniOS } from './07-session-export.js';
 
+const STORAGE_KEY_PROGRESO = 'ruta360-progreso-visitas-v1';
+
+const obtenerEstadoClienteSeleccionado = () =>
+    document.querySelector('input[name="radio-estado-cliente"]:checked')?.value || '';
+
+/**
+ * Muestra únicamente el formulario relacionado con el estado elegido para el cliente.
+ */
+export function gestionarCambioEstadoCliente(estado) {
+    document.getElementById('section-cliente-activo').style.display = estado === 'ACTIVO' ? 'flex' : 'none';
+    document.getElementById('section-cliente-duplicado').style.display = estado === 'DUPLICADO' ? 'flex' : 'none';
+    document.getElementById('section-cliente-otra-ruta').style.display = estado === 'OTRA_RUTA' ? 'flex' : 'none';
+}
+
+/**
+ * Abre o cierra los campos opcionales del resultado comercial de la visita.
+ */
+export function toggleResultadoVisita() {
+    const button = document.querySelector('[data-action="toggle-visit-result"]');
+    const content = document.getElementById('visit-result-content');
+    const abrir = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', String(abrir));
+    content.classList.toggle('open', abrir);
+}
+
+/**
+ * Guarda en el navegador únicamente el progreso generado durante las visitas.
+ */
+export function guardarProgresoLocal() {
+    try {
+        localStorage.setItem(STORAGE_KEY_PROGRESO, JSON.stringify({
+            version: 1,
+            guardadoEn: new Date().toISOString(),
+            visitados: [...appState.clientesVisitadosMap.entries()],
+            detalles: [...appState.registroVisitasDetalleMap.entries()]
+        }));
+    } catch (error) {
+        console.warn('No fue posible guardar el progreso local:', error);
+    }
+}
+
+/**
+ * Recupera visitas y cambios de clientes después de una recarga del navegador.
+ */
+export function restaurarProgresoLocal() {
+    try {
+        const progreso = JSON.parse(localStorage.getItem(STORAGE_KEY_PROGRESO) || 'null');
+        if (!progreso || progreso.version !== 1) return 0;
+        appState.clientesVisitadosMap = new Map(progreso.visitados || []);
+        appState.registroVisitasDetalleMap = new Map(progreso.detalles || []);
+        let restaurados = 0;
+        appState.registroVisitasDetalleMap.forEach((detalle, codigo) => {
+            const cliente = appState.rawClientes.find(c => c.codigo === codigo);
+            if (!cliente || !detalle.clienteActualizado) return;
+            Object.assign(cliente, detalle.clienteActualizado);
+            cliente._diaNorm = normalizarTexto(cliente.dia);
+            cliente._searchCache = `${cliente.nombre} ${cliente.codigo}`.toLowerCase();
+            restaurados++;
+        });
+        return restaurados;
+    } catch (error) {
+        console.warn('No fue posible restaurar el progreso local:', error);
+        return 0;
+    }
+}
+
 /**
  * Carga los datos de un cliente y abre el formulario de registro de visita.
  */
@@ -31,6 +97,16 @@ export function abrirModalVisitaCliente(codigo) {
     document.getElementById('txt-coords-actuales-display').textContent = `Lat: ${client.lat ? client.lat.toFixed(5) : '-'}, Lng: ${client.lng ? client.lng.toFixed(5) : '-'}`;
 
     const prevData = appState.registroVisitasDetalleMap.get(codigo);
+    document.querySelectorAll('input[name="radio-estado-cliente"]').forEach(radio => {
+        radio.checked = radio.value === (prevData?.estadoCliente || '');
+    });
+    gestionarCambioEstadoCliente(prevData?.estadoCliente || '');
+    document.getElementById('duplicado-codigo').value = prevData?.duplicadoCodigo || '';
+    document.getElementById('duplicado-nombre').value = prevData?.duplicadoNombre || '';
+    document.getElementById('otra-ruta-codigo').value = prevData?.otraRutaCodigo || '';
+    document.getElementById('otra-ruta-nombre').value = prevData?.otraRutaNombre || '';
+    document.querySelector('[data-action="toggle-visit-result"]').setAttribute('aria-expanded', 'false');
+    document.getElementById('visit-result-content').classList.remove('open');
     if (prevData) {
         const radios = document.getElementsByName('radio-visita');
         radios.forEach(r => { if (r.value === prevData.tipoVisita) r.checked = true; });
@@ -140,6 +216,19 @@ export function cerrarModalVisita() {
  * Valida el formulario y abre la confirmación antes de modificar datos.
  */
 export function solicitarConfirmacionGuardar() {
+    const estado = obtenerEstadoClienteSeleccionado();
+    if (!estado) {
+        mostrarNotificacioniOS('Estado requerido', 'Seleccione el estado actual del cliente antes de guardar.', 'warning');
+        return;
+    }
+    if (estado === 'DUPLICADO' && (!document.getElementById('duplicado-codigo').value.trim() || !document.getElementById('duplicado-nombre').value.trim())) {
+        mostrarNotificacioniOS('Datos incompletos', 'Ingrese el código y el nombre del cliente duplicado.', 'warning');
+        return;
+    }
+    if (estado === 'OTRA_RUTA' && (!document.getElementById('otra-ruta-codigo').value.trim() || !document.getElementById('otra-ruta-nombre').value.trim())) {
+        mostrarNotificacioniOS('Datos incompletos', 'Ingrese el código y el nombre de la ruta correcta.', 'warning');
+        return;
+    }
     document.getElementById('modal-confirmar-guardar').style.display = 'flex';
 }
 
@@ -156,6 +245,7 @@ export function cerrarModalConfirmacion() {
 export function ejecutarGuardadoDefinitivo() {
     if (!appState.clienteEnEdicion) return;
     const cod = appState.clienteEnEdicion.codigo;
+    const estadoCliente = obtenerEstadoClienteSeleccionado();
 
     const nomNuevo = document.getElementById('edit-nombre-tienda').value.trim();
     const diaNuevo = document.getElementById('edit-dia-visita').value;
@@ -186,31 +276,51 @@ export function ejecutarGuardadoDefinitivo() {
     const obsVal = document.getElementById('txt-observacion-visita').value.trim();
 
     appState.registroVisitasDetalleMap.set(cod, {
+        estadoCliente,
+        duplicadoCodigo: estadoCliente === 'DUPLICADO' ? document.getElementById('duplicado-codigo').value.trim() : '',
+        duplicadoNombre: estadoCliente === 'DUPLICADO' ? document.getElementById('duplicado-nombre').value.trim() : '',
+        otraRutaCodigo: estadoCliente === 'OTRA_RUTA' ? document.getElementById('otra-ruta-codigo').value.trim() : '',
+        otraRutaNombre: estadoCliente === 'OTRA_RUTA' ? document.getElementById('otra-ruta-nombre').value.trim() : '',
         tipoVisita: tipoVisita,
         totalVenta: totalVentaVal ? parseFloat(totalVentaVal).toFixed(2) : '0.00',
         motivos: motivosSel,
         observacion: obsVal,
-        fechaHora: new Date().toLocaleString()
+        fechaHora: new Date().toLocaleString(),
+        clienteActualizado: estadoCliente === 'ACTIVO' ? {
+            nombre: nomNuevo || appState.clienteEnEdicion.nombre,
+            dia: diaNuevo,
+            telefono: telNuevo || 'Sin teléfono',
+            direccion: dirNuevo || appState.clienteEnEdicion.direccion,
+            lat: appState.tempGpsLat,
+            lng: appState.tempGpsLng
+        } : null
     });
 
-    appState.clienteEnEdicion.nombre = nomNuevo || appState.clienteEnEdicion.nombre;
-    appState.clienteEnEdicion.dia = diaNuevo;
-    appState.clienteEnEdicion.telefono = telNuevo || 'Sin teléfono';
-    appState.clienteEnEdicion.direccion = dirNuevo || appState.clienteEnEdicion.direccion;
-    appState.clienteEnEdicion.lat = appState.tempGpsLat;
-    appState.clienteEnEdicion.lng = appState.tempGpsLng;
+    if (estadoCliente === 'ACTIVO') {
+        appState.clienteEnEdicion.nombre = nomNuevo || appState.clienteEnEdicion.nombre;
+        appState.clienteEnEdicion.dia = diaNuevo;
+        appState.clienteEnEdicion.telefono = telNuevo || 'Sin teléfono';
+        appState.clienteEnEdicion.direccion = dirNuevo || appState.clienteEnEdicion.direccion;
+        appState.clienteEnEdicion.lat = appState.tempGpsLat;
+        appState.clienteEnEdicion.lng = appState.tempGpsLng;
+    }
 
     appState.clienteEnEdicion._diaNorm = normalizarTexto(appState.clienteEnEdicion.dia);
     appState.clienteEnEdicion._searchCache = (appState.clienteEnEdicion.nombre + ' ' + appState.clienteEnEdicion.codigo).toLowerCase();
 
     cambiarEstadoVisitado(cod, true);
+    guardarProgresoLocal();
     cerrarModalConfirmacion();
     cerrarModalVisita();
     aplicarFiltros();
 
-    let notifText = huboActualizacionCliente 
-        ? `Información del cliente ${cod} guardada y actualizada correctamente.`
-        : `Información del cliente ${cod} guardada correctamente.`;
+    const mensajesEstado = {
+        ACTIVO: huboActualizacionCliente ? 'Cliente activo y datos actualizados' : 'Cliente activo confirmado',
+        NO_EXISTE: 'Cliente marcado como inexistente',
+        DUPLICADO: 'Cliente duplicado registrado',
+        OTRA_RUTA: 'Cambio de ruta solicitado'
+    };
+    const notifText = `${mensajesEstado[estadoCliente]}. El cambio del cliente ${cod} quedó guardado en este navegador.`;
 
     mostrarNotificacioniOS("Registro Exitoso", notifText, 'success');
 }

@@ -11,7 +11,8 @@ import { cargarDatosIniciales } from './02-data.js';
 import {
     abrirModalVisitaCliente, capturarCoordenadasGPS, cerrarModalConfirmacion,
     cerrarModalVisita, ejecutarGuardadoDefinitivo, evaluarCambioDataCliente,
-    formatearDecimalesVenta, gestionarCambioTipoVisita, solicitarConfirmacionGuardar
+    formatearDecimalesVenta, gestionarCambioEstadoCliente, gestionarCambioTipoVisita,
+    restaurarProgresoLocal, solicitarConfirmacionGuardar, toggleResultadoVisita
 } from './04-visits.js';
 import {
     actualizarOpcionesDivision, actualizarOpcionesGrupo, actualizarOpcionesRuta,
@@ -106,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'request-save-visit': solicitarConfirmacionGuardar,
             'close-confirmation': cerrarModalConfirmacion,
             'confirm-save-visit': ejecutarGuardadoDefinitivo,
+            'toggle-visit-result': toggleResultadoVisita,
         };
 
         if (actionElement.dataset.action === 'select-client') {
@@ -137,6 +139,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="radio-visita"]').forEach(input => {
         input.addEventListener('change', function() {
             gestionarCambioTipoVisita(this.value);
+        });
+    });
+    document.querySelectorAll('input[name="radio-estado-cliente"]').forEach(input => {
+        input.addEventListener('change', function() {
+            gestionarCambioEstadoCliente(this.value);
         });
     });
     ['edit-dia-visita', 'edit-nombre-tienda', 'edit-telefono-cliente', 'edit-direccion-cliente'].forEach(id => {
@@ -234,7 +241,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-restaurar-datos').addEventListener('click', restaurarDatosOriginales);
 
     cargarDatosIniciales().then(() => {
+        const restaurados = restaurarProgresoLocal();
         console.log('Datos de sistema e itinerarios cargados correctamente.');
+        if (restaurados > 0) console.log(`${restaurados} cambios locales restaurados.`);
     }).catch(err => {
         console.error('Error durante la inicialización:', err);
         mostrarNotificacioniOS(

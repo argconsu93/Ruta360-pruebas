@@ -167,14 +167,26 @@ let browser;
     const { abrirModalVisitaCliente } = await import('/js/04-visits.js');
     abrirModalVisitaCliente('QA-001');
   });
+  await page.locator('input[name="radio-estado-cliente"][value="DUPLICADO"]').check();
+  if (!await page.locator('#section-cliente-duplicado').isVisible()) throw new Error('No se mostró el formulario de duplicado');
+  await page.locator('input[name="radio-estado-cliente"][value="OTRA_RUTA"]').check();
+  if (!await page.locator('#section-cliente-otra-ruta').isVisible()) throw new Error('No se mostró el formulario de otra ruta');
+  await page.locator('input[name="radio-estado-cliente"][value="NO_EXISTE"]').check();
+  if (await page.locator('#section-cliente-activo').isVisible()) throw new Error('Cliente inexistente mostró campos adicionales');
+  await page.locator('input[name="radio-estado-cliente"][value="ACTIVO"]').check();
   await page.locator('[data-action="capture-gps"]').click();
   await page.waitForFunction(() => document.querySelector('#txt-coords-actuales-display').textContent.includes('Nuevas GPS'));
   await page.locator('#btn-close-ios-notif').click();
+  await page.locator('[data-action="toggle-visit-result"]').click();
   await page.locator('input[name="radio-visita"][value="SI"]').check();
   await page.locator('#input-total-venta').fill('125.5');
   await page.locator('[data-action="request-save-visit"]').click();
   await page.locator('[data-action="confirm-save-visit"]').click();
   await page.waitForFunction(() => document.querySelector('#kpi-visitados').textContent.trim() === '1');
+  await page.waitForFunction(() => document.querySelector('#ios-notif-title').textContent.includes('Registro Exitoso'));
+  if (!await page.evaluate(() => Boolean(localStorage.getItem('ruta360-progreso-visitas-v1')))) {
+    throw new Error('El progreso de visita no quedó guardado en el navegador');
+  }
   await page.locator('#btn-close-ios-notif').click();
 
   await page.evaluate(() => {
@@ -185,6 +197,9 @@ let browser;
   await page.waitForFunction(() =>
     window.__qaDownloads.some((filename) => /visitados.*\.xlsx$/i.test(filename))
   );
+  if (!await page.evaluate(() => window.__qaDownloads.some((filename) => filename.includes('R-001')))) {
+    throw new Error('La descarga de visitados no incluyó la ruta en el nombre');
+  }
 
   await page.locator('#select-ruta').selectOption('R-001');
   await page.locator('.btn-day[data-dia="Lunes"]').click();

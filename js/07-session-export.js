@@ -5,7 +5,7 @@
 
 import {
     PAISES_MAPA_NOMBRES, appState, coincideDivision, coincideGrupo, coincidePais,
-    escapeHTML, normalizarNombreGrupo, normalizarTexto
+    crearEtiquetaRutas, escapeHTML, normalizarNombreGrupo, normalizarTexto
 } from './01-core.js';
 import {
     LIMITES_CARGA, inicializarMapa, parsearFilasClientes, procesarPropiedadesGeocercas,
@@ -213,6 +213,14 @@ export function cerrarModalComparativo() {
     document.getElementById('modal-comparativo').style.display = 'none';
 }
 
+const camposGestionCliente = (detalle = {}) => ({
+    "Estado actual del cliente": detalle.estadoCliente || '',
+    "Código cliente duplicado": detalle.duplicadoCodigo || '',
+    "Nombre cliente duplicado": detalle.duplicadoNombre || '',
+    "Código ruta correcta": detalle.otraRutaCodigo || '',
+    "Nombre ruta correcta": detalle.otraRutaNombre || ''
+});
+
 /**
  * Exporta a Excel los clientes marcados como visitados.
  */
@@ -231,6 +239,7 @@ export function descargarClientesVisitados() {
                 "Teléfono": c.telefono,
                 "Dirección": c.direccion,
                 "Día de visita": c.dia,
+                ...camposGestionCliente(det),
                 "Visita Efectiva": det.tipoVisita || 'SI',
                 "Total Venta ($)": det.totalVenta || '0.00',
                 "Motivos Detalle": (det.motivos || []).join(', '),
@@ -247,7 +256,8 @@ export function descargarClientesVisitados() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Clientes Visitados");
     const fecha = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Clientes_Visitados_Bocadeli_${fecha}.xlsx`);
+    const ruta = crearEtiquetaRutas(listVisitados.map(item => ({ ruta: item.Ruta })));
+    XLSX.writeFile(workbook, `Clientes_Visitados_Bocadeli_Ruta_${ruta}_${fecha}.xlsx`);
 }
 
 /**
@@ -270,6 +280,7 @@ export function descargarItinerarioFiltrado() {
             "Teléfono": c.telefono,
             "Direccion": c.direccion,
             "Dia de visita": c.dia,
+            ...camposGestionCliente(det),
             "Estado Visitado": appState.clientesVisitadosMap.get(c.codigo) ? "SÍ" : "NO",
             "Resultado Visita": det.tipoVisita || '-',
             "Total Venta ($)": det.totalVenta || '0.00',
@@ -281,7 +292,8 @@ export function descargarItinerarioFiltrado() {
     const worksheet = XLSX.utils.json_to_sheet(datosExportar);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Itinerario");
-    XLSX.writeFile(workbook, `Itinerario_Bocadeli.xlsx`);
+    const ruta = crearEtiquetaRutas(appState.ultimoClientesFiltrados);
+    XLSX.writeFile(workbook, `Itinerario_Bocadeli_Ruta_${ruta}.xlsx`);
 }
 
 /**
@@ -306,6 +318,7 @@ export function descargarClientesFueraGeocerca() {
             "Teléfono": c.telefono || '',
             "Latitud": c.lat || '',
             "Longitud": c.lng || '',
+            ...camposGestionCliente(det),
             "Estado Visitado": appState.clientesVisitadosMap.get(c.codigo) ? "SÍ" : "NO",
             "Resultado Visita": det.tipoVisita || '-',
             "Total Venta ($)": det.totalVenta || '0.00'
@@ -315,7 +328,8 @@ export function descargarClientesFueraGeocerca() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Fuera_de_Geocerca");
     const fecha = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Clientes_Fuera_Geocerca_${fecha}.xlsx`);
+    const ruta = crearEtiquetaRutas(appState.ultimoClientesFuera);
+    XLSX.writeFile(workbook, `Clientes_Fuera_Geocerca_Ruta_${ruta}_${fecha}.xlsx`);
     mostrarNotificacioniOS("Descarga Exitosa", `✅ Se descargaron ${appState.ultimoClientesFuera.length} clientes fuera de geocerca.`, "success");
 }
 

@@ -4,7 +4,7 @@
  */
 
 import {
-    COLORES_DIAS, ErrorSolicitud, appState, coincideDia, escapeHTML,
+    COLORES_DIAS, ErrorSolicitud, appState, coincideDia, crearEtiquetaRutas, escapeHTML,
     normalizarTexto, solicitarRecurso
 } from './01-core.js';
 import { obtenerValorPropiedad } from './02-data.js';
@@ -523,7 +523,7 @@ export function descargarOptimizacionRuta() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Ruta Optimizada");
     
-    const rutaSel = appState.rutasSeleccionadasMultiples[0] || "Ruta";
+    const rutaSel = crearEtiquetaRutas(appState.ultimaSecuenciaOptimizada.map(item => ({ ruta: item.Ruta })));
     const fecha = new Date().toISOString().slice(0, 10);
     XLSX.writeFile(workbook, `Optimizacion_Ruta_${rutaSel}_${appState.diaSeleccionado}_${fecha}.xlsx`);
 }
