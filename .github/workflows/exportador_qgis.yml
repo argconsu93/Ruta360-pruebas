@@ -1,0 +1,42 @@
+name: Exportar Clientes para QGIS e Itinerarios
+
+on:
+  workflow_dispatch:
+    inputs:
+      opcion_exportacion:
+        description: 'Tipo de Archivos a Generar (1: Solo División, 2: Solo Grupo, 3: Ambos, 4: Ambos + Rutas)'
+        required: true
+        default: '3'
+        type: choice
+        options:
+          - '1' # Solo por División (QGIS)
+          - '2' # Solo por Grupo
+          - '3' # Ambos (División + Grupo)
+          - '4' # Ambos + Rutas (Itinerarios)
+
+jobs:
+  procesar_datos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar Código del Repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar Librerías
+        run: |
+          pip install pandas
+
+      - name: Ejecutar Script de Procesamiento
+        run: |
+          python scripts/generar_archivos_qgis.py ${{ github.event.inputs.opcion_exportacion }}
+
+      - name: Subir Archivos Generados como ZIP Descargable
+        uses: actions/upload-artifact@v4
+        with:
+          name: Archivos_Consolidados_QGIS
+          path: archivos_exportados/
