@@ -116,15 +116,23 @@ let browser;
     routeFilterEnabled: await page.locator('#select-ruta').isEnabled(),
     groupOptions: await page.locator('#select-grupo option').count(),
     routeOptions: await page.locator('#select-ruta option').count(),
-    clientRows: await page.locator('#tabla-clientes-body tr').count(),
   };
 
   if (!authenticatedChecks.mapInitialized || !authenticatedChecks.countryFilterEnabled ||
       !authenticatedChecks.groupFilterEnabled || !authenticatedChecks.routeFilterEnabled ||
-      authenticatedChecks.groupOptions < 2 || authenticatedChecks.routeOptions < 2 ||
-      authenticatedChecks.clientRows < 1) {
+      authenticatedChecks.groupOptions < 2 || authenticatedChecks.routeOptions < 2) {
     throw new Error(`Fallo después del login: ${JSON.stringify(authenticatedChecks)}`);
   }
+
+  if (await page.locator('.btn-day.active').count() !== 0) {
+    throw new Error('El acceso no debe iniciar con TODOS ni otro día seleccionado');
+  }
+  if ((await page.locator('#tabla-clientes-body tr').count()) !== 0) {
+    throw new Error('No deben renderizarse clientes hasta seleccionar un día');
+  }
+
+  await page.locator('.btn-day[data-dia="Lunes"]').click();
+  await page.waitForFunction(() => document.querySelectorAll('#tabla-clientes-body tr').length === 2);
 
   await page.locator('#file-geojson-input').setInputFiles({
     name: 'geocercas-invalidas.geojson',
@@ -144,7 +152,7 @@ let browser;
     mimeType: 'text/csv',
     buffer: Buffer.from([
       'CodigoCliente,NombreCliente,Grupo,Ruta,Dia,Latitud,Longitud,Direccion,Telefono,Pais,Division',
-      'TMP-001,Cliente temporal,GRUPO 09,TMP-01,Martes,13.7200,-89.2200,Dirección temporal,2222-9999,El Salvador,SV Centro',
+      'TMP-001,Cliente temporal,GRUPO 09,TMP-01,Lunes,13.7200,-89.2200,Dirección temporal,2222-9999,El Salvador,SV Centro',
     ].join('\n')),
   });
   await page.waitForFunction(() =>
@@ -218,7 +226,6 @@ let browser;
   }
 
   await page.locator('#select-ruta').selectOption('R-001');
-  await page.locator('.btn-day[data-dia="Lunes"]').click();
   await page.waitForFunction(() => !document.querySelector('#btn-trazar-ruta').disabled);
   await page.evaluate(() => document.querySelector('#btn-trazar-ruta').click());
   await page.waitForFunction(() => !document.querySelector('#btn-descargar-optimizacion').disabled);

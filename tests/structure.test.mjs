@@ -52,6 +52,9 @@ assert.ok(!/\blet\s+(USUARIOS_ROLES|paisSeleccionado|divisionSeleccionada|esAcce
 assert.ok(!/getElementById\(['"][^'"]*appState\./.test(applicationSource), 'La refactorización no debe modificar IDs literales');
 assert.ok(!/L\.map\(['"]appState\./.test(applicationSource), 'La refactorización no debe modificar el ID del mapa');
 assert.ok(!/fa-appState\./.test(applicationSource), 'La refactorización no debe modificar clases de iconos');
+assert.ok(html.includes('Cliente pertenece a otra ruta'), 'Debe mostrarse la categoría abreviada de otra ruta');
+assert.ok(html.includes('Código de cliente:'), 'Otra ruta debe solicitar el código del cliente');
+assert.ok(html.includes('Nombre de cliente:'), 'Otra ruta debe solicitar el nombre del cliente');
 assert.ok(!/<script defer src="js\//.test(html), 'No deben reaparecer scripts globales ordenados manualmente');
 const externalExecutableTags = [
   ...html.matchAll(/<script\b[^>]*\bsrc="https:\/\/[^"]+"[^>]*>/g),

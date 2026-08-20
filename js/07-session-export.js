@@ -79,6 +79,8 @@ export function validarLogin() {
 
         appState.gruposSeleccionadosMultiples = (appState.usuarioActual.grupo && appState.usuarioActual.grupo !== 'TODOS') ? [normalizarNombreGrupo(appState.usuarioActual.grupo)] : [];
         appState.rutasSeleccionadasMultiples = [];
+        appState.diaSeleccionado = 'NINGUNO';
+        document.querySelectorAll('.btn-day').forEach(btn => btn.classList.remove('active'));
 
         inicializarMapa();
         poblarFiltrosPermitidos();
@@ -225,8 +227,8 @@ const camposGestionCliente = (detalle = {}) => ({
     "Estado actual del cliente": detalle.estadoCliente || '',
     "Código cliente duplicado": detalle.duplicadoCodigo || '',
     "Nombre cliente duplicado": detalle.duplicadoNombre || '',
-    "Código ruta correcta": detalle.otraRutaCodigo || '',
-    "Nombre ruta correcta": detalle.otraRutaNombre || ''
+    "Código cliente de otra ruta": detalle.otraRutaCodigo || '',
+    "Nombre cliente de otra ruta": detalle.otraRutaNombre || ''
 });
 
 /**

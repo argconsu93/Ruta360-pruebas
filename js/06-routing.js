@@ -77,7 +77,23 @@ export function formatearMinutosAHora12(totalMin) {
  * Ordena paradas y mejora el recorrido localmente para reducir distancia.
  */
 export function optimizarSecuenciaSweep2OPT(secuenciaOriginal, puntoOrigen) {
-    if (secuenciaOriginal.length <= 2) return secuenciaOriginal;
+    if (secuenciaOriginal.length <= 1) return secuenciaOriginal;
+
+    // Una ruta cerrada conserva la misma distancia total si se recorre al
+    // revés. Se aprovecha esa equivalencia para comenzar por el extremo más
+    // alejado de la distribuidora y terminar en el cliente más cercano.
+    const orientarMasLejanoPrimero = (secuencia) => {
+        const distanciaPrimero = calcularDistancia(
+            puntoOrigen.lat, puntoOrigen.lng, secuencia[0].lat, secuencia[0].lng
+        );
+        const ultimo = secuencia[secuencia.length - 1];
+        const distanciaUltimo = calcularDistancia(
+            puntoOrigen.lat, puntoOrigen.lng, ultimo.lat, ultimo.lng
+        );
+        return distanciaPrimero >= distanciaUltimo ? secuencia : [...secuencia].reverse();
+    };
+
+    if (secuenciaOriginal.length === 2) return orientarMasLejanoPrimero([...secuenciaOriginal]);
 
     // 1. Barrido Sectorial (Sweep): Ordenar estrictamente por ángulo polar (coordenadas polares) desde el depósito.
     // Esto asegura que la ruta barra de forma continua en abanico/círculo sin saltos erráticos ni retornos.
@@ -126,7 +142,8 @@ export function optimizarSecuenciaSweep2OPT(secuenciaOriginal, puntoOrigen) {
         }
     }
 
-    return rutaIndices.slice(1).map(idx => puntos[idx]);
+    const secuenciaOptimizada = rutaIndices.slice(1).map(idx => puntos[idx]);
+    return orientarMasLejanoPrimero(secuenciaOptimizada);
 }
 
 /**

@@ -226,7 +226,7 @@ export function solicitarConfirmacionGuardar() {
         return;
     }
     if (estado === 'OTRA_RUTA' && (!document.getElementById('otra-ruta-codigo').value.trim() || !document.getElementById('otra-ruta-nombre').value.trim())) {
-        mostrarNotificacioniOS('Datos incompletos', 'Ingrese el código y el nombre de la ruta correcta.', 'warning');
+        mostrarNotificacioniOS('Datos incompletos', 'Ingrese el código y el nombre del cliente que pertenece a la otra ruta.', 'warning');
         return;
     }
     document.getElementById('modal-confirmar-guardar').style.display = 'flex';
